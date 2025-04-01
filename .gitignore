@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Folders
+/data
+/.snakemake
+
 # C extensions
 *.so
 
