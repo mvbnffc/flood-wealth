@@ -1,0 +1,9 @@
+##########################
+### Analysis Countries ###
+##########################
+
+# ISO Codes for all analysis countries (108 total)
+iso_codes:
+  - "AGO"
+  - "ALB"
+  - "ARG"
