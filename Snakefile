@@ -18,3 +18,4 @@ include: "rules/download/relative_wealth_index.smk"
 include: "rules/download/ghs_pop.smk"
 
 include: "rules/prepare/ghs_pop.smk"
+include: "rules/prepare/jrc_flood.smk"
