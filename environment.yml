@@ -1,0 +1,10 @@
+name: flood-wealth
+channels:
+- bioconda
+- conda-forge
+dependencies:
+- gdal
+- geopandas
+- bioconda::snakemake==7.18.2
+- wget
+
