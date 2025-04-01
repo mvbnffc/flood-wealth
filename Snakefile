@@ -14,3 +14,5 @@ configfile: "config/config.yaml"
 ##### load rules #####
 include: "rules/download/admin_boundaries.smk"
 include: "rules/download/jrc_flood.smk"
+include: "rules/download/relative_wealth_index.smk"
+include: "rules/download/ghs_pop.smk"
