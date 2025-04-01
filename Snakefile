@@ -13,3 +13,4 @@ configfile: "config/config.yaml"
 
 ##### load rules #####
 include: "rules/download/admin_boundaries.smk"
+include: "rules/download/jrc_flood.smk"
