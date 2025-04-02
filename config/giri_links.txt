@@ -1,8 +1,0 @@
-https://hazards-data.unepgrid.ch/global_pc_h5glob.tif
-https://hazards-data.unepgrid.ch/global_pc_h10glob.tif
-https://hazards-data.unepgrid.ch/global_pc_h25glob.tif
-https://hazards-data.unepgrid.ch/global_pc_h50glob.tif
-https://hazards-data.unepgrid.ch/global_pc_h100glob.tif
-https://hazards-data.unepgrid.ch/global_pc_h200glob.tif
-https://hazards-data.unepgrid.ch/global_pc_h500glob.tif
-https://hazards-data.unepgrid.ch/global_pc_h1000glob.tif
