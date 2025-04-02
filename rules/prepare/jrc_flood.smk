@@ -10,7 +10,7 @@ rule clip_jrc_flood:
         raw_flood_file="data/inputs/flood/JRC/merged/jrc_global_flood_RP{RP}.tif",
         boundary_file="data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.geojson",
     output:
-        trimmed_flood_file="data/inputs/analysis/{ISO3}/{ISO3}_jrc_flood_RP{RP}.tif",
+        trimmed_flood_file="data/inputs/analysis/{ISO3}/{ISO3}_jrc-flood_RP{RP}.tif",
     wildcard_constraints:
         RP="10|20|50|75|100|200|500"
     shell:
@@ -31,5 +31,5 @@ rule clip_jrc_flood:
         """
 """ 
 Test with
-snakemake -c1 data/inputs/analysis/KEN/KEN_jrc_flood_RP10.tif
+snakemake -c1 data/inputs/analysis/KEN/KEN_jrc-flood_RP10.tif
 """
