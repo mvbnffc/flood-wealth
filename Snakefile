@@ -19,3 +19,6 @@ include: "rules/download/ghs_pop.smk"
 
 include: "rules/prepare/ghs_pop.smk"
 include: "rules/prepare/jrc_flood.smk"
+include: "rules/prepare/relative_wealth_index.smk"
+
+include: "rules/analyze/jrc_flood.smk"
