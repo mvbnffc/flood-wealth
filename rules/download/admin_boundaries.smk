@@ -64,6 +64,19 @@ rule geobounds_iso:
         except:
             print("ISO code does not exist in geoBoundaries dataset!")
 
+        def check_and_fix(gdf, layer_name):
+            if not gdf.is_valid.all():
+                print(f"Warning: Some geometries in {layer_name} are invalid. Fixing them...")
+                gdf["geometry"] = gdf["geometry"].buffer(0) # 0 buffer should fix issue
+            else:
+                print(f"All geometries in {layer_name} are valid.")
+            return gdf
+        
+        # Check and fix geometries for each administrative level
+        adm0_iso = check_and_fix(adm0_iso, "ADM0")
+        adm1_iso = check_and_fix(adm1_iso, "ADM1")
+        adm2_iso = check_and_fix(adm2_iso, "ADM2")
+
         print("Exporting files...")
         adm0_iso.to_file(output.gpkg, layer="ADM0", driver="GPKG")
         adm1_iso.to_file(output.gpkg, layer="ADM1", driver="GPKG")
