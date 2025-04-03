@@ -16,12 +16,13 @@ if __name__ == "__main__":
         return_period: int = snakemake.wildcards["RP"]
         vuln_dataset: str = snakemake.wildcards["VULN_CURVE"]
         country_code: str = snakemake.wildcards['ISO3']
+        model: str = snakemake.wildcards['MODEL']
     except NameError:
         raise ValueError("Must be run via snakemake.")
     
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
-logging.info(f"Calculating flood risk for {country_code} at RP {return_period} using {vuln_dataset} vulnerability curve.")
+logging.info(f"Calculating flood risk using {model} data, in {country_code} at RP {return_period} using {vuln_dataset} vulnerability curve.")
 
 logging.info(f"Initializing vulnerability curve")
 vuln_curves = {"JRC": ([0, 0.5, 1, 1.5, 2, 3, 4, 5, 6], [0, 0.35, 0.53, 0.66, 0.77, 0.89, 0.94, 0.98, 1]), # average of Asia, sAmerica, Africa Residential curve
@@ -36,6 +37,9 @@ with rasterio.open(flood_path) as flood_src:
     flood = flood_src.read(1)
     flood_transform = flood_src.transform
     flood_meta = flood_src.meta
+    # If model is GIRI, then need to convert depths to m
+    if model == 'giri':
+        flood = flood/100
 
 logging.info("Performing flood risk analysis")
 
@@ -54,7 +58,9 @@ risk = vectorized_damage(flood, vuln_curve[0], vuln_curve[1])
 # Update for compression
 flood_meta.update(
     compress='lzw',
-    tiled=True
+    tiled=True,
+    count=1,
+    dtype='float32'
 )
 
 logging.info("Writing output raster.")

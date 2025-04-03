@@ -4,7 +4,7 @@ Prepare (clip) JRC Flood Data
 
 rule clip_jrc_flood:
     """
-    Clip JRC flood raster to country boundary. 
+    Clip JRC flood raster to country boundary.
     """
     input:
         raw_flood_file="data/inputs/flood/JRC/merged/jrc_global_flood_RP{RP}.tif",
