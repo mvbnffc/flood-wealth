@@ -26,3 +26,14 @@ rule inequality_metrics:
 Test with
 snakemake -c1 data/results/social_flood/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_V-JRC.gpkg
 """
+
+# Run for all ISO3 codes, models, and admins
+
+configfile: "config/config.yaml"
+ADMINS = ["ADM-0", "ADM-1"]
+MODELS = ["jrc", "wri", "giri"]
+
+rule metrics_for_all_countries:
+    input:
+        expand("data/results/social_flood/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_V-JRC.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS)
