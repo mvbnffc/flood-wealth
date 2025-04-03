@@ -42,7 +42,6 @@ rule clip_giri_flood:
         gdalwarp \
             -cutline {input.boundary_file} \
             -crop_to_cutline \
-            -dstalpha \
             -of GTiff \
             -co compress=lzw \
             {input.raw_flood_file} \

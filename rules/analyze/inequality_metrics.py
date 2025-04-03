@@ -58,7 +58,6 @@ logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 logging.info("Looping over admin regions and calculating concentration indices")
 results = [] # List for collecting results
  # Loop over each admin region
-count = 1 # for calculating progress
 for idx, region in tqdm(admin_areas.iterrows()):
     # Get the geometry for the current admin region
     geom = region["geometry"].__geo_interface__
