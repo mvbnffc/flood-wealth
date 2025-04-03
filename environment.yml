@@ -1,13 +1,22 @@
+# to install this environment:
+# micromamba create -f environment.yml -y
 name: flood-wealth
 channels:
 - conda-forge
+- nodefaults
 dependencies:
 - python=3.10
+- pip
+- ipykernel           # notebook support
+- jupyter             # notebook support
 - fiona
 - gdal
+- pandas==2.0.3
 - geopandas
-- rasterio
+- rasterio            # raster file formats
+- rasterstats         # raster statistics
 - bioconda::snakemake==7.18.2
-- tqdm
+- tqdm==4.62.3
 - wget
+- requests
 
