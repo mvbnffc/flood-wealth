@@ -1,0 +1,13 @@
+name: flood-wealth
+channels:
+- conda-forge
+dependencies:
+- python=3.10
+- fiona
+- gdal
+- geopandas
+- rasterio
+- bioconda::snakemake==7.18.2
+- tqdm
+- wget
+
