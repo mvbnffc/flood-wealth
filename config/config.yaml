@@ -4,10 +4,10 @@
 
 # ISO Codes for all analysis countries (108 total)
 iso_codes:
- - "AGO"   # Angola
- - "ALB"   # Albania
- - "ARG"   # Argentina
- - "ARM"   # Armenia
+ - "AGO"
+ - "ALB"
+ - "ARG"
+ - "ARM"
  - "AZE"   
  - "BDI"
  - "BEN"
