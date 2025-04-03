@@ -27,7 +27,7 @@ logging.info(f"Calculating flood risk using {model} data, in {country_code} at R
 logging.info(f"Initializing vulnerability curve")
 vuln_curves = {"JRC": ([0, 0.5, 1, 1.5, 2, 3, 4, 5, 6], [0, 0.35, 0.53, 0.66, 0.77, 0.89, 0.94, 0.98, 1]), # average of Asia, sAmerica, Africa Residential curve
             "BER": ([0, 0.15, 0.5, 1.5], [0, 0.33, 0.67, 1]),
-            "EXP": ([0, 5], [1, 1])
+            "EXP": ([0, 0.0001, 5], [0, 1, 1])
              }
 vuln_curve = vuln_curves[vuln_dataset]
 
