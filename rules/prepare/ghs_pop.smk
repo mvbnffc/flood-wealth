@@ -21,7 +21,6 @@ rule clip_ghs_pop:
         gdalwarp \
             -cutline {input.boundary_file} \
             -crop_to_cutline \
-            -dstalpha \
             -of GTiff \
             -co compress=lzw \
             {input.raw_pop_file} \
