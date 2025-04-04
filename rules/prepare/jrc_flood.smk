@@ -27,6 +27,7 @@ rule clip_jrc_flood:
             -tr 0.00083333333333333 0.00083333333333333 \
             -tap \
             -te_srs EPSG:4326 \
+            -co BIGTIFF=YES \
             -te $(gdalinfo -json {input.pop_file} | jq -r '.cornerCoordinates | [.upperLeft[0], .lowerLeft[1], .lowerRight[0], .upperRight[1]] | join(" ")') \
             -of GTiff \
             -co compress=lzw \
