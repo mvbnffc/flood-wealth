@@ -9,6 +9,7 @@ rule clip_jrc_flood:
     input:
         raw_flood_file="data/inputs/flood/JRC/merged/jrc_global_flood_RP{RP}.tif",
         boundary_file="data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.geojson",
+        pop_file="data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif",
     output:
         trimmed_flood_file="data/inputs/analysis/{ISO3}/{ISO3}_jrc-flood_RP{RP}.tif",
     wildcard_constraints:
@@ -23,6 +24,10 @@ rule clip_jrc_flood:
         gdalwarp \
             -cutline {input.boundary_file} \
             -crop_to_cutline \
+            -tr 0.00083333333333333 0.00083333333333333 \
+            -tap \
+            -te_srs EPSG:4326 \
+            -te $(gdalinfo -json {input.pop_file} | jq -r '.cornerCoordinates | [.upperLeft[0], .lowerLeft[1], .lowerRight[0], .upperRight[1]] | join(" ")') \
             -of GTiff \
             -co compress=lzw \
             {input.raw_flood_file} \

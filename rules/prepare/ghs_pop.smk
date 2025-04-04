@@ -22,6 +22,8 @@ rule clip_ghs_pop:
             -cutline {input.boundary_file} \
             -crop_to_cutline \
             -of GTiff \
+            -tr 0.00083333333333333 0.00083333333333333 \
+            -tap \
             -co compress=lzw \
             {input.raw_pop_file} \
             {output.trimmed_pop_file}
