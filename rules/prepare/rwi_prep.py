@@ -79,7 +79,7 @@ with rasterio.open(temp_path) as src:
         "height": out_image.shape[1],
         "width": out_image.shape[2],
         "transform": out_transform
-        "bigtiff": "YES"
+        "bigtiff": "YES",
     })
 
     
