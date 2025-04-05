@@ -78,8 +78,8 @@ with rasterio.open(temp_path) as src:
     out_meta.update({
         "height": out_image.shape[1],
         "width": out_image.shape[2],
-        "transform": out_transform
-        "bigtiff": "YES",
+        "transform": out_transform,
+        "bigtiff": "YES"
     })
 
     
