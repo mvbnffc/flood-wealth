@@ -30,7 +30,7 @@ snakemake -c1 data/results/social_flood/KEN/inequality_metrics/KEN_ADM-0_metrics
 # Run for all ISO3 codes, models, and admins
 
 configfile: "config/config.yaml"
-ADMINS = ["ADM-0", "ADM-1"]
+ADMINS = ["ADM-0"]
 MODELS = ["jrc", "wri", "giri"]
 
 rule metrics_for_all_countries:
