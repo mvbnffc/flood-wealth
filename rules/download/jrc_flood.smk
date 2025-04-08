@@ -15,7 +15,6 @@ rule download_jrc_flood:
     Downloads JRC global flood maps (in tiles) and merges into a single global file
     """
     output:
-        raw_folder=directory("data/inputs/flood/JRC/raw/"),
         RP10="data/inputs/flood/JRC/merged/jrc_global_flood_RP10.tif",
         RP20="data/inputs/flood/JRC/merged/jrc_global_flood_RP20.tif",
         RP50="data/inputs/flood/JRC/merged/jrc_global_flood_RP50.tif",
