@@ -48,6 +48,7 @@ rule clip_giri_flood:
             -te_srs EPSG:4326 \
             -te $(gdalinfo -json {input.pop_file} | jq -r '.cornerCoordinates | [.upperLeft[0], .lowerLeft[1], .lowerRight[0], .upperRight[1]] | join(" ")') \
             -of GTiff \
+            -co BIGTIFF=YES \
             -co compress=lzw \
             {input.raw_flood_file} \
             {output.trimmed_flood_file}

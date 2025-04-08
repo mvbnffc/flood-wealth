@@ -38,31 +38,20 @@ from osgeo import gdal
 
 if __name__ == "__main__":
     try:
-        raw_folder: str = snakemake.output["raw_folder"]
-        RP10_file = snakemake.output["RP10"]
-        RP20_file = snakemake.output["RP20"]
-        RP50_file = snakemake.output["RP50"]
-        RP75_file = snakemake.output["RP75"]
-        RP100_file = snakemake.output["RP100"]
-        RP200_file = snakemake.output["RP200"]
-        RP500_file = snakemake.output["RP500"]
+        raw_folder: str = snakemake.output["output_dir"]
     except NameError:
         raise ValueError("Must be run via snakemake.")
-    
-# What RPs are we working with?
-RPS = ["10", "20", "50", "75", "100", "200", "500"]
-RP_files = [RP10_file, RP20_file, RP50_file, RP75_file, RP100_file, RP200_file, RP500_file]
+
+BUCKET_NAME = "flood-forecasting/inundation_history"
 
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
-logging.info("Preparing files")
+logging.info("Creating output directory (if it doesn't already exist)")
 os.makedirs(raw_folder, exist_ok=True)
-VRT_FILE = os.path.join(raw_folder, "temp_vrt.vrt") # temp virtual raster for merging
 
-logging.info("Loading tile extents from GeoJSON")
-BASE_URL = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/" # JRC flood data base URL
-geojson_path = os.path.join(BASE_URL, "tile_extents.geojson")
-tiles = gpd.read_file(geojson_path)
+logging.info("Initialize the GCS client and get the bucket")
+client = storage.Client()
+bucket = client.bucket(BUCKET_NAME)
 
 for idx, RP in enumerate(RPS):
     logging.info(f"Working on RP {RP}.")

@@ -26,6 +26,8 @@ if __name__ == "__main__":
     except:
         raise ValueError("Must be run via snakemake.")
 
+logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
+
 logging.info(f"Preparing the Global Flood Database maps for a global merge.")
 
 #### Define functions for the analysis ####
