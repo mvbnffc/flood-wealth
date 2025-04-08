@@ -33,7 +33,7 @@ snakemake -c1 data/results/social_flood/KEN/inequality_metrics/KEN_ADM-0_metrics
 configfile: "config/config.yaml"
 ADMINS = ["ADM-0"]
 MODELS = ["jrc", "wri", "giri"]
-TYPES = ["RP100", "AAR]
+TYPES = ["RP100", "AAR"]
 VULN_CURVES = ["JRC", "EXP", "BER"]
 
 rule metrics_for_all_countries:
