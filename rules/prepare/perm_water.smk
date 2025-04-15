@@ -24,26 +24,12 @@ Test with
 snakemake -c1 data/inputs/jrc-perm/merged/surface_water.vrt
 """
 
-rule align_surface_water:
-    """
-    Fixes alignment issue with surface water dataset
-    """
-    input:
-        vrt="data/inputs/jrc-perm/merged/surface_water.vrt",
-    output:
-        aligned_vrt="data/inputs/jrc-perm/merged/surface_water_aligned.vrt",
-    shell:
-        """
-        gdal_translate -a_ullr -180 90 180 -90 \
-               {input.vrt} {output.aligned_vrt}
-        """
-
 rule clip_surface_water:
     """
     Clips and resamples surface water dataset. Will use average resampling.
     """
     input:
-        surface_water_vrt="data/inputs/jrc-perm/merged/surface_water_aligned.vrt",
+        surface_water_vrt="data/inputs/jrc-perm/merged/surface_water.vrt",
         boundary_file="data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.geojson",
         pop_file="data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif",
     output:
