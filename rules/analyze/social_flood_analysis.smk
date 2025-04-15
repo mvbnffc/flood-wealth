@@ -28,7 +28,31 @@ Test with
 snakemake -c1 data/results/social_flood/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_V-JRC.gpkg
 """
 
-# Run for all ISO3 codes, models, and admins
+rule inequality_metrics_observed:
+    """
+    This rule calcualtes two inequality metrics at the specified administrative level. For observed flooding datasets
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+        - Quantile Ratio (QR) - understand the tail inequality (20:80)
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        rwi_file="data/inputs/analysis/{ISO3}/{ISO3}_rwi.tif",
+        pop_file="data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif",
+        risk_file="data/inputs/analysis/{ISO3}/{ISO3}_{MODEL}-flood.tif",
+    output:
+        regional_CI = "data/results/social_flood/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood.gpkg",
+    wildcard_constraints:
+        MODEL="gfd|google",
+        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+    script:
+        "./inequality_metrics.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/KEN/inequality_metrics/KEN_ADM-0_metrics_gfd-flood.gpkg
+"""
+
+# Run modelled metrics for all ISO3 codes, models, and admins
 
 configfile: "config/config.yaml"
 ADMINS = ["ADM-0"]
@@ -40,3 +64,9 @@ rule metrics_for_all_countries:
     input:
         expand("data/results/social_flood/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}.gpkg",
                 ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, TYPE=TYPES, VULN_CURVE=VULN_CURVES)
+
+
+# Run observed modelled metrics for all ISO3 codes
+rule observed_metrics_for_all_countries:
+    input:
+        expand("data/results/social_flood/{ISO3}/inequality_metrics/{ISO3}_ADM-0_metrics_google-flood.gpkg", ISO3=config['iso_codes'])
