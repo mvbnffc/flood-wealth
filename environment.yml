@@ -7,14 +7,16 @@ channels:
 dependencies:
 - python=3.10
 - pip
-- ipykernel           # notebook support
-- jupyter             # notebook support
+- pip:
+  - download_surface_water # for downloading JRC surface water dataset
+- ipykernel           
+- jupyter notebook 
 - fiona
 - gdal
 - pandas==2.0.3
 - geopandas
-- rasterio            # raster file formats
-- rasterstats         # raster statistics
+- rasterio    
+- rasterstats 
 - bioconda::snakemake==7.18.2
 - tqdm==4.62.3
 - wget
