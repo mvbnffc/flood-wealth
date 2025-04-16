@@ -39,7 +39,7 @@ rule clip_gfd:
         boundary_file="data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.geojson",
         pop_file="data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif",
     output:
-        trimmed_flood_file="data/inputs/analysis/{ISO3}/{ISO3}_gfd-flood.tif",
+        trimmed_flood_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_gfd-flood.tif",
     shell:
         """
         set -ex
