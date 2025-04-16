@@ -24,6 +24,7 @@ if __name__ == "__main__":
         admin_path: str = snakemake.input["admin_areas"]
         rwi_path: str = snakemake.input["rwi_file"]
         pop_path: str = snakemake.input["pop_file"]
+        mask_path: str = snakemake.input["mask_file"]
         risk_path: str = snakemake.input["risk_file"]
         output_path: str = snakemake.output["regional_CI"]
         administrative_level: int = snakemake.wildcards.ADMIN_SLUG
@@ -39,12 +40,16 @@ admin_level = int(administrative_level.replace("ADM-", ""))
 logging.info(f"Calculating concentration indices at admin level {admin_level}.")
 
 logging.info("Reading raster data.")
-with rasterio.open(rwi_path) as rwi_src, rasterio.open(pop_path) as pop_src, rasterio.open(risk_path) as risk_src:
+with rasterio.open(rwi_path) as rwi_src, rasterio.open(pop_path) as pop_src, \
+     rasterio.open(mask_path) as mask_src, rasterio.open(risk_path) as risk_src:
     rwi = rwi_src.read(1)
     pop = pop_src.read(1)
+    water_mask = mask_src.read(1)
     risk = risk_src.read(1)
     affine = risk_src.transform 
 rwi[rwi==-999] = np.nan # convert -999 in RWI dataset to NaN
+# Create the water mask
+water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
 logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM_ADM_{admin_level}"
@@ -70,11 +75,14 @@ for idx, region in tqdm(admin_areas.iterrows()):
     rwi_clip = np.where(mask_array, rwi, np.nan)
     pop_clip = np.where(mask_array, pop, np.nan)
     risk_clip = np.where(mask_array, risk, np.nan)
+    water_mask_clip = np.where(mask_array, water_mask, np.nan)
+    
     # Mask out areas where not all rasters are valid
     mask = (
         ~np.isnan(pop_clip) &
         ~np.isnan(rwi_clip) &
-        ~np.isnan(risk_clip)
+        ~np.isnan(risk_clip) &
+        ~np.isnan(water_mask_clip)
     )
     # Flatten data
     pop_flat = pop_clip[mask]
@@ -86,7 +94,7 @@ for idx, region in tqdm(admin_areas.iterrows()):
     rwi_flat = rwi_flat[valid]
     risk_flat = risk_flat[valid]
 
-    # Going to calculate concentration indices for total, urban, and rural populations (un)protected
+    # Prepare dataframe for metric calculation
     df = pd.DataFrame({
         'pop': pop_flat,
         'rwi': rwi_flat,

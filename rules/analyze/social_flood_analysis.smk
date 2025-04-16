@@ -15,9 +15,10 @@ rule inequality_metrics:
         admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
         rwi_file="data/inputs/analysis/{ISO3}/{ISO3}_rwi.tif",
         pop_file="data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/{ISO3}/{ISO3}_surface_water.tif",
         risk_file="data/results/flood_risk/{ISO3}/{ISO3}_{MODEL}-flood-risk_{TYPE}_V-{VULN_CURVE}.tif",
     output:
-        regional_CI = "data/results/social_flood/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}.gpkg",
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}.gpkg",
     wildcard_constraints:
         MODEL="giri|jrc|wri",
         TYPE="AAR|RP100",
@@ -27,7 +28,7 @@ rule inequality_metrics:
         "./inequality_metrics.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_V-JRC.gpkg
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_V-JRC.gpkg
 """
 
 rule inequality_metrics_observed:
@@ -39,11 +40,12 @@ rule inequality_metrics_observed:
     """
     input:
         admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
-        rwi_file="data/inputs/analysis/{ISO3}/{ISO3}_rwi.tif",
-        pop_file="data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif",
-        risk_file="data/inputs/analysis/{ISO3}/{ISO3}_{MODEL}-flood.tif",
+        rwi_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_rwi.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{MODEL}-flood.tif",
     output:
-        regional_CI = "data/results/social_flood/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood.gpkg",
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood.gpkg",
     wildcard_constraints:
         MODEL="gfd|google",
         ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
@@ -51,7 +53,7 @@ rule inequality_metrics_observed:
         "./inequality_metrics.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/KEN/inequality_metrics/KEN_ADM-0_metrics_gfd-flood.gpkg
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_gfd-flood.gpkg
 """
 
 def get_event_iso3s(wildcards):
@@ -70,9 +72,9 @@ rule dfo_event_analysis:
     Reporting various metrics and returning a CSV file of results.
     """
     input:
-        rwi_file = lambda wc: expand("data/inputs/analysis/{ISO3}/{ISO3}_rwi.tif", ISO3=get_event_iso3s(wc)),
-        pop_file = lambda wc: expand("data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif", ISO3=get_event_iso3s(wc)),
-        mask_file = lambda wc: expand("data/inputs/analysis/{ISO3}/{ISO3}_surface_water.tif", ISO3=get_event_iso3s(wc)),
+        rwi_file = lambda wc: expand("data/inputs/analysis/countries/{ISO3}/{ISO3}_rwi.tif", ISO3=get_event_iso3s(wc)),
+        pop_file = lambda wc: expand("data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif", ISO3=get_event_iso3s(wc)),
+        mask_file = lambda wc: expand("data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif", ISO3=get_event_iso3s(wc)),
         flood_file = lambda wc: expand("data/inputs/analysis/events/DFO_{event_id}/{ISO3}_{event_id}.tif", ISO3=get_event_iso3s(wc), event_id=wc.event_id)
     output:
         results = "data/results/social_flood/events/DFO_{event_id}/DFO_{event_id}_results.csv"
@@ -106,7 +108,7 @@ rule metrics_for_all_countries:
 # Run observed modelled metrics for all ISO3 codes
 rule observed_metrics_for_all_countries:
     input:
-        expand("data/results/social_flood/{ISO3}/inequality_metrics/{ISO3}_ADM-0_metrics_google-flood.gpkg", ISO3=config['iso_codes'])
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM-0_metrics_gfd-flood.gpkg", ISO3=config['iso_codes'])
 
 # Run metrics on all DFO flood events
 # Find all events in the prep folder
