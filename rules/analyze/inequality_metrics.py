@@ -122,17 +122,29 @@ for idx, region in tqdm(admin_areas.iterrows()):
     
     
     def calculate_quantile_ratio(df, quantile=0.2):
-        # Sort the DataFrame by wealth (rwi) in ascending order
-        df_sorted = df.sort_values(by="rwi", ascending=True).copy()
-        n = len(df_sorted)
-        k = max(1, int(n * quantile))
-        
-        # Compute average flood exposure for bottom and top quantiles
-        bottom_avg = df_sorted["flood"].iloc[:k].mean()
-        top_avg = df_sorted["flood"].iloc[-k:].mean()
-        
-        # Return the ratio; avoid division by zero
-        return top_avg / bottom_avg if bottom_avg != 0 else np.nan
+                # Sort the DataFrame by RWI (ascending)
+                df_sorted = df.sort_values(by='rwi', ascending=True).copy()
+            
+                total_pop = df_sorted['pop'].sum()
+                if total_pop == 0:
+                    return np.nan
+                
+                # Calculate cumulative population
+                df_sorted['cum_pop'] = df_sorted['pop'].cumsum()
+                # Get bottom quantile: cells that add up to the first quantile share of the population
+                bottom_df = df_sorted[df_sorted['cum_pop'] <= quantile * total_pop]
+                # Get top quantile: cells that add up to the top quantile share of the population
+                top_df = df_sorted[df_sorted['cum_pop'] >= (1 - quantile) * total_pop]
+                
+                try:
+                    # Compute population-weighted average flood exposure
+                    bottom_weighted_avg = np.average(bottom_df["flood"], weights=bottom_df["pop"])
+                    top_weighted_avg = np.average(top_df["flood"], weights=top_df["pop"])
+                except ZeroDivisionError:
+                    return np.nan
+                    
+                # Return the quantile ratio. (Make sure you don’t divide by zero.)
+                return top_weighted_avg / bottom_weighted_avg if bottom_weighted_avg != 0 else np.nan
     
     QR = calculate_quantile_ratio(df, quantile=0.2)
 

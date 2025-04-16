@@ -15,7 +15,7 @@ rule prepare_gfd_merge:
     input:
         raw_gfd_folder="data/inputs/gfd/raw/"
     output:
-        merge_gfd_folder=directory("data/inputs/gfd/merged/prep/")
+        merge_gfd_folder=directory("data/inputs/gfd/prep/")
     script:
         "./prepare_gfd.py"
 
@@ -24,7 +24,7 @@ rule merge_gfd:
     This rule merges GFD rasters into one global file
     """
     input:
-        merge_gfd_folder="data/inputs/gfd/merged/prep"
+        merge_gfd_folder="data/inputs/gfd/prep/"
     output:
         merge_gfd_file="data/inputs/gfd/merged/gfd.tif"
     script:
@@ -70,8 +70,8 @@ rule clip_gfd_event:
     Will Clip GFD flood raster to country boundary for specific event.
     """
     input:
-        raw_flood_file="data/inputs/gfd/merged/prep/DFO_{event_id}.tif",
-        json_file="data/inputs/gfd/merged/prep/json/DFO_{event_id}_properties.json",
+        raw_flood_file="data/inputs/gfd/prep/DFO_{event_id}.tif",
+        json_file="data/inputs/gfd/prep/json/DFO_{event_id}_properties.json",
     output:
         flood_event_dir=directory("data/inputs/analysis/events/DFO_{event_id}/")
     script:
@@ -84,9 +84,9 @@ snakemake -c1 data/inputs/analysis/events/DFO_1586/
 
 # Run clip_gfd_event rule for all events in the prep folder
 # Find all events in the prep folder
-events = glob_wildcards("data/inputs/gfd/merged/prep/DFO_{event_id}.tif").event_id
+events = glob_wildcards("data/inputs/gfd/prep/DFO_{event_id}.tif").event_id
 
-rule run_all_gfd_events:
+rule clip_all_gfd_events:
     input:
         expand("data/inputs/analysis/events/DFO_{event_id}/", event_id=events)
 

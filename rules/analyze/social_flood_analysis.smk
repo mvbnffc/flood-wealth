@@ -59,7 +59,10 @@ def get_event_iso3s(wildcards):
     props_path = f"data/inputs/analysis/events/DFO_{wildcards.event_id}/countries.json"
     with open(props_path, "r") as f:
         props = json.load(f)
-    return props['valid']
+    # TEMP: PC DEBUG
+    problem_isos = config['problem_iso_codes'] # DEBUG code
+    return [iso for iso in props['valid'] if iso not in problem_isos] # DEBUG code
+    # return props['valid'] # original
 
 rule dfo_event_analysis:
     """
@@ -104,3 +107,10 @@ rule metrics_for_all_countries:
 rule observed_metrics_for_all_countries:
     input:
         expand("data/results/social_flood/{ISO3}/inequality_metrics/{ISO3}_ADM-0_metrics_google-flood.gpkg", ISO3=config['iso_codes'])
+
+# Run metrics on all DFO flood events
+# Find all events in the prep folder
+events = glob_wildcards("data/inputs/gfd/prep/DFO_{event_id}.tif").event_id
+rule metrics_all_gfd_events:
+    input:
+        expand("data/results/social_flood/events/DFO_{event_id}/DFO_{event_id}_results.csv", event_id=events)
