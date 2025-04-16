@@ -6,7 +6,7 @@
 iso_codes:
  - "AGO"
  - "ALB"
- - "ARG"
+ - "ARG" # fails on PC
  - "ARM"
  - "AZE"   
  - "BDI"
@@ -17,26 +17,26 @@ iso_codes:
  - "BIH"
  - "BLZ"
  - "BOL"
- - "BRA"
+ - "BRA" # fails on PC
  - "BTN"
  - "BWA"
  - "CAF"
  - "CIV"
  - "CMR"
- - "COD"
+ - "COD" # fails on PC
  - "COG"
- - "COL"
+ - "COL" # fails on PC
  - "COM"
  - "CPV"
  - "CRI"
  - "DJI"
  - "DMA"
  - "DOM"
- - "DZA"
+ - "DZA" # fails on PC
  - "ECU"
  - "EGY"
  - "ERI"
- - "ETH"
+ - "ETH" # fails on PC
  - "GAB"
  - "GEO"
  - "GHA"
@@ -49,17 +49,17 @@ iso_codes:
  - "GUY"
  - "HND"
  - "HTI"
- - "IDN"
- - "IND"
+ - "IDN" # fails on PC
+ - "IND" # fails on PC
  - "JAM"
  - "JOR"
- - "KAZ"
+ - "KAZ" # fails on PC
  - "KEN"
  - "KGZ"
  - "KHM"
  - "LAO"
  - "LBR"
- - "LBY"
+ - "LBY" # fails on PC
  - "LCA"
  - "LKA"
  - "LSO"
@@ -67,23 +67,23 @@ iso_codes:
  - "MDA"
  - "MDG"
  - "MDV"
- - "MEX"
+ - "MEX" # fails on PC
  - "MKD"
- - "MLI"
+ - "MLI" # fails on PC
  - "MNE"
- - "MNG"
+ - "MNG" # fails on PC
  - "MOZ"
  - "MRT"
  - "MUS"
  - "MWI"
  - "MYS"
  - "NAM"
- - "NER"
+ - "NER" # fails on PC
  - "NGA"
  - "NIC"
  - "NPL"
- - "PAK"
- - "PER"
+ - "PAK" # fails on PC
+ - "PER" # fails on PC
  - "PHL"
  - "PRY"
  - "ROU"
@@ -109,6 +109,25 @@ iso_codes:
  - "UZB"
  - "VCT"
  - "VNM"
- - "ZAF"
+ - "ZAF" # fails on PC
  - "ZMB"
  - "ZWE"
+
+problem_iso_codes:
+ - "ARG" # fails on PC
+ - "BRA" # fails on PC
+ - "COD" # fails on PC
+ - "COL" # fails on PC
+ - "DZA" # fails on PC
+ - "ETH" # fails on PC
+ - "IDN" # fails on PC
+ - "IND" # fails on PC
+ - "KAZ" # fails on PC
+ - "LBY" # fails on PC
+ - "MEX" # fails on PC
+ - "MLI" # fails on PC
+ - "MNG" # fails on PC
+ - "NER" # fails on PC
+ - "PAK" # fails on PC
+ - "PER" # fails on PC
+ - "ZAF" # fails on PC
