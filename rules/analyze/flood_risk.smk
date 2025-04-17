@@ -73,6 +73,31 @@ Test with
 snakemake -c1 data/results/flood_risk/countries/KEN/KEN_jrc-flood-risk_AAR_V-JRC.tif
 """
 
+rule jrc_average_annual_risk_protected:
+    """
+    This rule calculates one layer (average annual relative risk) given a set of 
+    JRC return period flood maps. 
+    """
+    input:
+        flood_rp_10="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_RP10_V-{VULN_CURVE}.tif",
+        flood_rp_20="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_RP20_V-{VULN_CURVE}.tif",
+        flood_rp_50="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_RP50_V-{VULN_CURVE}.tif",
+        flood_rp_75="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_RP75_V-{VULN_CURVE}.tif",
+        flood_rp_100="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_RP100_V-{VULN_CURVE}.tif",
+        flood_rp_200="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_RP200_V-{VULN_CURVE}.tif",
+        flood_rp_500="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_RP500_V-{VULN_CURVE}.tif",
+        flopros="data/inputs/analysis/countries/{ISO3}/{ISO3}_flopros.tif"
+    output:
+        flood_aar_protected="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_protected_AAR_V-{VULN_CURVE}.tif"
+    wildcard_constraints:
+        VULN_CURVE="BER|JRC|EXP"
+    script:
+        "./jrc_average_annual_risk_protected.py"
+"""
+Test with
+snakemake -c1 data/results/flood_risk/countries/KEN/KEN_jrc-flood-risk_protected_AAR_V-JRC.tif
+"""
+
 rule wri_average_annual_risk:
     """
     This rule calculates one layer (average annual relative risk) given a set of 

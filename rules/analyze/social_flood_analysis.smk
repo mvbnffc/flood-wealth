@@ -13,10 +13,10 @@ rule inequality_metrics:
     """
     input:
         admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
-        rwi_file="data/inputs/analysis/{ISO3}/{ISO3}_rwi.tif",
-        pop_file="data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif",
-        mask_file="data/inputs/analysis/{ISO3}/{ISO3}_surface_water.tif",
-        risk_file="data/results/flood_risk/{ISO3}/{ISO3}_{MODEL}-flood-risk_{TYPE}_V-{VULN_CURVE}.tif",
+        rwi_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_rwi.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_{TYPE}_V-{VULN_CURVE}.tif",
     output:
         regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}.gpkg",
     wildcard_constraints:
@@ -28,7 +28,33 @@ rule inequality_metrics:
         "./inequality_metrics.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_V-JRC.gpkg
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_AAR_V-JRC.gpkg
+"""
+
+rule inequality_metrics_protected:
+    """
+    This rule calcualtes two inequality metrics at the specified administrative level. FLOPROS protection is ON.
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+        - Quantile Ratio (QR) - understand the tail inequality (20:80)
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        rwi_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_rwi.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_protected_AAR_V-{VULN_CURVE}.tif",
+    output:
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_protected_AAR_V-{VULN_CURVE}.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        VULN_CURVE="BER|JRC|EXP",
+        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+    script:
+        "./inequality_metrics.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_protected_AAR_V-JRC.gpkg
 """
 
 rule inequality_metrics_observed:
@@ -95,14 +121,19 @@ snakemake -c1 data/results/social_flood/events/DFO_1595/DFO_1595_results.csv
 
 configfile: "config/config.yaml"
 ADMINS = ["ADM-0"]
-MODELS = ["jrc", "wri", "giri"]
-TYPES = ["RP100", "AAR"]
-VULN_CURVES = ["JRC", "EXP", "BER"]
+MODELS = ["jrc"]
+TYPES = ["AAR"]
+VULN_CURVES = ["JRC"]
 
 rule metrics_for_all_countries:
     input:
-        expand("data/results/social_flood/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}.gpkg",
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}.gpkg",
                 ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, TYPE=TYPES, VULN_CURVE=VULN_CURVES)
+
+rule protected_metrics_for_all_countries:
+    input:
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_protected_AAR_V-{VULN_CURVE}.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES)
 
 
 # Run observed modelled metrics for all ISO3 codes
