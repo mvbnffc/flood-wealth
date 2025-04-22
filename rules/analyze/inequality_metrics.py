@@ -128,7 +128,6 @@ for idx, region in tqdm(admin_areas.iterrows()):
 
     CI = calculate_CI(df)
     
-    
     def calculate_quantile_ratio(df, quantile=0.2):
                 # Sort the DataFrame by RWI (ascending)
                 df_sorted = df.sort_values(by='rwi', ascending=True).copy()

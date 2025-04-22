@@ -122,9 +122,9 @@ snakemake -c1 data/results/social_flood/events/DFO_1595/DFO_1595_results.csv
 
 configfile: "config/config.yaml"
 ADMINS = ["ADM-0"]
-MODELS = ["jrc"]
-TYPES = ["AAR"]
-VULN_CURVES = ["JRC"]
+MODELS = ["jrc", "wri", "giri"]
+TYPES = ["AAR", "RP100"]
+VULN_CURVES = ["JRC", "EXP"]
 
 rule metrics_for_all_countries:
     input:
