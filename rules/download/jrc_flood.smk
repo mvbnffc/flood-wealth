@@ -6,15 +6,12 @@ References
 JRC: https://data.jrc.ec.europa.eu/dataset/jrc-floods-floodmapgl_rp50y-tif
 """
 
-rule all_jrc_flood:
-    input:
-        tiffs=expand("data/inputs/flood/JRC/merged/jrc_global_flood_RP{RP}.tif", RP=[10, 20, 50, 75, 100, 200, 500])
-
 rule download_jrc_flood:
     """
     Downloads JRC global flood maps (in tiles) and merges into a single global file
     """
     output:
+        raw_folder=directory("data/inputs/flood/JRC/raw/"),
         RP10="data/inputs/flood/JRC/merged/jrc_global_flood_RP10.tif",
         RP20="data/inputs/flood/JRC/merged/jrc_global_flood_RP20.tif",
         RP50="data/inputs/flood/JRC/merged/jrc_global_flood_RP50.tif",

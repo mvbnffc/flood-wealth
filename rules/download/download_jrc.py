@@ -1,33 +1,33 @@
 """
-Download and merge JRC river flood return period maps
-
-https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/
-
-The global river flood hazard maps are a gridded data set representing
-inundation along the river network, for seven different flood return periods
-(from 1-in-10-years to 1-in-500-years). The input river flow data for the new
-maps are produced by means of the open-source hydrological model LISFLOOD, while
-inundation simulations are performed with the hydrodynamic model LISFLOOD-FP.
-The extent comprises the entire world with the exception of Greenland and
-Antarctica and small islands with river basins smaller than 500km2.
-
-Cell values indicate water depth (in m). The maps can be used to assess the
-exposure of population and economic assets to river floods, and to perform flood
-risk assessments. The dataset is created as part of the Copernicus Emergency
-Management Service. NOTE: this dataset is not an official flood hazard map (for
-details and limitations please refer to related publications).
-
-Dataset is tiled. This script first downloads the tiles and then merges them
-into a single global GeoTiff
-
-Citation:
-
-Baugh, Calum; Colonese, Juan; D'Angelo, Claudia; Dottori, Francesco; Neal,
-Jeffrey; Prudhomme, Christel; Salamon, Peter (2024): Global river flood hazard
-maps. European Commission, Joint Research Centre (JRC) [Dataset] PID:
-http://data.europa.eu/89h/jrc-floods-floodmapgl_rp50y-tif
-"""
-
+ Download and merge JRC river flood return period maps
+ 
+ https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/CEMS-GLOFAS/flood_hazard/
+ 
+ The global river flood hazard maps are a gridded data set representing
+ inundation along the river network, for seven different flood return periods
+ (from 1-in-10-years to 1-in-500-years). The input river flow data for the new
+ maps are produced by means of the open-source hydrological model LISFLOOD, while
+ inundation simulations are performed with the hydrodynamic model LISFLOOD-FP.
+ The extent comprises the entire world with the exception of Greenland and
+ Antarctica and small islands with river basins smaller than 500km2.
+ 
+ Cell values indicate water depth (in m). The maps can be used to assess the
+ exposure of population and economic assets to river floods, and to perform flood
+ risk assessments. The dataset is created as part of the Copernicus Emergency
+ Management Service. NOTE: this dataset is not an official flood hazard map (for
+ details and limitations please refer to related publications).
+ 
+ Dataset is tiled. This script first downloads the tiles and then merges them
+ into a single global GeoTiff
+ 
+ Citation:
+ 
+ Baugh, Calum; Colonese, Juan; D'Angelo, Claudia; Dottori, Francesco; Neal,
+ Jeffrey; Prudhomme, Christel; Salamon, Peter (2024): Global river flood hazard
+ maps. European Commission, Joint Research Centre (JRC) [Dataset] PID:
+ http://data.europa.eu/89h/jrc-floods-floodmapgl_rp50y-tif
+ """
+ 
 import os
 import requests
 import logging
@@ -38,6 +38,7 @@ from osgeo import gdal
 
 if __name__ == "__main__":
     try:
+        raw_folder: str = snakemake.output["raw_folder"]
         RP10_file = snakemake.output["RP10"]
         RP20_file = snakemake.output["RP20"]
         RP50_file = snakemake.output["RP50"]
@@ -55,7 +56,6 @@ RP_files = [RP10_file, RP20_file, RP50_file, RP75_file, RP100_file, RP200_file, 
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
 logging.info("Preparing files")
-raw_folder = "data/inputs/flood/JRC/raw/"
 os.makedirs(raw_folder, exist_ok=True)
 VRT_FILE = os.path.join(raw_folder, "temp_vrt.vrt") # temp virtual raster for merging
 
