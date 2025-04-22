@@ -113,7 +113,7 @@ iso_codes:
  - "ZMB"
  - "ZWE"
 
-problem_iso_codes:
+problem_iso_codes: []
 #  - "ARG" # fails on PC
 #  - "BRA" # fails on PC
 #  - "COD" # fails on PC
