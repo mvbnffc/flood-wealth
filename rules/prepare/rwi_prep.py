@@ -66,7 +66,8 @@ with rasterio.open(rwi_path) as rwi_src:
             src_crs=rwi_src.crs,
             dst_transform=pop_transform,
             dst_crs=pop_crs,
-            resampling=Resampling.nearest
+            resampling=Resampling.nearest,
+            bigtiff='YES'
         )
 
 
