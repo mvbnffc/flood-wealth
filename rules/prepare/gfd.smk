@@ -73,7 +73,8 @@ rule clip_gfd_event:
         raw_flood_file="data/inputs/gfd/prep/DFO_{event_id}.tif",
         json_file="data/inputs/gfd/prep/json/DFO_{event_id}_properties.json",
     output:
-        flood_event_dir=directory("data/inputs/analysis/events/DFO_{event_id}/")
+        flood_event_dir=directory("data/inputs/analysis/events/DFO_{event_id}/"),
+        country_json="data/inputs/analysis/events/DFO_{event_id}/countries.json"
     script:
         "./gfd_events.py"
 
