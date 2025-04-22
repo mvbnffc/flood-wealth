@@ -51,7 +51,8 @@ with rasterio.open(rwi_path) as rwi_src:
         'transform': pop_transform,
         'width': pop_width,
         'height': pop_height,
-        'compress': 'lzw'
+        'compress': 'lzw',
+        'BIGTIFF': 'YES'
     })
 
     # Create an intermediate output path (that will be deleted)
@@ -67,7 +68,6 @@ with rasterio.open(rwi_path) as rwi_src:
             dst_transform=pop_transform,
             dst_crs=pop_crs,
             resampling=Resampling.nearest,
-            bigtiff='YES'
         )
 
 
