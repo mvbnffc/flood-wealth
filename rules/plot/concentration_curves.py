@@ -21,6 +21,7 @@ if __name__ == "__main__":
         admin_path: str = snakemake.input["admin_areas"]
         rwi_path: str = snakemake.input["rwi_file"]
         pop_path: str = snakemake.input["pop_file"]
+        mask_path : str = snakemake.input["mask_file"]
         risk_path: str = snakemake.input["risk_file"]
         output_path: str = snakemake.output["figure_directory"]
         administrative_level: int = snakemake.wildcards.ADMIN_SLUG
@@ -40,11 +41,15 @@ if not os.path.exists(output_path):
     os.makedirs(output_path)
 
 logging.info("Reading raster data.")
-with rasterio.open(rwi_path) as rwi_src, rasterio.open(pop_path) as pop_src, rasterio.open(risk_path) as risk_src:
+with rasterio.open(rwi_path) as rwi_src, rasterio.open(pop_path) as pop_src, rasterio.open(risk_path) as risk_src, \
+    rasterio.open(mask_path) as mask_src:
     rwi = rwi_src.read(1)
     pop = pop_src.read(1)
+    mask = mask_src.read(1)
     risk = risk_src.read(1)
     affine = risk_src.transform
+rwi[rwi==-999] = np.nan # convert -999 in RWI dataset to NaN
+water_mask = np.where(mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
 logging.info("Reading level {admin_level} admin boundaries")
 
@@ -72,11 +77,13 @@ for idx, region in tqdm(admin_areas.iterrows()):
     rwi_clip = np.where(mask_array, rwi, np.nan)
     pop_clip = np.where(mask_array, pop, np.nan)
     risk_clip = np.where(mask_array, risk, np.nan)
+    water_mask_clip = np.where(mask_array, water_mask, np.nan)
     # Mask out areas where not all rasters are valid
     mask = (
         ~np.isnan(pop_clip) &
         ~np.isnan(rwi_clip) &
-        ~np.isnan(risk_clip)
+        ~np.isnan(risk_clip) &
+        ~np.isnan(water_mask_clip)
     )
     # Flatten data
     pop_flat = pop_clip[mask]
