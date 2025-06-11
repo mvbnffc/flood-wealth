@@ -171,7 +171,8 @@ for idx, region in tqdm(admin_areas.iterrows()):
         
         total_pop = df_sorted['pop'].sum()
         if total_pop == 0:
-            return np.nan, np.nan
+            logging.warning("Total pop is ZERO - returning NaN risk.")
+            return np.nan, np.nan, np.nan, np.nan, np.nan
         
         # Calculate cumulative population
         df_sorted['cum_pop'] = df_sorted['pop'].cumsum()
