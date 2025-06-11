@@ -126,24 +126,25 @@ snakemake -c1 data/results/social_flood/events/DFO_1595/DFO_1595_results.csv
 configfile: "config/config.yaml"
 ADMINS = ["ADM-0"]
 MODELS = ["jrc", "giri", "wri"]
-TYPES = ["AAR", "RP100"]
+TYPES = ["AAR"]
 VULN_CURVES = ["JRC", "EXP"]
+SOCIALS = ['gdp']
 
 rule metrics_for_all_countries:
     input:
-        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, TYPE=TYPES, VULN_CURVE=VULN_CURVES)
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}_S-{SOCIAL}.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, TYPE=TYPES, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
 
 rule protected_metrics_for_all_countries:
     input:
-        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_protected_AAR_V-{VULN_CURVE}.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES)
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_protected_AAR_V-{VULN_CURVE}_S-{SOCIAL}.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
 
 
 # Run observed modelled metrics for all ISO3 codes
 rule observed_metrics_for_all_countries:
     input:
-        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM-0_metrics_gfd-flood.gpkg", ISO3=config['iso_codes'])
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM-0_metrics_gfd-flood_S-{SOCIAL}.gpkg", ISO3=config['iso_codes'], SOCIAL=SOCIALS)
 
 # Run metrics on all DFO flood events
 # Find all events in the prep folder
