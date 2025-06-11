@@ -1,6 +1,6 @@
 """
-This script calculates inequality metrics (concentration index and quantile ratio) 
-at a given administrative level
+This script calculates inequality metrics (concentration index and quantile ratio)
+and flood risk metrics at a given administrative level.
 
 The GADM administrative layers we are interested in:
     - National (level 0)
@@ -22,13 +22,14 @@ if __name__ == "__main__":
 
     try:
         admin_path: str = snakemake.input["admin_areas"]
-        rwi_path: str = snakemake.input["rwi_file"]
+        social_path: str = snakemake.input["social_file"]
         pop_path: str = snakemake.input["pop_file"]
         mask_path: str = snakemake.input["mask_file"]
         risk_path: str = snakemake.input["risk_file"]
         output_path: str = snakemake.output["regional_CI"]
         administrative_level: int = snakemake.wildcards.ADMIN_SLUG
         model: str = snakemake.wildcards.MODEL
+        social_name: str = snakemake.wildcards.SOCIAL
     except NameError:
         raise ValueError("Must be run via snakemake.")
     
@@ -40,14 +41,16 @@ admin_level = int(administrative_level.replace("ADM-", ""))
 logging.info(f"Calculating concentration indices at admin level {admin_level}.")
 
 logging.info("Reading raster data.")
-with rasterio.open(rwi_path) as rwi_src, rasterio.open(pop_path) as pop_src, \
+with rasterio.open(social_path) as social_src, rasterio.open(pop_path) as pop_src, \
      rasterio.open(mask_path) as mask_src, rasterio.open(risk_path) as risk_src:
-    rwi = rwi_src.read(1)
+    social = social_src.read(1)
     pop = pop_src.read(1)
     water_mask = mask_src.read(1)
     risk = risk_src.read(1)
     affine = risk_src.transform 
-rwi[rwi==-999] = np.nan # convert -999 in RWI dataset to NaN
+
+if social_name == "rwi":
+    social[social==-999] = np.nan # convert -999 in RWI dataset to NaN
 # Create the water mask
 water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
@@ -70,9 +73,9 @@ for idx, region in tqdm(admin_areas.iterrows()):
     mask_array = geometry_mask([geom],
                                 transform=affine,
                                 invert=True,
-                                out_shape=rwi.shape)
+                                out_shape=social.shape)
     # Use the mask to clip each raster by setting values outside the region to nan
-    rwi_clip = np.where(mask_array, rwi, np.nan)
+    social_clip = np.where(mask_array, social, np.nan)
     pop_clip = np.where(mask_array, pop, np.nan)
     risk_clip = np.where(mask_array, risk, np.nan)
     water_mask_clip = np.where(mask_array, water_mask, np.nan)
@@ -80,31 +83,34 @@ for idx, region in tqdm(admin_areas.iterrows()):
     # Mask out areas where not all rasters are valid
     mask = (
         ~np.isnan(pop_clip) &
-        ~np.isnan(rwi_clip) &
+        ~np.isnan(social_clip) &
         ~np.isnan(risk_clip) &
         ~np.isnan(water_mask_clip)
     )
     # Flatten data
     pop_flat = pop_clip[mask]
-    rwi_flat = rwi_clip[mask]
+    social_flat = social_clip[mask]
     risk_flat = risk_clip[mask]
     # Mask out zero-populatoin cells
     valid = pop_flat > 0
     pop_flat = pop_flat[valid]
-    rwi_flat = rwi_flat[valid]
+    social_flat = social_flat[valid]
     risk_flat = risk_flat[valid]
+
+    # Calculate total flood risk (pop * risk) for the region
+    total_flood_risk = np.nansum(pop_flat * risk_flat)
 
     # Prepare dataframe for metric calculation
     df = pd.DataFrame({
         'pop': pop_flat,
-        'rwi': rwi_flat,
+        'social': social_flat,
         'flood': risk_flat,
     })
 
     # Define function
     def calculate_CI(df):
         # Sort dataframe by wealth
-        df = df.sort_values(by="rwi", ascending=True)
+        df = df.sort_values(by="social", ascending=True)
         # Calculate cumulative population rank (to represent distribution of people)
         df['cum_pop'] = df['pop'].cumsum()
         # Calculate total pop of sample
@@ -130,7 +136,7 @@ for idx, region in tqdm(admin_areas.iterrows()):
     
     def calculate_quantile_ratio(df, quantile=0.2):
                 # Sort the DataFrame by RWI (ascending)
-                df_sorted = df.sort_values(by='rwi', ascending=True).copy()
+                df_sorted = df.sort_values(by='social', ascending=True).copy()
             
                 total_pop = df_sorted['pop'].sum()
                 if total_pop == 0:
@@ -155,17 +161,59 @@ for idx, region in tqdm(admin_areas.iterrows()):
     
     QR = calculate_quantile_ratio(df, quantile=0.2)
 
+    def calculate_flood_risk_per_quantile(df, quantile=0.2):
+        """
+        Calculate flood risk (pop * risk) for all quantiles
+        NOTE: we have hardcoded quintiles here, but this can be adjusted
+        """
+        # Sort the DataFrame by social indicator (ascending)
+        df_sorted = df.sort_values(by='social', ascending=True).copy()
+        
+        total_pop = df_sorted['pop'].sum()
+        if total_pop == 0:
+            return np.nan, np.nan
+        
+        # Calculate cumulative population
+        df_sorted['cum_pop'] = df_sorted['pop'].cumsum()
+        
+        # Get first quantile (cells that add up to the first quantile share of the population)
+        q1_df = df_sorted[df_sorted['cum_pop'] <= quantile * total_pop]
+        # Get second quantile (cells that add up to the second quantile share of the population)
+        q2_df = df_sorted[(df_sorted['cum_pop'] > quantile * total_pop) & (df_sorted['cum_pop'] <= 2 * quantile * total_pop)]
+        # Get third quantile (cells that add up to the third quantile share of the population)
+        q3_df = df_sorted[(df_sorted['cum_pop'] > 2 * quantile * total_pop) & (df_sorted['cum_pop'] <= 3 * quantile * total_pop)]
+        # Get fourth quantile (cells that add up to the fourth quantile share of the population)
+        q4_df = df_sorted[(df_sorted['cum_pop'] > 3 * quantile * total_pop) & (df_sorted['cum_pop'] <= 4 * quantile * total_pop)]
+        # Get top quantile: cells that add up to the top quantile share of the population
+        q5_df = df_sorted[df_sorted['cum_pop'] >= (1 - quantile) * total_pop]
+        
+        # Calculate flood risk (pop * risk) for each quantile
+        q1_flood_risk = np.sum(q1_df['pop'] * q1_df['flood'])
+        q2_flood_risk = np.sum(q2_df['pop'] * q2_df['flood'])
+        q3_flood_risk = np.sum(q3_df['pop'] * q3_df['flood'])
+        q4_flood_risk = np.sum(q4_df['pop'] * q4_df['flood'])
+        q5_flood_risk = np.sum(q5_df['pop'] * q5_df['flood'])
+        
+        return q1_flood_risk, q2_flood_risk, q3_flood_risk, q4_flood_risk, q5_flood_risk
+    
+    Q1_risk, Q2_risk, Q3_risk, Q4_risk, Q5_risk = calculate_flood_risk_per_quantile(df, quantile=0.2)
+
     # Calculate the number of cells where population and rwi overlaps
     total_pop = np.nansum(pop_clip)
-    pop_rwi = np.nansum(np.where(~np.isnan(rwi_clip), pop_clip, 0))
+    pop_social = np.nansum(np.where(~np.isnan(social_clip), pop_clip, 0))
 
     results.append({
         area_unique_id_col: region[area_unique_id_col],
         "CI": CI,
         "QR": QR,
         "Population": total_pop,
-        "Population Coverage (%)": (pop_rwi/total_pop)*100,
-        "rwi_count": np.count_nonzero(rwi_flat),
+        "Population Coverage (%)": (pop_social/total_pop)*100,
+        "Total Flood Risk": total_flood_risk,
+        "Q1 Flood Risk": Q1_risk,
+        "Q2 Flood Risk": Q2_risk,
+        "Q3 Flood Risk": Q3_risk,
+        "Q4 Flood Risk": Q4_risk,
+        "Q5 Flood Risk": Q5_risk,
         "geometry": region["geometry"]
     })
 
