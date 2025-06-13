@@ -21,6 +21,22 @@ Test with
 snakemake -c1 data/results/social_flood/countries/RWA/map_layers/RWA_jrc-flood-risk-exposure_V-JRC.tif
 """
 
+rule observed_risk_exposure:
+    """
+    This rule creates a flood risk exposure GeoTiff by multiplying GFD observed with the population map
+    """
+    input:
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        risk_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_gfd-flood.tif",
+    output:
+        risk_exposure="data/results/social_flood/countries/{ISO3}/map_layers/{ISO3}_gfd-flood-risk-exposure.tif",
+    script:
+        "./observed_flood_risk_exposure.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/RWA/map_layers/RWA_observed-flood-risk-exposure.tif
+"""
+
 rule pop_wealth_quntiles:
     """
     This rule returns a population map classified by wealth quintile (values 1-5 from bottom to top quantile)
