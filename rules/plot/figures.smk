@@ -57,7 +57,7 @@ rule plot_observed_concentration_curve:
         rwi_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_rwi.tif",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
-        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_gfd-flood.tif",
+        risk_file="data/results/analysis/countries/{ISO3}/{ISO3}_gfd-flood.tif",
     output:
         figure_directory = directory("figures/concentration_curves/countries/{ISO3}/{ADMIN_SLUG}/gfd/"),
     wildcard_constraints:
