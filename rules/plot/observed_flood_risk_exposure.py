@@ -13,9 +13,7 @@ if __name__ == "__main__":
         pop_path: str = snakemake.input["pop_file"]
         risk_path: str = snakemake.input["risk_file"]
         output_path: str = snakemake.output["risk_exposure"]
-        model: str = snakemake.wildcards.MODEL
         country: str = snakemake.wildcards.ISO3
-        vuln: str = snakemake.wildcards.VULN_CURVE
     except NameError:
         raise ValueError("Must be run via snakemake.")
     

@@ -34,7 +34,7 @@ rule observed_risk_exposure:
         "./observed_flood_risk_exposure.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/countries/RWA/map_layers/RWA_observed-flood-risk-exposure.tif
+snakemake -c1 data/results/social_flood/countries/RWA/map_layers/RWA_gfd-flood-risk-exposure.tif
 """
 
 rule pop_wealth_quntiles:
