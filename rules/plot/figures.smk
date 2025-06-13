@@ -57,11 +57,12 @@ rule plot_observed_concentration_curve:
         rwi_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_rwi.tif",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
-        risk_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_gfd-flood.tif",
+        risk_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{MODEL}-flood.tif",
     output:
-        figure_directory = directory("figures/concentration_curves/countries/{ISO3}/{ADMIN_SLUG}/gfd/"),
+        figure_directory = directory("figures/concentration_curves/countries/{ISO3}/{ADMIN_SLUG}/{MODEL}/"),
     wildcard_constraints:
-        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+        ADMIN_SLUG="ADM-0|ADM-1|ADM-2",
+        MODEL="gfd"
     script:
         "./concentration_curves.py"
 """
