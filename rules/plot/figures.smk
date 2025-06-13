@@ -54,10 +54,10 @@ rule plot_observed_concentration_curve:
     """
     input:
         admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
-        rwi_file="data/inputs/analysis/{ISO3}/{ISO3}_rwi.tif",
-        pop_file="data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif",
-        mask_file="data/inputs/analysis/{ISO3}/{ISO3}_surface_water.tif",
-        risk_file="data/results/flood_risk/{ISO3}/{ISO3}_gfd-flood.tif",
+        rwi_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_rwi.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_gfd-flood.tif",
     output:
         figure_directory = directory("figures/concentration_curves/countries/{ISO3}/{ADMIN_SLUG}/gfd/"),
     wildcard_constraints:
@@ -74,9 +74,9 @@ rule plot_event_concentration_curve:
     This rule plots the concentration curve for a specific flood event, and country
     """
     input:
-        rwi_file="data/inputs/analysis/{ISO3}/{ISO3}_rwi.tif",
-        pop_file="data/inputs/analysis/{ISO3}/{ISO3}_ghs-pop.tif",
-        mask_file="data/inputs/analysis/{ISO3}/{ISO3}_surface_water.tif",
+        rwi_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_rwi.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
         flood_file="data/inputs/analysis/events/DFO_{event_id}/{ISO3}_{event_id}.tif",
     output:
         figure_file = "figures/concentration_curves/events/DFO_{event_id}/{ISO3}_DFO_{event_id}_concentration_curve.png"
