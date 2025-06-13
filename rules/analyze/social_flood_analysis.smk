@@ -128,7 +128,7 @@ ADMINS = ["ADM-0"]
 MODELS = ["jrc", "giri", "wri"]
 TYPES = ["AAR"]
 VULN_CURVES = ["JRC", "EXP"]
-SOCIALS = ['gdp']
+SOCIALS = ['rwi']
 
 rule metrics_for_all_countries:
     input:
