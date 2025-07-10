@@ -36,6 +36,7 @@ include: "rules/prepare/gfd.smk"
 include: "rules/prepare/perm_water.smk"
 include: "rules/prepare/flopros.smk"
 include: "rules/prepare/gdp.smk"
+include: "rules/prepare/urbanisation.smk"
 
 include: "rules/analyze/flood_risk.smk"
 include: "rules/analyze/social_flood_analysis.smk"
