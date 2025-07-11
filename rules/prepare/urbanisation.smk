@@ -13,3 +13,15 @@ rule prepare_urbanisation:
         urban_file= "data/inputs/analysis/countries/{ISO3}/{ISO3}_urbanization.gpkg"
     script:
         "./prepare_urban.py"
+
+rule rasterize_urbanization:
+    """
+    Rasterize the urbanization layer
+    """
+    input:
+        urbanization="data/inputs/analysis/countries/{ISO3}/{ISO3}_urbanization.gpkg",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+    output:
+        rasterized="data/inputs/analysis/countries/{ISO3}/{ISO3}_urbanization.tif",
+    script:
+        "./rasterize_urban.py"
