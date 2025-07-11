@@ -38,7 +38,7 @@ include: "rules/prepare/flopros.smk"
 include: "rules/prepare/gdp.smk"
 include: "rules/prepare/urbanisation.smk"
 include: "rules/prepare/prepare_river_network.smk"
-include: "rules/prepare/prepare_river_flood_protection.smk"
+include: "rules/prepare/prepare_adaptation_measures.smk"
 
 include: "rules/analyze/flood_risk.smk"
 include: "rules/analyze/social_flood_analysis.smk"

@@ -1,5 +1,5 @@
 """
-Prepare adaptation scenario of river flood protection
+Prepare adaptation scenarios
 """
 
 rule prepare_river_flood_protection:
