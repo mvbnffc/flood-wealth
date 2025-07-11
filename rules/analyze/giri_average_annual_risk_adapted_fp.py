@@ -1,6 +1,6 @@
 """
 Given relative risk maps for GIRI flood return periods - calculate the average annual relative risk
-for each flooded grid cell.
+for each flooded grid cell. This is for the flood protection adaptation scenario.
 """
 
 import logging
@@ -19,15 +19,18 @@ if __name__ == "__main__":
         RP200_path: str = snakemake.input["flood_rp_200"]
         RP500_path: str = snakemake.input["flood_rp_500"]
         RP1000_path: str = snakemake.input["flood_rp_1000"]
-        flopros_path: str = snakemake.input["flopros"]
+        flopros_path: str = snakemake.input["flood_protection"]
         aar_output_path: str = snakemake.output["flood_aar_adapted"]
+        rp_protection: str = snakemake.wildcards["RP"]
+        urban_class: str = snakemake.wildcards["urban_class"]
         vuln_dataset: str = snakemake.wildcards["VULN_CURVE"]
     except NameError:
         raise ValueError("Must be run via snakemake.")
     
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
-logging.info(f"Calculating (adapted) GIRI average annual relative risk using {vuln_dataset} vulnerability curve.")
+logging.info(f"Calculating (adapted) GIRI average annual relative risk using {vuln_dataset} vulnerability curve." \
+             "Flood protection adaptation scenario. Return period for flood protection: {rp_protection}, Urbanization class: {urban_class}.")
 
 logging.info("Reading raster data.")
 raster_paths = [RP5_path, RP10_path, RP25_path, RP50_path, RP100_path, RP200_path, RP500_path, RP1000_path]

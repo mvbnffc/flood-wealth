@@ -1,6 +1,6 @@
 """
-Given relative risk maps for JRC flood return periods - calculate the average annual relative risk
-for each flooded grid cell.
+Given relative risk maps for WRI flood return periods - calculate the average annual relative risk
+for each flooded grid cell. This is for the flood protection adaptation scenario.
 """
 
 import logging
@@ -11,25 +11,30 @@ import numpy as np
 if __name__ == "__main__":
 
     try:
+        RP2_path: str = snakemake.input["flood_rp_2"]
+        RP5_path: str = snakemake.input["flood_rp_5"]
         RP10_path: str = snakemake.input["flood_rp_10"]
-        RP20_path: str = snakemake.input["flood_rp_20"]
+        RP25_path: str = snakemake.input["flood_rp_25"]
         RP50_path: str = snakemake.input["flood_rp_50"]
-        RP75_path: str = snakemake.input["flood_rp_75"]
         RP100_path: str = snakemake.input["flood_rp_100"]
-        RP200_path: str = snakemake.input["flood_rp_200"]
+        RP250_path: str = snakemake.input["flood_rp_250"]
         RP500_path: str = snakemake.input["flood_rp_500"]
-        flopros_path: str = snakemake.input["flopros"]
+        RP1000_path: str = snakemake.input["flood_rp_1000"]
+        flopros_path: str = snakemake.input["flood_protection"]
         aar_output_path: str = snakemake.output["flood_aar_adapted"]
+        rp_protection: str = snakemake.wildcards["RP"]
+        urban_class: str = snakemake.wildcards["urban_class"]
         vuln_dataset: str = snakemake.wildcards["VULN_CURVE"]
     except NameError:
         raise ValueError("Must be run via snakemake.")
     
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
-logging.info(f"Calculating (adapted) JRC average annual relative risk using {vuln_dataset} vulnerability curve.")
+logging.info(f"Calculating (adapted) WRI average annual relative risk using {vuln_dataset} vulnerability curve." \
+             "Flood protection adaptation scenario. Return period for flood protection: {rp_protection}, Urbanization class: {urban_class}.")
 
 logging.info("Reading raster data.")
-raster_paths = [RP10_path, RP20_path, RP50_path, RP75_path, RP100_path, RP200_path, RP500_path]
+raster_paths = [RP2_path, RP5_path, RP10_path, RP25_path, RP50_path, RP100_path, RP250_path, RP500_path, RP1000_path]
 flood_maps = [] # going to load rasters into this list
 for path in raster_paths:
     with rasterio.open(path) as src:
@@ -39,9 +44,6 @@ for path in raster_paths:
 with rasterio.open(flopros_path) as src:
     flopros = src.read(1)
 
-# Create an empty array for bankful (2-year) flood
-RP2 = np.zeros_like(flood_maps[0])
-flood_maps.insert(0, RP2) # insert this array at beginning of list.
 # Convert to numpy array
 flood_maps = np.array(flood_maps)
 
@@ -90,7 +92,7 @@ def integrate_truncated_risk(risk_curve, T, RPs):
     return np.trapezoid(sorted_risk, x=sorted_aep)
 
 logging.info("Reshaping flood maps")
-RPs = np.array([2, 10, 20, 50, 75, 100, 200, 500]) # define return periods
+RPs = np.array([2, 5, 10, 25, 50, 100, 200, 500, 1000]) # define return periods
 rows, cols = flopros.shape # for writing back to normal shape later
 n_rps = len(RPs)
 risk_flat = flood_maps.reshape(n_rps, -1) # each column is now a cell's risk curve
