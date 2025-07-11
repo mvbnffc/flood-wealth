@@ -59,6 +59,35 @@ Test with
 snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_protected_AAR_V-JRC_S-rwi.gpkg
 """
 
+rule inequality_metrics_flood_protection:
+    """
+    This rule calcualtes two inequality metrics at the specified administrative level for the flood protection adaptation scenario.
+    Adaptation parameters required as input are RP protection and min level of urbanization to protect.
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+        - Quantile Ratio (QR) - understand the tail inequality (20:80)
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_adapted_AAR_V-{VULN_CURVE}_fp_rp{RP}_duc{urban_class}.tif",
+    output:
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_adapted_AAR_V-{VULN_CURVE}_S-{SOCIAL}_fp_rp{RP}_duc{urban_class}.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        VULN_CURVE="BER|JRC|EXP",
+        SOCIAL="rwi|gdp",
+        urban_class="11|12|13|21|22|23|30",
+        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+    script:
+        "./inequality_metrics.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_fp_rp100_duc23.gpkg
+"""
+
 rule inequality_metrics_observed:
     """
     This rule calcualtes two inequality metrics at the specified administrative level. For observed flooding datasets
