@@ -21,3 +21,25 @@ rule prepare_river_flood_protection:
         urban_class="11|12|13|21|22|23|30"
     script:
         "./prepare_river_flood_protection.py"
+
+rule prepare_relocation:
+    """
+    Relocate all those people living in the 10-year flood plain with a flood depth > 1 m.
+    User needs to specify the degree of urbanization classification for people that will be relocated.
+    For these areas - flood protection layer will be set to 1000 yr RP (assuming that individual's position on wealth distribution remains the same - but now no risk)
+    Rule also outputs the total # of people relocated in the country (can then be used to calculate costs)
+    """
+    input:
+        flopros_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_flopros.tif",
+        flood_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP10.tif",
+        pop_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        urbanization_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_urbanization.tif"
+    output:
+        flood_protection="data/inputs/analysis/countries/{ISO3}/{ISO3}_adaptation_rl_m-{model}_duc{urban_class}.tif",
+        people_relocated="data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_rl_m-{model}_duc{urban_class}.txt"
+    wildcard_constraints:
+        urban_class="11|12|13|21|22|23|30",
+        model="giri|jrc|wri"
+    script:
+        "./prepare_relocation.py"
+
