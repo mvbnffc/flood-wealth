@@ -4,9 +4,9 @@
 
 # ISO Codes for all analysis countries (108 total)
 iso_codes:
- - "AGO" # fails on PC NEW
+#  - "AGO" # fails on PC NEW
  - "ALB"
- - "ARG" # fails on PC
+#  - "ARG" # fails on PC
  - "ARM"
  - "AZE"   
  - "BDI"
@@ -16,27 +16,27 @@ iso_codes:
  - "BGR"
  - "BIH"
  - "BLZ"
- - "BOL" # fails on PC NEW
- - "BRA" # fails on PC
+#  - "BOL" # fails on PC NEW
+#  - "BRA" # fails on PC
  - "BTN"
  - "BWA"
  - "CAF"
  - "CIV"
  - "CMR"
- - "COD" # fails on PC
+#  - "COD" # fails on PC
  - "COG"
- - "COL" # fails on PC
+#  - "COL" # fails on PC
  - "COM"
  - "CPV"
  - "CRI"
  - "DJI"
  - "DMA"
  - "DOM"
- - "DZA" # fails on PC
+#  - "DZA" # fails on PC
  - "ECU"
  - "EGY"
  - "ERI"
- - "ETH" # fails on PC
+#  - "ETH" # fails on PC
  - "GAB"
  - "GEO"
  - "GHA"
@@ -49,17 +49,17 @@ iso_codes:
  - "GUY"
  - "HND"
  - "HTI"
- - "IDN" # fails on PC
- - "IND" # fails on PC
+#  - "IDN" # fails on PC
+#  - "IND" # fails on PC
  - "JAM"
  - "JOR"
- - "KAZ" # fails on PC
+#  - "KAZ" # fails on PC
  - "KEN"
  - "KGZ"
  - "KHM"
  - "LAO"
  - "LBR"
- - "LBY" # fails on PC
+#  - "LBY" # fails on PC
  - "LCA"
  - "LKA"
  - "LSO"
@@ -67,24 +67,24 @@ iso_codes:
  - "MDA"
  - "MDG"
  - "MDV"
- - "MEX" # fails on PC
+#  - "MEX" # fails on PC
  - "MKD"
- - "MLI" # fails on PC
+#  - "MLI" # fails on PC
  - "MNE"
- - "MNG" # fails on PC
- - "MOZ" # fails on PC NEW
+#  - "MNG" # fails on PC
+#  - "MOZ" # fails on PC NEW
  - "MRT"
  - "MUS"
  - "MWI"
  - "MYS"
- - "NAM" # fails on PC NEW
- - "NER" # fails on PC
+#  - "NAM" # fails on PC NEW
+#  - "NER" # fails on PC
  - "NGA"
  - "NIC"
  - "NPL"
- - "PAK" # fails on PC
- - "PER" # fails on PC
- - "PHL" # fails on PC  NEW
+#  - "PAK" # fails on PC
+#  - "PER" # fails on PC
+#  - "PHL" # fails on PC  NEW
  - "PRY"
  - "ROU"
  - "RWA"
@@ -95,7 +95,7 @@ iso_codes:
  - "STP"
  - "SUR"
  - "SWZ"
- - "TCD" # fails on PC NEW
+#  - "TCD" # fails on PC NEW
  - "TGO"
  - "THA"
  - "TJK"
@@ -109,12 +109,14 @@ iso_codes:
  - "UZB"
  - "VCT"
  - "VNM"
- - "ZAF" # fails on PC
+#  - "ZAF" # fails on PC
  - "ZMB"
  - "ZWE"
 
 problem_iso_codes: []
+#  - "AGO" # fails on PC NEW
 #  - "ARG" # fails on PC
+#  - "BOL" # fails on PC NEW
 #  - "BRA" # fails on PC
 #  - "COD" # fails on PC
 #  - "COL" # fails on PC
@@ -127,7 +129,11 @@ problem_iso_codes: []
 #  - "MEX" # fails on PC
 #  - "MLI" # fails on PC
 #  - "MNG" # fails on PC
+#  - "MOZ" # fails on PC NEW
+#  - "NAM" # fails on PC NEW
 #  - "NER" # fails on PC
 #  - "PAK" # fails on PC
 #  - "PER" # fails on PC
+#  - "PHL" # fails on PC  NEW
+#  - "TCD" # fails on PC NEW
 #  - "ZAF" # fails on PC
