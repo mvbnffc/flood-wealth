@@ -188,8 +188,8 @@ TYPES = ["AAR"]
 VULN_CURVES = ["JRC"]
 SOCIALS = ['rwi']
 RPs = [100]
-DUC_protection = [21, 22, 23, 30]
-DUC_relocation = [11, 12, 13]
+DUC_protection = [21, 30]
+DUC_relocation = [11, 13]
 
 rule metrics_for_all_countries:
     input:
