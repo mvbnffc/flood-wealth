@@ -242,7 +242,7 @@ rule adapted_relocation_metrics_for_all_countries:
 # Run observed modelled metrics for all ISO3 codes
 rule observed_metrics_for_all_countries:
     input:
-        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_gfd-flood_S-{SOCIAL}.gpkg", ISO3=config['problem_iso_codes'], SOCIAL=SOCIALS)
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_gfd-flood_S-{SOCIAL}.gpkg", ISO3=config['iso_codes'], SOCIAL=SOCIALS)
 
 # Run metrics on all DFO flood events
 # Find all events in the prep folder
