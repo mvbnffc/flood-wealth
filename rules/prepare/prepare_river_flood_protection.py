@@ -189,7 +189,10 @@ if len(filtered_urbanization) > 0:
         with rasterio.open(output_path, 'w', **profile) as dst:
             dst.write(adaptation_raster, 1)
 else:
-    logging.info("No admin regions met the filtering criteria - no adaptation raster created.")
+    logging.info("No admin regions met the filtering criteria - write out original FLOPROS raster.")
+    with rasterio.open(flopros_path) as src:
+        with rasterio.open(output_path, 'w', **src.profile) as dst:
+            dst.write(src.read(1), 1)
 
 logging.info("Done.")
 
