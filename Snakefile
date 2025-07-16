@@ -25,6 +25,7 @@ include: "rules/download/flopros.smk"
 include: "rules/download/gdp.smk"
 include: "rules/download/river_network.smk"
 include: "rules/download/urbanisation.smk"
+include: "rules/download/ghs_res.smk"
 
 include: "rules/prepare/ghs_pop.smk"
 include: "rules/prepare/jrc_flood.smk"
