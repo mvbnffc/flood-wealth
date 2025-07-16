@@ -166,12 +166,55 @@ for iso3 in iso3_list:
     
     QR = calculate_quantile_ratio(df, quantile=0.2)
 
+    def calculate_flood_exposure_per_quantile(df, quantile=0.2):
+        """
+        Calculate flood exposure for all quantiles
+        NOTE: we have hardcoded quintiles here, but this can be adjusted
+        """
+        # Sort the DataFrame by social indicator (ascending)
+        df_sorted = df.sort_values(by='social', ascending=True).copy()
+        
+        total_pop = df_sorted['pop'].sum()
+        if total_pop == 0:
+            logging.warning("Total pop is ZERO - returning NaN risk.")
+            return np.nan, np.nan, np.nan, np.nan, np.nan
+        
+        # Calculate cumulative population
+        df_sorted['cum_pop'] = df_sorted['pop'].cumsum()
+        
+        # Get first quantile (cells that add up to the first quantile share of the population)
+        q1_df = df_sorted[df_sorted['cum_pop'] <= quantile * total_pop]
+        # Get second quantile (cells that add up to the second quantile share of the population)
+        q2_df = df_sorted[(df_sorted['cum_pop'] > quantile * total_pop) & (df_sorted['cum_pop'] <= 2 * quantile * total_pop)]
+        # Get third quantile (cells that add up to the third quantile share of the population)
+        q3_df = df_sorted[(df_sorted['cum_pop'] > 2 * quantile * total_pop) & (df_sorted['cum_pop'] <= 3 * quantile * total_pop)]
+        # Get fourth quantile (cells that add up to the fourth quantile share of the population)
+        q4_df = df_sorted[(df_sorted['cum_pop'] > 3 * quantile * total_pop) & (df_sorted['cum_pop'] <= 4 * quantile * total_pop)]
+        # Get top quantile: cells that add up to the top quantile share of the population
+        q5_df = df_sorted[df_sorted['cum_pop'] >= (1 - quantile) * total_pop]
+        
+        # Calculate flood risk (pop * risk) for each quantile
+        q1_flood_exp = np.sum(q1_df['pop'] * q1_df['flood'])
+        q2_flood_exp = np.sum(q2_df['pop'] * q2_df['flood'])
+        q3_flood_exp = np.sum(q3_df['pop'] * q3_df['flood'])
+        q4_flood_exp = np.sum(q4_df['pop'] * q4_df['flood'])
+        q5_flood_exp = np.sum(q5_df['pop'] * q5_df['flood'])
+        
+        return q1_flood_exp, q2_flood_exp, q3_flood_exp, q4_flood_exp, q5_flood_exp
+    
+    Q1_exp, Q2_exp, Q3_exp, Q4_exp, Q5_exp = calculate_flood_exposure_per_quantile(df, quantile=0.2)
+
     results.append({
         "ISO3": iso3,
         "FE": FE,
         "BQFE": BQFE,
         "CI": CI,
-        "QR": QR
+        "QR": QR,
+        "Q1_exp": Q1_exp,
+        "Q2_exp": Q2_exp,
+        "Q3_exp": Q3_exp,
+        "Q4_exp": Q4_exp,
+        "Q5_exp": Q5_exp
     })
 
 
