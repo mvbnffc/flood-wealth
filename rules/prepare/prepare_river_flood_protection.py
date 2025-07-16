@@ -110,7 +110,7 @@ lengths_by_admin = (
 
 logging.info("Merge river lengths with urbanization data.")
 urbanization = urbanization.merge(lengths_by_admin, on=f"GID_{gadm_level}", how="left")
-urbanization['river_length_m'] = urbanization['river_length_m'].fillna(0)  # Fill NaN with 0
+urbanization['river_length_m'] = (urbanization['river_length_m'].astype(float).fillna(0))  # Fill NaN with 0. Also fixing DEBUG Type Error
 
 logging.info("Calculate the ADMIN level costs of adaptation measures.")
 # Formula for cost of adaptation is C = unit cost * River Length (km) * log2(∆ flood protection) Source: Boulange et al (2023)
