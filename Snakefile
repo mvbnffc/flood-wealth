@@ -40,6 +40,7 @@ include: "rules/prepare/gdp.smk"
 include: "rules/prepare/urbanisation.smk"
 include: "rules/prepare/prepare_river_network.smk"
 include: "rules/prepare/prepare_adaptation_measures.smk"
+include: "rules/prepare/ghs_res.smk"
 
 include: "rules/analyze/flood_risk.smk"
 include: "rules/analyze/social_flood_analysis.smk"
