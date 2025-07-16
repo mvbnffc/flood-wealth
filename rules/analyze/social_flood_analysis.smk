@@ -117,6 +117,33 @@ Test with
 snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_rl_duc23.gpkg
 """
 
+rule inequality_metrics_dry_proofing:
+    """
+    This rule calcualtes two inequality metrics at the specified administrative level for the dry proofing adaptation scenario.
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+        - Quantile Ratio (QR) - understand the tail inequality (20:80)
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_adapted_AAR_V-{VULN_CURVE}_dp.tif",
+    output:
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_adapted_AAR_V-{VULN_CURVE}_S-{SOCIAL}_dp.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        VULN_CURVE="BER|JRC|EXP",
+        SOCIAL="rwi|gdp",
+        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+    script:
+        "./inequality_metrics.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg
+"""
+
 rule inequality_metrics_observed:
     """
     This rule calcualtes two inequality metrics at the specified administrative level. For observed flooding datasets
