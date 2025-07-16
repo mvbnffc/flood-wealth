@@ -2,10 +2,7 @@
 This script calculates inequality metrics (concentration index and quantile ratio)
 and flood risk metrics at a given administrative level.
 
-The GADM administrative layers we are interested in:
-    - National (level 0)
-    - State/province/equivalent (level 1)
-    - County/district/equivalent (level 2)
+Note: now using geoboundaries rather than GADM for admin boundaries.
 """
 
 import logging
@@ -36,7 +33,7 @@ if __name__ == "__main__":
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
 # Update notation for GADM
-admin_level = int(administrative_level.replace("ADM-", ""))
+admin_level = int(administrative_level.replace("ADM", ""))
 
 logging.info(f"Calculating concentration indices at admin level {admin_level}.")
 
@@ -55,12 +52,10 @@ if social_name == "rwi":
 water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
 logging.info(f"Reading level {administrative_level} admin boundaries")
-layer_name = f"ADM_ADM_{admin_level}"
+layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
-area_unique_id_col = f"GID_{admin_level}"
-# retain names of larger, encompassing adminstrative units
-contextual_name_cols = [f"GID_{i}" for i in range(0, admin_level)]
-admin_areas = admin_areas[[area_unique_id_col, *contextual_name_cols, "geometry"]]
+area_unique_id_col = "shapeName"
+admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
 logging.info("Looping over admin regions and calculating concentration indices")

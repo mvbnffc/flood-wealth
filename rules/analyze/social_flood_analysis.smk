@@ -12,7 +12,7 @@ rule inequality_metrics:
         - Quantile Ratio (QR) - understand the tail inequality (20:80)
     """
     input:
-        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
         social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
@@ -24,12 +24,12 @@ rule inequality_metrics:
         TYPE="AAR|RP100",
         SOCIAL="rwi|gdp",
         VULN_CURVE="BER|JRC|EXP",
-        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
     script:
         "./inequality_metrics.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_AAR_V-JRC_S-rwi.gpkg
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_jrc-flood_AAR_V-JRC_S-rwi.gpkg
 """
 
 rule inequality_metrics_protected:
@@ -40,7 +40,7 @@ rule inequality_metrics_protected:
         - Quantile Ratio (QR) - understand the tail inequality (20:80)
     """
     input:
-        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
         social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
@@ -51,12 +51,12 @@ rule inequality_metrics_protected:
         MODEL="giri|jrc|wri",
         VULN_CURVE="BER|JRC|EXP",
         SOCIAL="rwi|gdp",
-        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
     script:
         "./inequality_metrics.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_protected_AAR_V-JRC_S-rwi.gpkg
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_jrc-flood_protected_AAR_V-JRC_S-rwi.gpkg
 """
 
 rule inequality_metrics_flood_protection:
@@ -68,7 +68,7 @@ rule inequality_metrics_flood_protection:
         - Quantile Ratio (QR) - understand the tail inequality (20:80)
     """
     input:
-        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
         social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
@@ -80,12 +80,12 @@ rule inequality_metrics_flood_protection:
         VULN_CURVE="BER|JRC|EXP",
         SOCIAL="rwi|gdp",
         urban_class="11|12|13|21|22|23|30",
-        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
     script:
         "./inequality_metrics.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_fp_rp100_duc23.gpkg
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_fp_rp100_duc23.gpkg
 """
 
 rule inequality_metrics_relocation:
@@ -97,7 +97,7 @@ rule inequality_metrics_relocation:
         - Quantile Ratio (QR) - understand the tail inequality (20:80)
     """
     input:
-        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
         social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
@@ -109,12 +109,12 @@ rule inequality_metrics_relocation:
         VULN_CURVE="BER|JRC|EXP",
         SOCIAL="rwi|gdp",
         urban_class="11|12|13|21|22|23|30",
-        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
     script:
         "./inequality_metrics.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_rl_duc23.gpkg
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_rl_duc23.gpkg
 """
 
 rule inequality_metrics_dry_proofing:
@@ -125,7 +125,7 @@ rule inequality_metrics_dry_proofing:
         - Quantile Ratio (QR) - understand the tail inequality (20:80)
     """
     input:
-        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
         social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
@@ -136,12 +136,12 @@ rule inequality_metrics_dry_proofing:
         MODEL="giri|jrc|wri",
         VULN_CURVE="BER|JRC|EXP",
         SOCIAL="rwi|gdp",
-        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
     script:
         "./inequality_metrics.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg
 """
 
 rule inequality_metrics_observed:
@@ -152,7 +152,7 @@ rule inequality_metrics_observed:
         - Quantile Ratio (QR) - understand the tail inequality (20:80)
     """
     input:
-        admin_areas = "data/inputs/boundaries/{ISO3}/gadm_{ISO3}.gpkg",
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
         social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
@@ -162,12 +162,12 @@ rule inequality_metrics_observed:
     wildcard_constraints:
         MODEL="gfd|google",
         SOCIAL="rwi|gdp",
-        ADMIN_SLUG="ADM-0|ADM-1|ADM-2"
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
     script:
         "./inequality_metrics.py"
 """
 Test with
-snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM-0_metrics_gfd-flood_S-rwi.gpkg
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_gfd-flood_S-rwi.gpkg
 """
 
 def get_event_iso3s(wildcards):
@@ -209,7 +209,7 @@ snakemake -c1 data/results/social_flood/events/DFO_1595/DFO_1595_results.csv
 # Run modelled metrics for all ISO3 codes, models, and admins
 
 configfile: "config/config.yaml"
-ADMINS = ["ADM-0"]
+ADMINS = ["ADM0"]
 MODELS = ["jrc"]
 TYPES = ["AAR"]
 VULN_CURVES = ["JRC"]
@@ -242,7 +242,7 @@ rule adapted_relocation_metrics_for_all_countries:
 # Run observed modelled metrics for all ISO3 codes
 rule observed_metrics_for_all_countries:
     input:
-        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM-0_metrics_gfd-flood_S-{SOCIAL}.gpkg", ISO3=config['problem_iso_codes'], SOCIAL=SOCIALS)
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM-0_metrics_gfd-flood_S-{SOCIAL}.gpkg", ISO3=config['iso_codes'], SOCIAL=SOCIALS)
 
 # Run metrics on all DFO flood events
 # Find all events in the prep folder
