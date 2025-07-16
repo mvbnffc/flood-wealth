@@ -43,3 +43,21 @@ rule prepare_relocation:
     script:
         "./prepare_relocation.py"
 
+rule prepare_dry_proofing:
+    """
+    Implement dry proofing for all residential buildings exposed to 500-year flood extent and outside the > 1 m 10-year flood plain.
+    This follows the appraoch in Mortenson et al, 2024 (https://nhess.copernicus.org/articles/24/1381/2024/). But have adjusted low RP
+    from 2 to 10 and high RP from 1000 to 500 to align probabilities between available GFMs.
+    Rule outputs ghs-res layer masked to protected buildings. As well as text file of area (m^2) of buildings to protect (can then be used to calculate costs)
+    """
+    input:
+        rp10_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP10.tif",
+        rp500_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP500.tif",
+        res_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-res.tif"
+    output:
+        dry_proofed_buildings="data/inputs/analysis/countries/{ISO3}/{ISO3}_adaptation_dp_m-{model}.tif",
+        area_protected="data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_dp_m-{model}.txt"
+    script:
+        "./prepare_dry_proofing.py"
+
+
