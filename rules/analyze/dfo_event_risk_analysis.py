@@ -172,7 +172,7 @@ for iso3 in iso3_list:
         NOTE: we have hardcoded quintiles here, but this can be adjusted
         """
         # Sort the DataFrame by social indicator (ascending)
-        df_sorted = df.sort_values(by='social', ascending=True).copy()
+        df_sorted = df.sort_values(by='rwi', ascending=True).copy()
         
         total_pop = df_sorted['pop'].sum()
         if total_pop == 0:
