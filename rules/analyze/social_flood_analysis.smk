@@ -231,7 +231,7 @@ rule protected_metrics_for_all_countries:
 rule adapted_flood_protection_metrics_for_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_adapted_AAR_V-{VULN_CURVE}_S-{SOCIAL}_fp_rp{RP}_duc{DUC}.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS, RP=RPs, DUC=DUC_protection)
+                ISO3=config['problem_iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS, RP=RPs, DUC=DUC_protection)
 
 rule adapted_relocation_metrics_for_all_countries:
     input:
