@@ -176,9 +176,9 @@ def get_event_iso3s(wildcards):
     with open(props_path, "r") as f:
         props = json.load(f)
     # TEMP: PC DEBUG
-    problem_isos = config['problem_iso_codes'] # DEBUG code
-    return [iso for iso in props['valid'] if iso not in problem_isos] # DEBUG code
-    # return props['valid'] # original
+    # problem_isos = config['problem_iso_codes'] # DEBUG code
+    # return [iso for iso in props['valid'] if iso not in problem_isos] # DEBUG code
+    return props['valid'] # original
 
 rule dfo_event_analysis:
     """
