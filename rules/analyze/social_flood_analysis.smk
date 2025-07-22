@@ -210,10 +210,10 @@ snakemake -c1 data/results/social_flood/events/DFO_1595/DFO_1595_results.csv
 
 configfile: "config/config.yaml"
 ADMINS = ["ADM0"]
-MODELS = ["jrc"]
+MODELS = ["jrc", "giri", "wri"],
 TYPES = ["AAR"]
-VULN_CURVES = ["JRC"]
-SOCIALS = ['rwi']
+VULN_CURVES = ["JRC", "EXP"]
+SOCIALS = ['rwi', 'gdp']
 RPs = [100]
 DUC_protection = [21, 30]
 DUC_relocation = [11, 13]
