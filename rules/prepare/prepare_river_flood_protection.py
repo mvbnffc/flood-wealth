@@ -14,6 +14,7 @@ import logging
 import sys
 import glob
 import os
+import re
 
 import numpy as np
 import rasterio
@@ -53,8 +54,16 @@ urbanization = gpd.read_file(urbanization_path)
 # Make sure both layers are in same CRS
 river_network = river_network.to_crs(urbanization.crs)
 # Extract the GID level for this dataset
-gadm_level = urbanization.columns[0].split('_')[-1]  # Assuming it is in first column
-logging.info(f"GADM level for urbanization data is level {gadm_level}.")
+# Find all columns named GID_<n>
+gid_cols = [col for col in urbanization.columns if re.fullmatch(r'GID_\d+', col)]
+# extract numeric part
+gadm_levels = [int(re.fullmatch(r'GID_(\d+)', col).group(1)) for col in gid_cols]
+if gadm_levels:
+    gadm_level = str(max(gadm_levels))  # Use the highest GID level found
+    logging.info(f"GADM level for urbanization data is level {gadm_level}.")
+else:
+    logging.error("No GID columns found in urbanization data.")
+    sys.exit(1)
 
 logging.info("Calculate the level of flood protection within each admin region.")
 modes = [] # collect the modes for each region in this list
@@ -137,7 +146,7 @@ for idx, row in urbanization.iterrows():
                 river_length_km = row['river_length_m'] / 1000.0
                 urbanization.at[idx, 'adaptation_cost_min'] = min_unit_cost * river_length_km * np.log2(delta_fp)
                 urbanization.at[idx, 'adaptation_cost_mid'] = mid_unit_cost * river_length_km * np.log2(delta_fp)
-                urbanization.at[idx, 'adaptation_cost_max'] = max_unit_cost * river_length_km * np.log2(delta_fp)  
+                urbanization.at[idx, 'adaptation_cost_max'] = max_unit_cost * river_length_km * np.log2(delta_fp)
 
 logging.info("Sum costs across admin regions and save to text file.")
 costs = urbanization[['GID_' + gadm_level, 'adaptation_cost_min', 'adaptation_cost_mid', 'adaptation_cost_max']].sum()
