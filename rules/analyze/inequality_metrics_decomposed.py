@@ -129,16 +129,16 @@ for idx, region in tqdm(admin_areas.iterrows()):
         # # Calculate total pop of sample
         total_pop = df['pop'].sum()
         if total_pop == 0:
-            return np.nan
+            return np.nan, {}
         # Calculate fractional rank of each row
         df['rank'] = (df['cum_pop'] - 0.5*df['pop']) / total_pop
         try:
             # Calcualte weighted mean of flood risk
             weighted_mean_flood = np.average(df['flood'], weights=df['pop'])
         except ZeroDivisionError:
-            return np.nan
+            return np.nan, {}
         if weighted_mean_flood == 0:
-            return np.nan
+            return np.nan, {}
         # Calculate weighted sum of (flood * rank * pop)
         sum_xR = (df['flood'] * df['rank'] * df['pop']).sum()
         # Calculate Concentration Index
