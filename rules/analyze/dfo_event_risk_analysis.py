@@ -111,31 +111,57 @@ for iso3 in iso3_list:
 
     # Define function
     def calculate_CI(df):
+        '''
+        Calculates the concentration index (CI) for the given dataframe.
+        Also Uses Clarke (2002) component decomposition of the concentration index.
+        This is essentially the weighted average of the urban class concentration indices.
+        Returns the overall CI and a dictionary with a tuple containing the (1) the CI contribution
+        of each urban class, (2) the CI of the urban class (3) flood risk share of each urban class.
+        (1, 2, 3)
+        '''
         # Sort dataframe by wealth
         df = df.sort_values(by="rwi", ascending=True)
         # Calculate cumulative population rank (to represent distribution of people)
         df['cum_pop'] = df['pop'].cumsum()
-        # Calculate total pop of sample
+        # # Calculate total pop of sample
         total_pop = df['pop'].sum()
         if total_pop == 0:
-            return np.nan
+            return np.nan, {}
         # Calculate fractional rank of each row
         df['rank'] = (df['cum_pop'] - 0.5*df['pop']) / total_pop
         try:
             # Calcualte weighted mean of flood risk
             weighted_mean_flood = np.average(df['flood'], weights=df['pop'])
         except ZeroDivisionError:
-            return np.nan
+            return np.nan, {}
         if weighted_mean_flood == 0:
-            return np.nan
+            return np.nan, {}
         # Calculate weighted sum of (flood * rank * pop)
         sum_xR = (df['flood'] * df['rank'] * df['pop']).sum()
         # Calculate Concentration Index
         CI = (2 * sum_xR) / (df['pop'].sum() * weighted_mean_flood) - 1
-        return CI
 
-    CI = calculate_CI(df)
+        # Calculate contributions of each urban class
+        contrib = {}
+        for g, sub in df.groupby("urban"):
+            if sub.empty:
+                continue
+            sub_pop = sub['pop'].sum()
+            sub_weighted_mean_flood = np.average(sub['flood'], weights=sub['pop'])
+            sub_sum_xR = (sub['flood'] * sub['rank'] * sub['pop']).sum()
+            sub_CI = (2 * sub_sum_xR) / (sub_pop * sub_weighted_mean_flood) - 1
+            sub_share = (sub_pop * sub_weighted_mean_flood) / (total_pop * weighted_mean_flood)
+            contrib[g] = (sub_CI * sub_share, sub_CI, sub_share)
+
+        # Ensure all urban classes are represented in the output
+        valid_codes = [11, 12, 13, 21, 22, 23, 30]
+        for c in valid_codes:
+            if c not in contrib:
+                contrib[c] = (np.nan, np.nan, np.nan)   # (net, CI_k, share)
+
+        return CI, contrib
     
+    CI, contrib = calculate_CI(df)
     
     def calculate_quantile_ratio(df, quantile=0.2):
         # Sort the DataFrame by RWI (ascending)
@@ -204,6 +230,10 @@ for iso3 in iso3_list:
     
     Q1_exp, Q2_exp, Q3_exp, Q4_exp, Q5_exp = calculate_flood_exposure_per_quantile(df, quantile=0.2)
 
+    def safe(comp, code, idx):
+        # Function to safely get values from the contribution dictionary
+        return comp.get(code, (np.nan, np.nan, np.nan))[idx]
+
     results.append({
         "ISO3": iso3,
         "FE": FE,
@@ -214,9 +244,29 @@ for iso3 in iso3_list:
         "Q2_exp": Q2_exp,
         "Q3_exp": Q3_exp,
         "Q4_exp": Q4_exp,
-        "Q5_exp": Q5_exp
+        "Q5_exp": Q5_exp,
+        "DUC11 CI": safe(contrib, 11, 1),
+        "DUC12 CI": safe(contrib, 12, 1),
+        "DUC13 CI": safe(contrib, 13, 1),
+        "DUC21 CI": safe(contrib, 21, 1),
+        "DUC22 CI": safe(contrib, 22, 1),
+        "DUC23 CI": safe(contrib, 23, 1),
+        "DUC30 CI": safe(contrib, 30, 1),
+        "DUC11 Contribution": safe(contrib, 11, 0),
+        "DUC12 Contribution": safe(contrib, 12, 0),
+        "DUC13 Contribution": safe(contrib, 13, 0),
+        "DUC21 Contribution": safe(contrib, 21, 0),
+        "DUC22 Contribution": safe(contrib, 22, 0),
+        "DUC23 Contribution": safe(contrib, 23, 0),
+        "DUC30 Contribution": safe(contrib, 30, 0),
+        "DUC11 Risk Share": safe(contrib, 11, 2),
+        "DUC12 Risk Share": safe(contrib, 12, 2),
+        "DUC13 Risk Share": safe(contrib, 13, 2),
+        "DUC21 Risk Share": safe(contrib, 21, 2),
+        "DUC22 Risk Share": safe(contrib, 22, 2),
+        "DUC23 Risk Share": safe(contrib, 23, 2),
+        "DUC30 Risk Share": safe(contrib, 30, 2),
     })
-
 
 logging.info("Writing reults to GeoPackage.")
 results_df = pd.DataFrame(results)
