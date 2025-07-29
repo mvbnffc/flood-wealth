@@ -193,33 +193,37 @@ for idx, region in tqdm(admin_areas.iterrows()):
     total_pop = np.nansum(pop_clip)
     pop_social = np.nansum(np.where(~np.isnan(social_clip), pop_clip, 0))
 
+    def safe(comp, code, idx):
+        # Function to safely get values from the contribution dictionary
+        return comp.get(code, (np.nan, np.nan, np.nan))[idx]
+
     results.append({
         area_unique_id_col: region[area_unique_id_col],
         "CI": CI,
         "Population": total_pop,
         "Population Coverage (%)": (pop_social/total_pop)*100,
         "Total Flood Risk": total_flood_risk,
-        "DUC11 CI": contrib[11][1],
-        "DUC12 CI": contrib[12][1],
-        "DUC13 CI": contrib[13][1],
-        "DUC21 CI": contrib[21][1],
-        "DUC22 CI": contrib[22][1],
-        "DUC23 CI": contrib[23][1],
-        "DUC30 CI": contrib[30][1],
-        "DUC11 contribution": contrib[11][0],
-        "DUC12 contribution": contrib[12][0],
-        "DUC13 contribution": contrib[13][0],
-        "DUC21 contribution": contrib[21][0],
-        "DUC22 contribution": contrib[22][0],
-        "DUC23 contribution": contrib[23][0],
-        "DUC30 contribution": contrib[30][0],
-        "DUC11 risk share": contrib[11][2],
-        "DUC12 risk share": contrib[12][2],
-        "DUC13 risk share": contrib[13][2],
-        "DUC21 risk share": contrib[21][2],
-        "DUC22 risk share": contrib[22][2],
-        "DUC23 risk share": contrib[23][2],
-        "DUC30 risk share": contrib[30][2],
+        "DUC11 CI": safe(contrib, 11, 1),
+        "DUC12 CI": safe(contrib, 12, 1),
+        "DUC13 CI": safe(contrib, 13, 1),
+        "DUC21 CI": safe(contrib, 21, 1),
+        "DUC22 CI": safe(contrib, 22, 1),
+        "DUC23 CI": safe(contrib, 23, 1),
+        "DUC30 CI": safe(contrib, 30, 1),
+        "DUC11 Contribution": safe(contrib, 11, 0),
+        "DUC12 Contribution": safe(contrib, 12, 0),
+        "DUC13 Contribution": safe(contrib, 13, 0),
+        "DUC21 Contribution": safe(contrib, 21, 0),
+        "DUC22 Contribution": safe(contrib, 22, 0),
+        "DUC23 Contribution": safe(contrib, 23, 0),
+        "DUC30 Contribution": safe(contrib, 30, 0),
+        "DUC11 Risk Share": safe(contrib, 11, 2),
+        "DUC12 Risk Share": safe(contrib, 12, 2),
+        "DUC13 Risk Share": safe(contrib, 13, 2),
+        "DUC21 Risk Share": safe(contrib, 21, 2),
+        "DUC22 Risk Share": safe(contrib, 22, 2),
+        "DUC23 Risk Share": safe(contrib, 23, 2),
+        "DUC30 Risk Share": safe(contrib, 30, 2),
         "geometry": region["geometry"]
     })
 
