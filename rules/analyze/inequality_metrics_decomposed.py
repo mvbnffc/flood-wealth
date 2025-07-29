@@ -156,7 +156,14 @@ for idx, region in tqdm(admin_areas.iterrows()):
             sub_share = (sub_pop * sub_weighted_mean_flood) / (total_pop * weighted_mean_flood)
             contrib[g] = (sub_CI * sub_share, sub_CI, sub_share)
 
+        # Ensure all urban classes are represented in the output
+        valid_codes = [11, 12, 13, 21, 22, 23, 30]
+        for c in valid_codes:
+            if c not in contrib:
+                contrib[c] = (np.nan, np.nan, np.nan)   # (net, CI_k, share)
+
         return CI, contrib
+
 
     def print_ci(ci_total, contrib_dict):
         df = (pd.DataFrame.from_dict(contrib_dict, orient="index",
