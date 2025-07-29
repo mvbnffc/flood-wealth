@@ -32,6 +32,35 @@ Test with
 snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_jrc-flood_AAR_V-JRC_S-rwi.gpkg
 """
 
+rule inequality_metrics_decomposed:
+    """
+    This rule calcualtes two inequality metrics at the specified administrative level decomposed by urbanization level
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+        - Quantile Ratio (QR) - understand the tail inequality (20:80)
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        urban_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-mod.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_{TYPE}_V-{VULN_CURVE}.tif",
+    output:
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_decomposed_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}_S-{SOCIAL}.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        TYPE="AAR|RP100",
+        SOCIAL="rwi|gdp",
+        VULN_CURVE="BER|JRC|EXP",
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
+    script:
+        "./inequality_metrics_decomposed.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_decomposed_metrics_jrc-flood_AAR_V-JRC_S-rwi.gpkg
+"""
+
 rule inequality_metrics_protected:
     """
     This rule calcualtes two inequality metrics at the specified administrative level. FLOPROS protection is ON.
