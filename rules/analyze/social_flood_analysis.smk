@@ -88,6 +88,34 @@ Test with
 snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_jrc-flood_protected_AAR_V-JRC_S-rwi.gpkg
 """
 
+rule inequality_metrics_protected_decomposed:
+    """
+    This rule calcualtes two inequality metrics at the specified administrative level. FLOPROS protection is ON.
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+        - Quantile Ratio (QR) - understand the tail inequality (20:80)
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
+        urban_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-mod.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_protected_AAR_V-{VULN_CURVE}.tif",
+    output:
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_decomposed_metrics_{MODEL}-flood_protected_AAR_V-{VULN_CURVE}_S-{SOCIAL}.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        VULN_CURVE="BER|JRC|EXP",
+        SOCIAL="rwi|gdp",
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
+    script:
+        "./inequality_metrics_decomposed.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_decomposed_metrics_jrc-flood_protected_AAR_V-JRC_S-rwi.gpkg
+"""
+
 rule inequality_metrics_flood_protection:
     """
     This rule calcualtes two inequality metrics at the specified administrative level for the flood protection adaptation scenario.
@@ -199,6 +227,33 @@ Test with
 snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_gfd-flood_S-rwi.gpkg
 """
 
+rule inequality_metrics_observed_decomposed:
+    """
+    This rule calcualtes two inequality metrics at the specified administrative level. For observed flooding datasets
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+        - Quantile Ratio (QR) - understand the tail inequality (20:80)
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        urban_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-mod.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{MODEL}-flood.tif",
+    output:
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_decomposed_metrics_{MODEL}-flood_S-{SOCIAL}.gpkg",
+    wildcard_constraints:
+        MODEL="gfd|google",
+        SOCIAL="rwi|gdp",
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
+    script:
+        "./inequality_metrics_decomposed.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_decomposed_metrics_gfd-flood_S-rwi.gpkg
+"""
+
 def get_event_iso3s(wildcards):
     """Return a list of valid ISO3 codes for an event by reading its properties file."""
     props_path = f"data/inputs/analysis/events/DFO_{wildcards.event_id}/countries.json"
@@ -241,8 +296,8 @@ configfile: "config/config.yaml"
 ADMINS = ["ADM0"]
 MODELS = ["jrc", "giri", "wri"]
 TYPES = ["AAR"]
-VULN_CURVES = ["JRC", "EXP"]
-SOCIALS = ['rwi', 'gdp']
+VULN_CURVES = ["JRC"]
+SOCIALS = ['rwi']
 RPs = [100]
 DUC_protection = [21, 30]
 DUC_relocation = [11, 13]
@@ -255,6 +310,11 @@ rule metrics_for_all_countries:
 rule protected_metrics_for_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_protected_AAR_V-{VULN_CURVE}_S-{SOCIAL}.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
+
+rule protected_metrics_decomposed_for_all_countries:
+    input:
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_decomposed_metrics_{MODEL}-flood_protected_AAR_V-{VULN_CURVE}_S-{SOCIAL}.gpkg",
                 ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
 
 rule adapted_flood_protection_metrics_for_all_countries:
@@ -278,6 +338,11 @@ rule adapted_dry_proofing_metrics_for_all_countries:
 rule observed_metrics_for_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_gfd-flood_S-{SOCIAL}.gpkg", ISO3=config['problem_iso_codes'], SOCIAL=SOCIALS)
+
+rule observed_metrics_decomposed_for_all_countries:
+    input:
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_decomposed_metrics_gfd-flood_S-{SOCIAL}.gpkg", ISO3=config['iso_codes'], SOCIAL=SOCIALS)
+
 
 # Run metrics on all DFO flood events
 # Find all events in the prep folder
