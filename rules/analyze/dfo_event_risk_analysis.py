@@ -19,6 +19,7 @@ if __name__ == "__main__":
         rwi_path_list = snakemake.input["rwi_file"]
         pop_path_list = snakemake.input["pop_file"]
         mask_path_list = snakemake.input["mask_file"]
+        urban_path_list = snakemake.input["urban_file"]
         flood_path_list = snakemake.input["flood_file"]
         output_path: str = snakemake.output["results"]
         event_id: str = snakemake.wildcards.event_id
@@ -41,19 +42,24 @@ for iso3 in iso3_list:
     # Get the paths for the current country
     rwi_path = [path for path in rwi_path_list if iso3 in path][0]
     pop_path = [path for path in pop_path_list if iso3 in path][0]
+    urban_path = [path for path in urban_path_list if iso3 in path][0]
     mask_path = [path for path in mask_path_list if iso3 in path][0]
     flood_path = [path for path in flood_path_list if iso3 in path][0]
 
     logging.info("Reading raster data.")
     with rasterio.open(rwi_path) as rwi_src, rasterio.open(pop_path) as pop_src, \
-          rasterio.open(mask_path) as mask_src, rasterio.open(flood_path) as flood_src:
+          rasterio.open(mask_path) as mask_src, rasterio.open(urban_path) as urban_src, \
+          rasterio.open(flood_path) as flood_src:
         rwi = rwi_src.read(1)
         pop = pop_src.read(1)
         mask = mask_src.read(1)
+        urban = urban_src.read(1).astype('float32') # convert to float to avoid errors
         flood = flood_src.read(1)
         affine = flood_src.transform 
     
-    rwi[rwi==-999] = np.nan # convert -999 in RWI dataset to NaN    
+    rwi[rwi==-999] = np.nan # convert -999 in RWI dataset to NaN 
+    urban[urban==10] = np.nan # convert 10 in urban dataset (water class) to NaN
+    urban[urban==-200] = np.nan # convert -200 in urban dataset (no data) to NaN   
 
     water_mask = np.where(mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
     # Remove all areas where one of the datasets is NaN
@@ -61,22 +67,26 @@ for iso3 in iso3_list:
         ~np.isnan(pop) &
         ~np.isnan(rwi) &
         ~np.isnan(flood) &
+        ~np.isnan(urban) &
         ~np.isnan(water_mask)
     )
     # Flatten data
     pop_flat = pop[mask_areas]
     rwi_flat = rwi[mask_areas]
+    urban_flat = urban[mask_areas]
     flood_flat = flood[mask_areas]
     # Mask out zero-populatoin cells
     valid = pop_flat > 0
     pop_flat = pop_flat[valid]
     rwi_flat = rwi_flat[valid]
+    urban_flat = urban_flat[valid]
     flood_flat = flood_flat[valid]
 
     # Create dataframe for analysis
     df = pd.DataFrame({
         'pop': pop_flat,
         'rwi': rwi_flat,
+        'urban': urban_flat,
         'flood': flood_flat,
     })
 
