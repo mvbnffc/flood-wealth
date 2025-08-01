@@ -1,6 +1,6 @@
 """
 This script calculates inequality metrics (concentration index and quantile ratio)
-and flood risk metrics at a given administrative level.
+and flood risk metrics at a given administrative level. It also decomposes the metric by urbanization.
 
 Note: now using geoboundaries rather than GADM for admin boundaries.
 """
@@ -22,6 +22,7 @@ if __name__ == "__main__":
         social_path: str = snakemake.input["social_file"]
         pop_path: str = snakemake.input["pop_file"]
         mask_path: str = snakemake.input["mask_file"]
+        urban_path: str = snakemake.input["urban_file"]
         risk_path: str = snakemake.input["risk_file"]
         output_path: str = snakemake.output["regional_CI"]
         administrative_level: int = snakemake.wildcards.ADMIN_SLUG
@@ -39,15 +40,19 @@ logging.info(f"Calculating concentration indices at admin level {admin_level}.")
 
 logging.info("Reading raster data.")
 with rasterio.open(social_path) as social_src, rasterio.open(pop_path) as pop_src, \
-     rasterio.open(mask_path) as mask_src, rasterio.open(risk_path) as risk_src:
+     rasterio.open(mask_path) as mask_src, rasterio.open(urban_path) as urban_src, \
+    rasterio.open(risk_path) as risk_src:
     social = social_src.read(1)
     pop = pop_src.read(1)
     water_mask = mask_src.read(1)
+    urban = urban_src.read(1).astype('float32') # convert to float to avoid errors
     risk = risk_src.read(1)
     affine = risk_src.transform 
 
 if social_name == "rwi":
     social[social==-999] = np.nan # convert -999 in RWI dataset to NaN
+urban[urban==10] = np.nan # convert 10 in urban dataset (water class) to NaN
+urban[urban==-200] = np.nan # convert -200 in urban dataset (no data) to NaN
 # Create the water mask
 water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
@@ -72,6 +77,7 @@ for idx, region in tqdm(admin_areas.iterrows()):
     # Use the mask to clip each raster by setting values outside the region to nan
     social_clip = np.where(mask_array, social, np.nan)
     pop_clip = np.where(mask_array, pop, np.nan)
+    urban_clip = np.where(mask_array, urban, np.nan)
     risk_clip = np.where(mask_array, risk, np.nan)
     water_mask_clip = np.where(mask_array, water_mask, np.nan)
     
@@ -80,15 +86,18 @@ for idx, region in tqdm(admin_areas.iterrows()):
         ~np.isnan(pop_clip) &
         ~np.isnan(social_clip) &
         ~np.isnan(risk_clip) &
+        ~np.isnan(urban_clip) &
         ~np.isnan(water_mask_clip)
     )
     # Flatten data
     pop_flat = pop_clip[mask]
     social_flat = social_clip[mask]
+    urban_flat = urban_clip[mask]
     risk_flat = risk_clip[mask]
     # Mask out zero-populatoin cells
     valid = pop_flat > 0
     pop_flat = pop_flat[valid]
+    urban_flat = urban_flat[valid]
     social_flat = social_flat[valid]
     risk_flat = risk_flat[valid]
 
@@ -100,116 +109,121 @@ for idx, region in tqdm(admin_areas.iterrows()):
         'pop': pop_flat,
         'social': social_flat,
         'flood': risk_flat,
+        'urban': urban_flat
     })
 
     # Define function
     def calculate_CI(df):
+        '''
+        Calculates the concentration index (CI) for the given dataframe.
+        Also Uses Clarke (2002) component decomposition of the concentration index.
+        This is essentially the weighted average of the urban class concentration indices.
+        Returns the overall CI and a dictionary with a tuple containing the (1) the CI contribution
+        of each urban class, (2) the CI of the urban class (3) flood risk share of each urban class.
+        (1, 2, 3)
+        '''
         # Sort dataframe by wealth
         df = df.sort_values(by="social", ascending=True)
         # Calculate cumulative population rank (to represent distribution of people)
         df['cum_pop'] = df['pop'].cumsum()
-        # Calculate total pop of sample
+        # # Calculate total pop of sample
         total_pop = df['pop'].sum()
         if total_pop == 0:
-            return np.nan
+            return np.nan, {}
         # Calculate fractional rank of each row
         df['rank'] = (df['cum_pop'] - 0.5*df['pop']) / total_pop
         try:
             # Calcualte weighted mean of flood risk
             weighted_mean_flood = np.average(df['flood'], weights=df['pop'])
         except ZeroDivisionError:
-            return np.nan
+            return np.nan, {}
         if weighted_mean_flood == 0:
-            return np.nan
+            return np.nan, {}
         # Calculate weighted sum of (flood * rank * pop)
         sum_xR = (df['flood'] * df['rank'] * df['pop']).sum()
         # Calculate Concentration Index
         CI = (2 * sum_xR) / (df['pop'].sum() * weighted_mean_flood) - 1
-        return CI
 
-    CI = calculate_CI(df)
-    
-    def calculate_quantile_ratio(df, quantile=0.2):
-                # Sort the DataFrame by RWI (ascending)
-                df_sorted = df.sort_values(by='social', ascending=True).copy()
-            
-                total_pop = df_sorted['pop'].sum()
-                if total_pop == 0:
-                    return np.nan
-                
-                # Calculate cumulative population
-                df_sorted['cum_pop'] = df_sorted['pop'].cumsum()
-                # Get bottom quantile: cells that add up to the first quantile share of the population
-                bottom_df = df_sorted[df_sorted['cum_pop'] <= quantile * total_pop]
-                # Get top quantile: cells that add up to the top quantile share of the population
-                top_df = df_sorted[df_sorted['cum_pop'] >= (1 - quantile) * total_pop]
-                
-                try:
-                    # Compute population-weighted average flood exposure
-                    bottom_weighted_avg = np.average(bottom_df["flood"], weights=bottom_df["pop"])
-                    top_weighted_avg = np.average(top_df["flood"], weights=top_df["pop"])
-                except ZeroDivisionError:
-                    return np.nan
-                    
-                # Return the quantile ratio. (Make sure you don’t divide by zero.)
-                return top_weighted_avg / bottom_weighted_avg if bottom_weighted_avg != 0 else np.nan
-    
-    QR = calculate_quantile_ratio(df, quantile=0.2)
+        # Calculate contributions of each urban class
+        contrib = {}
+        for g, sub in df.groupby("urban"):
+            if sub.empty:
+                continue
+            sub_pop = sub['pop'].sum()
+            sub_weighted_mean_flood = np.average(sub['flood'], weights=sub['pop'])
+            sub_sum_xR = (sub['flood'] * sub['rank'] * sub['pop']).sum()
+            sub_CI = (2 * sub_sum_xR) / (sub_pop * sub_weighted_mean_flood) - 1
+            sub_share = (sub_pop * sub_weighted_mean_flood) / (total_pop * weighted_mean_flood)
+            contrib[g] = (sub_CI * sub_share, sub_CI, sub_share)
 
-    def calculate_flood_risk_per_quantile(df, quantile=0.2):
-        """
-        Calculate flood risk (pop * risk) for all quantiles
-        NOTE: we have hardcoded quintiles here, but this can be adjusted
-        """
-        # Sort the DataFrame by social indicator (ascending)
-        df_sorted = df.sort_values(by='social', ascending=True).copy()
-        
-        total_pop = df_sorted['pop'].sum()
-        if total_pop == 0:
-            logging.warning("Total pop is ZERO - returning NaN risk.")
-            return np.nan, np.nan, np.nan, np.nan, np.nan
-        
-        # Calculate cumulative population
-        df_sorted['cum_pop'] = df_sorted['pop'].cumsum()
-        
-        # Get first quantile (cells that add up to the first quantile share of the population)
-        q1_df = df_sorted[df_sorted['cum_pop'] <= quantile * total_pop]
-        # Get second quantile (cells that add up to the second quantile share of the population)
-        q2_df = df_sorted[(df_sorted['cum_pop'] > quantile * total_pop) & (df_sorted['cum_pop'] <= 2 * quantile * total_pop)]
-        # Get third quantile (cells that add up to the third quantile share of the population)
-        q3_df = df_sorted[(df_sorted['cum_pop'] > 2 * quantile * total_pop) & (df_sorted['cum_pop'] <= 3 * quantile * total_pop)]
-        # Get fourth quantile (cells that add up to the fourth quantile share of the population)
-        q4_df = df_sorted[(df_sorted['cum_pop'] > 3 * quantile * total_pop) & (df_sorted['cum_pop'] <= 4 * quantile * total_pop)]
-        # Get top quantile: cells that add up to the top quantile share of the population
-        q5_df = df_sorted[df_sorted['cum_pop'] >= (1 - quantile) * total_pop]
-        
-        # Calculate flood risk (pop * risk) for each quantile
-        q1_flood_risk = np.sum(q1_df['pop'] * q1_df['flood'])
-        q2_flood_risk = np.sum(q2_df['pop'] * q2_df['flood'])
-        q3_flood_risk = np.sum(q3_df['pop'] * q3_df['flood'])
-        q4_flood_risk = np.sum(q4_df['pop'] * q4_df['flood'])
-        q5_flood_risk = np.sum(q5_df['pop'] * q5_df['flood'])
-        
-        return q1_flood_risk, q2_flood_risk, q3_flood_risk, q4_flood_risk, q5_flood_risk
-    
-    Q1_risk, Q2_risk, Q3_risk, Q4_risk, Q5_risk = calculate_flood_risk_per_quantile(df, quantile=0.2)
+        # Ensure all urban classes are represented in the output
+        valid_codes = [11, 12, 13, 21, 22, 23, 30]
+        for c in valid_codes:
+            if c not in contrib:
+                contrib[c] = (np.nan, np.nan, np.nan)   # (net, CI_k, share)
+
+        return CI, contrib
+
+
+    def print_ci(ci_total, contrib_dict):
+        df = (pd.DataFrame.from_dict(contrib_dict, orient="index",
+                        columns=["Contribution", "CI", "Risk Share"])
+                .rename_axis("Urban class")
+                .sort_index())
+
+        # Share of the overall CI (helpful when CI ≠ 1)
+        df["Risk Share %"] = 100 * df["Risk Share"]
+        df.drop(columns="Risk Share", inplace=True)
+
+        # Share of the overall CI
+        df["% of total CI"] = np.where(
+            ci_total == 0, np.nan, 100 * df["Contribution"] / ci_total
+        )
+
+        # ------------------------------------------------------------------
+        # Console output
+        # ------------------------------------------------------------------
+        print(f"\n\033[1mOverall concentration index (CI):\033[0m {ci_total:+.4f}\n")
+        print(df.to_markdown(floatfmt=".4f"))
+
+    CI, contrib = calculate_CI(df)
+    print_ci(CI, contrib)
 
     # Calculate the number of cells where population and rwi overlaps
     total_pop = np.nansum(pop_clip)
     pop_social = np.nansum(np.where(~np.isnan(social_clip), pop_clip, 0))
 
+    def safe(comp, code, idx):
+        # Function to safely get values from the contribution dictionary
+        return comp.get(code, (np.nan, np.nan, np.nan))[idx]
+
     results.append({
         area_unique_id_col: region[area_unique_id_col],
         "CI": CI,
-        "QR": QR,
         "Population": total_pop,
         "Population Coverage (%)": (pop_social/total_pop)*100,
         "Total Flood Risk": total_flood_risk,
-        "Q1 Flood Risk": Q1_risk,
-        "Q2 Flood Risk": Q2_risk,
-        "Q3 Flood Risk": Q3_risk,
-        "Q4 Flood Risk": Q4_risk,
-        "Q5 Flood Risk": Q5_risk,
+        "DUC11 CI": safe(contrib, 11, 1),
+        "DUC12 CI": safe(contrib, 12, 1),
+        "DUC13 CI": safe(contrib, 13, 1),
+        "DUC21 CI": safe(contrib, 21, 1),
+        "DUC22 CI": safe(contrib, 22, 1),
+        "DUC23 CI": safe(contrib, 23, 1),
+        "DUC30 CI": safe(contrib, 30, 1),
+        "DUC11 Contribution": safe(contrib, 11, 0),
+        "DUC12 Contribution": safe(contrib, 12, 0),
+        "DUC13 Contribution": safe(contrib, 13, 0),
+        "DUC21 Contribution": safe(contrib, 21, 0),
+        "DUC22 Contribution": safe(contrib, 22, 0),
+        "DUC23 Contribution": safe(contrib, 23, 0),
+        "DUC30 Contribution": safe(contrib, 30, 0),
+        "DUC11 Risk Share": safe(contrib, 11, 2),
+        "DUC12 Risk Share": safe(contrib, 12, 2),
+        "DUC13 Risk Share": safe(contrib, 13, 2),
+        "DUC21 Risk Share": safe(contrib, 21, 2),
+        "DUC22 Risk Share": safe(contrib, 22, 2),
+        "DUC23 Risk Share": safe(contrib, 23, 2),
+        "DUC30 Risk Share": safe(contrib, 30, 2),
         "geometry": region["geometry"]
     })
 

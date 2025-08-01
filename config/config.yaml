@@ -113,21 +113,27 @@ iso_codes:
  - "ZMB"
  - "ZWE"
 
-problem_iso_codes: []
-#  - "ARG" # fails on PC
-#  - "BRA" # fails on PC
-#  - "COD" # fails on PC
-#  - "COL" # fails on PC
-#  - "DZA" # fails on PC
-#  - "ETH" # fails on PC
-#  - "IDN" # fails on PC
-#  - "IND" # fails on PC
-#  - "KAZ" # fails on PC
-#  - "LBY" # fails on PC
-#  - "MEX" # fails on PC
-#  - "MLI" # fails on PC
-#  - "MNG" # fails on PC
-#  - "NER" # fails on PC
-#  - "PAK" # fails on PC
-#  - "PER" # fails on PC
-#  - "ZAF" # fails on PC
+problem_iso_codes: # []
+ - "AGO" # fails on PC NEW
+ - "ARG" # fails on PC
+ - "BOL" # fails on PC NEW
+ - "BRA" # fails on PC
+ - "COD" # fails on PC
+ - "COL" # fails on PC
+ - "DZA" # fails on PC
+ - "ETH" # fails on PC
+ - "IDN" # fails on PC
+ - "IND" # fails on PC
+ - "KAZ" # fails on PC
+ - "LBY" # fails on PC
+ - "MEX" # fails on PC
+ - "MLI" # fails on PC
+ - "MNG" # fails on PC
+ - "MOZ" # fails on PC NEW
+ - "NAM" # fails on PC NEW
+ - "NER" # fails on PC
+ - "PAK" # fails on PC
+ - "PER" # fails on PC
+ - "PHL" # fails on PC  NEW
+ - "TCD" # fails on PC NEW
+ - "ZAF" # fails on PC

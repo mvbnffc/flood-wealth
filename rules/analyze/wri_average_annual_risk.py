@@ -27,7 +27,7 @@ if __name__ == "__main__":
     
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
-logging.info(f"Calculating GIRI average annual relative risk using {vuln_dataset} vulnerability curve.")
+logging.info(f"Calculating WRI average annual relative risk using {vuln_dataset} vulnerability curve.")
 
 logging.info("Reading raster data.")
 raster_paths = [RP2_path, RP5_path, RP10_path, RP25_path, RP50_path, RP100_path, RP250_path, RP500_path, RP1000_path]

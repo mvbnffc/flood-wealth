@@ -1,5 +1,5 @@
 """
-This script plots the concentration curve for the administration level of interest.
+This script plots the observed concentration curve for the administration level of interest.
 """
 
 import logging
@@ -25,16 +25,14 @@ if __name__ == "__main__":
         risk_path: str = snakemake.input["risk_file"]
         output_path: str = snakemake.output["figure_directory"]
         administrative_level: int = snakemake.wildcards.ADMIN_SLUG
-        model: str = snakemake.wildcards.MODEL
         country: str = snakemake.wildcards.ISO3
-        vuln: str = snakemake.wildcards.VULN_CURVE
     except NameError:
         raise ValueError("Must be run via snakemake.")
     
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
 admin_level = int(administrative_level.replace("ADM-", ""))
-logging.info(f"Plotting Concentration Curves for {country} using {model} model and {vuln} curve at Admin Level {admin_level}.")
+logging.info(f"Plotting Observed Concentration Curves for {country} at Admin Level {admin_level}.")
 
 if not os.path.exists(output_path):
     logging.info("Creating Concentration Curve Figure Directory")
@@ -135,6 +133,6 @@ for idx, region in tqdm(admin_areas.iterrows()):
         plt.close()
 
     x, y = compute_concentration_curve(df)
-    plot_concentration_curve(x, y, f"{region_code}_concentration_curve_{model}_V-{vuln}", output_path)
+    plot_concentration_curve(x, y, f"{region_code}observed_concentration_curve", output_path)
 
 logging.info("Done.")
