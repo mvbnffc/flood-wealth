@@ -88,11 +88,12 @@ def compute_concentration_curve(data):
     return x_vals, y_vals
 
 def plot_concentration_curve(x, y, title, output_path):
+    plt.figure(figsize=(4, 3))
     plt.plot(x, y, label="Concentration Curve")
     plt.plot([0,1], [0,1], "--", color='gray', label='Equality Line')
     plt.xlabel('Cumulative Population (Wealth Rank)')
     plt.ylabel('Cumulative Flood Risk Exposure')
-    plt.title(title)
+    # plt.title(title)
     plt.legend()
     plt.savefig(output_path)
     plt.close()
