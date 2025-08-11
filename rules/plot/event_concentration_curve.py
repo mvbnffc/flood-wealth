@@ -95,7 +95,7 @@ def plot_concentration_curve(x, y, title, output_path):
     plt.ylabel('Cumulative Flood Risk Exposure')
     # plt.title(title)
     plt.legend()
-    plt.savefig(output_path)
+    plt.savefig(output_path, bbox_inches='tight')
     plt.close()
 
 x, y = compute_concentration_curve(df)
