@@ -49,11 +49,11 @@ rule extract_res_layer:
     """
     input:
         a_total = "data/inputs/ghs-built/GHS_BUILT_S_E2020_GLOBE_R2023A_4326_3ss_V1_0.tif",
-        a_nres = "data/inputs/ghs-built/GHS_BUILT_S_NRES_E2020_GLOBE_R2023A_4326_3ss_V1_0.tif"
+        a_nres = "data/inputs/ghs-built/GHS_BUILT_S_NRES_E2020_GLOBE_R2023A_4326_3ss_V1_0.tif",
         v_total = "data/inputs/ghs-built/GHS_BUILT_V_E2020_GLOBE_R2023A_4326_3ss_V1_0.tif",
         v_nres = "data/inputs/ghs-built/GHS_BUILT_V_NRES_E2020_GLOBE_R2023A_4326_3ss_V1_0.tif"
     output:
-        a_res = "data/inputs/ghs-built/GHS_BUILT_S_RES_E2020_GLOBE_R2023A_4326_3ss_V1_0.tif"
+        a_res = "data/inputs/ghs-built/GHS_BUILT_S_RES_E2020_GLOBE_R2023A_4326_3ss_V1_0.tif",
         v_res = "data/inputs/ghs-built/GHS_BUILT_V_RES_E2020_GLOBE_R2023A_4326_3ss_V1_0.tif"
     resources:
         mem_mb=8000  # Adjust based on your system memory
