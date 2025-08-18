@@ -1,0 +1,2 @@
+RWA, https://download.geofabrik.de/africa/rwanda-latest-free.shp.zip
+ 
