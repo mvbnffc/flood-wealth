@@ -53,7 +53,7 @@ rule prepare_dry_proofing:
     input:
         rp10_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP10.tif",
         rp500_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP500.tif",
-        res_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-res.tif"
+        res_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-res_a.tif"
     output:
         dry_proofed_buildings="data/inputs/analysis/countries/{ISO3}/{ISO3}_adaptation_dp_m-{model}.tif",
         area_protected="data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_dp_m-{model}.txt"
