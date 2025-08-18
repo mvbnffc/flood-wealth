@@ -17,3 +17,21 @@ rule rasterize_osm_infra:
 Test with
 snakemake -c1 data/inputs/analysis/countries/RWA/RWA_infra.tif"
 """
+
+rule infrastructure_valuation:
+    """
+    This rule takes the IMF public capital stock data and disaggregates
+    it across the rasterized infrastructure layer for a country.
+    """
+    input: 
+        infrastructure_raster="data/inputs/analysis/countries/{ISO3}/{ISO3}_infra.tif",
+        capital_stock="data/inputs/imf/IMFInvestmentandCapitalStockDataset2021.xlsx"
+    output:
+        infra_value="data/inputs/analysis/countries/{ISO3}/{ISO3}_inf_capstock.tif"
+    script:
+        "./distribute_imf_capital.py"
+
+"""
+Test with
+snakemake -c1 data/inputs/analysis/countries/RWA/RWA_inf_capstock.tif"
+"""

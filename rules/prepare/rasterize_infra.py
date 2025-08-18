@@ -60,7 +60,7 @@ if roads.crs is None:
 if roads.crs != dst_crs:
     roads = roads.To_crs(dst_crs)
 # Filter road classes
-keep = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'residential'}
+keep = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'residential', 'unclassified', 'service'}
 roads = roads[roads['fclass'].isin(keep)]
 
 # Densify road lines to ~1/2 pixel so we can rasterize them properly
