@@ -15,7 +15,7 @@ rule relative_flood_risk:
     output:
         risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_RP{RP}_V-{VULN_CURVE}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP",
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
         MODEL="giri|jrc|wri"
     script:
         "./relative_flood_risk.py"
@@ -65,7 +65,7 @@ rule giri_average_annual_risk:
     output:
         flood_aar="data/results/flood_risk/countries/{ISO3}/{ISO3}_giri-flood-risk_AAR_V-{VULN_CURVE}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP"
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
     script:
         "./giri_average_annual_risk.py"
 """
@@ -91,7 +91,7 @@ rule giri_average_annual_risk_protected:
     output:
         flood_aar_protected="data/results/flood_risk/countries/{ISO3}/{ISO3}_giri-flood-risk_protected_AAR_V-{VULN_CURVE}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP"
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
     script:
         "./giri_average_annual_risk_protected.py"
 """
@@ -117,7 +117,7 @@ rule giri_average_annual_risk_adapted_fp:
     output:
         flood_aar_adapted="data/results/flood_risk/countries/{ISO3}/{ISO3}_giri-flood-risk_adapted_AAR_V-{VULN_CURVE}_fp_rp{RP}_duc{urban_class}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP",
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
         urban_class="11|12|13|21|22|23|30"
     script:
         "./giri_average_annual_risk_adapted_fp.py"
@@ -195,7 +195,7 @@ rule jrc_average_annual_risk:
     output:
         flood_aar="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_AAR_V-{VULN_CURVE}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP"
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
     script:
         "./jrc_average_annual_risk.py"
 """
@@ -220,7 +220,7 @@ rule jrc_average_annual_risk_protected:
     output:
         flood_aar_protected="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_protected_AAR_V-{VULN_CURVE}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP"
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
     script:
         "./jrc_average_annual_risk_protected.py"
 """
@@ -245,7 +245,7 @@ rule jrc_average_annual_risk_adapted_fp:
     output:
         flood_aar_adapted="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_adapted_AAR_V-{VULN_CURVE}_fp_rp{RP}_duc{urban_class}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP",
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
         urban_class="11|12|13|21|22|23|30"
     script:
         "./jrc_average_annual_risk_adapted_fp.py"
@@ -323,7 +323,7 @@ rule wri_average_annual_risk:
     output:
         flood_aar="data/results/flood_risk/countries/{ISO3}/{ISO3}_wri-flood-risk_AAR_V-{VULN_CURVE}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP"
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
     script:
         "./wri_average_annual_risk.py"
 """
@@ -350,7 +350,7 @@ rule wri_average_annual_risk_protected:
     output:
         flood_aar_protected="data/results/flood_risk/countries/{ISO3}/{ISO3}_wri-flood-risk_protected_AAR_V-{VULN_CURVE}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP"
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
     script:
         "./wri_average_annual_risk_protected.py"
 """
@@ -377,7 +377,7 @@ rule wri_average_annual_risk_adapted_fp:
     output:
         flood_aar_adapted="data/results/flood_risk/countries/{ISO3}/{ISO3}_wri-flood-risk_adapted_AAR_V-{VULN_CURVE}_fp_rp{RP}_duc{urban_class}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP",
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
         urban_class="11|12|13|21|22|23|30"
     script:
         "./wri_average_annual_risk_adapted_fp.py"
