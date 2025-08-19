@@ -30,7 +30,7 @@ if __name__ == "__main__":
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
 logging.info(f"Calculating (adapted) GIRI average annual relative risk using {vuln_dataset} vulnerability curve." \
-             "Flood protection adaptation scenario. Return period for flood protection: {rp_protection}, Urbanization class: {urban_class}.")
+             f"Flood protection adaptation scenario. Return period for flood protection: {rp_protection}, Urbanization class: {urban_class}.")
 
 logging.info("Reading raster data.")
 raster_paths = [RP5_path, RP10_path, RP25_path, RP50_path, RP100_path, RP200_path, RP500_path, RP1000_path]
