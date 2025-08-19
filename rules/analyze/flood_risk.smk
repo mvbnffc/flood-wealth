@@ -440,3 +440,54 @@ rule wri_average_annual_risk_adapted_dp:
 Test with
 snakemake -c1 data/results/flood_risk/countries/KEN/KEN_wri-flood-risk_adapted_AAR_V-JRC_dp.tif
 """
+
+rule summarize_baseline_capital_stock_losses:
+    """
+    Rule summarizes capital stock losses per admin region
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        res_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_protected_AAR_V-JRC.tif",
+        nres_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_protected_AAR_V-NRES.tif",
+        infr_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_protected_AAR_V-INFR.tif",
+        res_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_res_capstock.tif",
+        nres_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_nres_capstock.tif",
+        infr_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_inf_capstock.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif"
+    output:
+        regional_losses = "data/results/flood_risk/countries/{ISO3}/summary/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_AALs_baseline_capstock.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
+    script:
+        "./capital_stock_losses.py"
+"""
+Test with
+snakemake -c1 data/results/flood_risk/countries/RWA/summary/RWA_ADM2_metrics_jrc-flood_AALs_baseline_capstock.gpkg 
+"""
+
+rule summarize_adapted_capital_stock_losses:
+    """
+    Rule summarizes capital stock losses per admin region
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        res_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_adapted_AAR_V-JRC_fp_rp{RP}_duc{urban_class}.tif",
+        nres_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_adapted_AAR_V-NRES_fp_rp{RP}_duc{urban_class}.tif",
+        infr_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_adapted_AAR_V-INFR_fp_rp{RP}_duc{urban_class}.tif",
+        res_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_res_capstock.tif",
+        nres_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_nres_capstock.tif",
+        infr_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_inf_capstock.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif"
+    output:
+        regional_losses = "data/results/flood_risk/countries/{ISO3}/summary/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_AALs_adapted_fp_rp{RP}_duc{urban_class}_capstock.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        ADMIN_SLUG="ADM0|ADM1|ADM2",
+        urban_class="11|12|13|21|22|23|30"
+    script:
+        "./capital_stock_losses.py"
+"""
+Test with
+snakemake -c1 data/results/flood_risk/countries/RWA/summary/RWA_ADM2_metrics_jrc-flood_AALs_adapted_fp_rp100_duc30_capstock.gpkg 
+"""
