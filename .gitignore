@@ -10,7 +10,7 @@ __pycache__/
 
 # C extensions
 *.so
-*.csv
+# *.csv
 *.ipynb:Zone.Identifier
 
 # Distribution / packaging
