@@ -1,2 +1,3 @@
 RWA, https://download.geofabrik.de/africa/rwanda-latest-free.shp.zip
+THA, https://download.geofabrik.de/asia/thailand-latest-free.shp.zip
  
