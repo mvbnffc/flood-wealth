@@ -12,6 +12,11 @@ import rasterio
 import exactextract as ee
 import pandas as pd
 import geopandas as gpd
+import warnings
+
+# Suppress GDAL warnings
+warnings.filterwarnings('ignore', category=FutureWarning, module='osgeo')
+warnings.filterwarnings('ignore', message='.*gdal.UseExceptions.*')
 
 if __name__ == "__main__":
     try:
@@ -47,6 +52,7 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
     # Process in very small chunks to avoid memory issues
     chunk_size = 50  # Even smaller chunks
     all_results = []
+    successful_chunks = 0
     
     logging.info(f"Processing {len(gdf)} polygons in chunks of {chunk_size}")
     
@@ -78,6 +84,7 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
             chunk_results = pd.concat([chunk_results.reset_index(drop=True), res_df.reset_index(drop=True), nres_df.reset_index(drop=True)], axis=1)
             
             all_results.append(chunk_results)
+            successful_chunks += 1
             
             # Force garbage collection after each chunk
             del res_stats, nres_stats, res_df, nres_df, chunk_results, chunk
@@ -102,14 +109,6 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
             
             # Skip this chunk and continue
             continue
-    
-    logging.info("Combining all chunks.")
-    results_gdf = pd.concat(all_results, ignore_index=True)
-
-    logging.info(f"Saving summarized data to CSV.")
-    # Only keep relevant columns
-    columns_to_keep = ['shapeName', 'res_sum', 'nres_sum']
-    results_gdf[columns_to_keep].to_csv(output_path, index=False)
 
 # -----------------------------------------------------------------------
 
