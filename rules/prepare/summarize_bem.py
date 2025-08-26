@@ -54,10 +54,8 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
         chunk = gdf.iloc[i:i + chunk_size]
         chunk_num = i//chunk_size + 1
         total_chunks = (len(gdf)-1)//chunk_size + 1
-        logging.info(f"Processing chunk {chunk_num}/{total_chunks} ({len(chunk)} polygons)")
         
         try:
-            logging.info("Calculating zonal statistics for residential BEM.")
             res_stats = ee.exact_extract(
                 bem_res_raster_path,
                 chunk, 
@@ -65,7 +63,6 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
                 include_geom=False
             )
             
-            logging.info("Calculating zonal statistics for non-residential BEM.")
             nres_stats = ee.exact_extract(
                 bem_nres_raster_path,
                 chunk, 
@@ -88,7 +85,6 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
             
             # Also force Python to release memory every 50 chunks
             if chunk_num % 50 == 0:
-                logging.info(f"Forcing aggressive garbage collection at chunk {chunk_num}")
                 gc.collect()
                 gc.collect()  # Call twice for more aggressive cleanup
             
