@@ -82,5 +82,5 @@ rule disaggregate_capital:
         "./disaggregate_adm_bem.py"
 """ 
 Test with
-snakemake -c1 data/inputs/capital_stock/giri-ghs_nres_capstock.tif
+snakemake -c1 data/inputs/analysis/countries/RWA/RWA_nres_capstock.tif
 """

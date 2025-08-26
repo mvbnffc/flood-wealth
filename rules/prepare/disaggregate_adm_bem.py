@@ -46,11 +46,11 @@ df = df[df["shapeGroup"] == country].copy()
 logging.info("Joining relevant CSV columns with admin layer.")
 common_column = "shapeName"
 # What columns do we need
-df_use = df[[common_column, "sum(res)", "sum(nres)"]].copy()
+df_use = df[[common_column, "res_sum", "nres_sum"]].copy()
 gdf_use = gdf[[common_column, "geometry"]].copy()
 gdfm = gdf_use.merge(df_use, on=common_column, how='left')
 # Fill missing totals with 0
-gdfm[["sum(res)", "sum(nres)"]] = gdfm[["sum(res)", "sum(nres)"]].fillna(0.0)
+gdfm[["res_sum", "nres_sum"]] = gdfm[["res_sum", "nres_sum"]].fillna(0.0)
 
 logging.info("Building look-up arrays for raster disaggregation")
 # Build an intiger index per admin
@@ -59,8 +59,8 @@ gdfm["_idx"] = np.arange(1, len(gdfm) + 1, dtype=np.int32)
 # Lookup arrays
 idx_to_res = np.zeros(len(gdfm) + 1, dtype=np.float64)
 idx_to_nres = np.zeros(len(gdfm) + 1, dtype=np.float64)
-idx_to_res[gdfm["_idx"].values] = gdfm["sum(res)"].values
-idx_to_nres[gdfm["_idx"].values] = gdfm["sum(nres)"].values
+idx_to_res[gdfm["_idx"].values] = gdfm["res_sum"].values
+idx_to_nres[gdfm["_idx"].values] = gdfm["nres_sum"].values
 
 # ---------------- HELPER FUNCTION --------------------------
 def allocate_to_volume(volume_path: str, totals_by_idx: np.ndarray, label: str, out_path: str):
