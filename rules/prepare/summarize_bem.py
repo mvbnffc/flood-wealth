@@ -33,18 +33,26 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
     logging.info("Loading the admin layer.")
     gdf = gpd.read_file(adm_path)
     
-    logging.info("Loading the GIRI BEM raster.")
-    with rasterio.open(bem_res_raster_path) as res_src, rasterio.open(bem_nres_raster_path) as nres_src:
+    with rasterio.open(bem_res_raster_path) as res_src:
         # Check that the shapefile and rasters have the same CRS
-        # If not, reproject the shapefile to match the raster CRS
         if gdf.crs != res_src.crs:
             logging.info("Reprojecting admin boundaries to match raster CRS.")
             gdf = gdf.to_crs(res_src.crs)
 
+    # Process in chunks to avoid memory issues
+    chunk_size = 100  # Adjust this if still having memory issues
+    all_results = []
+    
+    logging.info(f"Processing {len(gdf)} polygons in chunks of {chunk_size}")
+    
+    for i in range(0, len(gdf), chunk_size):
+        chunk = gdf.iloc[i:i + chunk_size]
+        logging.info(f"Processing chunk {i//chunk_size + 1}/{(len(gdf)-1)//chunk_size + 1}")
+        
         logging.info("Calculating zonal statistics for residential BEM.")
         res_stats = ee.exact_extract(
             bem_res_raster_path,
-            gdf, 
+            chunk, 
             ['sum'],
             include_geom=False
         )
@@ -52,18 +60,22 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
         logging.info("Calculating zonal statistics for non-residential BEM.")
         nres_stats = ee.exact_extract(
             bem_nres_raster_path,
-            gdf, 
+            chunk, 
             ['sum'],
             include_geom=False
         )
+        
+        # Convert stats to DataFrame
+        res_df = pd.DataFrame(res_stats).add_prefix('res_')
+        nres_df = pd.DataFrame(nres_stats).add_prefix('nres_')
+        # Combined with chunk
+        chunk_results = chunk.copy()
+        chunk_results = pd.concat([chunk_results.reset_index(drop=True), res_df.reset_index(drop=True), nres_df.reset_index(drop=True)], axis=1)
+        
+        all_results.append(chunk_results)
     
-    logging.info("Converting stats to DataFrame and merging with original GeoDataFrame.")
-    # Convert stats to DataFrame
-    res_df = pd.DataFrame(res_stats).add_prefix('res_')
-    nres_df = pd.DataFrame(nres_stats).add_prefix('nres_')
-    # Combined with original GeoDataFrame
-    results_gdf = gdf.copy()
-    results_gdf = pd.concat([results_gdf.reset_index(drop=True), res_df.reset_index(drop=True), nres_df.reset_index(drop=True)], axis=1)
+    logging.info("Combining all chunks.")
+    results_gdf = pd.concat(all_results, ignore_index=True)
 
     logging.info(f"Saving summarized data to CSV.")
     # Only keep relevant columns
