@@ -49,10 +49,9 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
             logging.info("Reprojecting admin boundaries to match raster CRS.")
             gdf = gdf.to_crs(res_src.crs)
 
-    # Process in very small chunks to avoid memory issues
-    chunk_size = 50  # Even smaller chunks
+    # Process in chunks to avoid memory issues
+    chunk_size = 20  
     all_results = []
-    successful_chunks = 0
     
     logging.info(f"Processing {len(gdf)} polygons in chunks of {chunk_size}")
     
@@ -75,21 +74,29 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
                 ['sum'],
                 include_geom=False
             )
+
+            # Convert stats to DataFrame - handle GeoJSON format
+            # exactextract returns [{'type': 'Feature', 'properties': {'sum': value}}, ...]
+            res_values = [feature['properties'] for feature in res_stats if 'properties' in feature]
+            nres_values = [feature['properties'] for feature in nres_stats if 'properties' in feature]
             
-            # Convert stats to DataFrame
-            res_df = pd.DataFrame(res_stats).add_prefix('res_')
-            nres_df = pd.DataFrame(nres_stats).add_prefix('nres_')
+            res_df = pd.DataFrame(res_values).add_prefix('res_')
+            nres_df = pd.DataFrame(nres_values).add_prefix('nres_')
+            
             # Combined with chunk
             chunk_results = chunk.copy()
-            chunk_results = pd.concat([chunk_results.reset_index(drop=True), res_df.reset_index(drop=True), nres_df.reset_index(drop=True)], axis=1)
-            
+            chunk_results = pd.concat([
+                chunk_results.reset_index(drop=True), 
+                res_df.reset_index(drop=True), 
+                nres_df.reset_index(drop=True)
+            ], axis=1)
+
             all_results.append(chunk_results)
-            successful_chunks += 1
             
             # Force garbage collection after each chunk
             del res_stats, nres_stats, res_df, nres_df, chunk_results, chunk
             gc.collect()
-            
+
             # Also force Python to release memory every 50 chunks
             if chunk_num % 50 == 0:
                 gc.collect()
@@ -109,6 +116,19 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
             
             # Skip this chunk and continue
             continue
+    
+    if len(all_results) == 0:
+        logging.error("No chunks processed successfully!")
+        return
+    
+    logging.info("Combining all chunks.")
+    results_gdf = pd.concat(all_results, ignore_index=True)
+
+    logging.info(f"Saving summarized data to CSV.")
+    
+    # Remove all unnecessary columns and then save
+    columns_to_keep = ['shapeName', 'res_sum', 'nres_sum']
+    results_gdf.to_csv(output_path, index=False, columns=[col for col in columns_to_keep if col in results_gdf.columns])
 
 # -----------------------------------------------------------------------
 
