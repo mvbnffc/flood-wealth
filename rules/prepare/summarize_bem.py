@@ -13,6 +13,8 @@ import exactextract as ee
 import pandas as pd
 import geopandas as gpd
 import warnings
+import shapely
+from shapely.validation import make_valid  # Shapely ≥2.0
 
 # Suppress GDAL warnings
 warnings.filterwarnings('ignore', category=FutureWarning, module='osgeo')
@@ -34,6 +36,37 @@ if __name__ == "__main__":
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
 # ----------------------------- Common functions -----------------------------
+
+def clean_admin_geoms(gdf):
+    '''
+    Function to fix invalid geometries
+    '''
+    # Fix invalids (fallback to buffer(0) if make_valid unavailable)
+    if hasattr(shapely, "make_valid"):
+        gdf["geometry"] = gdf["geometry"].apply(
+            lambda g: shapely.make_valid(g) if g is not None else None
+        )
+    else:
+        gdf["geometry"] = gdf["geometry"].buffer(0)
+
+    # Drop Nones/empties/zero-area
+    gdf = gdf[ gdf["geometry"].notna() ]
+    gdf = gdf[ ~gdf.geometry.is_empty ]
+    # If CRS is projected, also drop zero area; if geographic, area may be 0—skip this line.
+    # gdf = gdf[gdf.geometry.area > 0]
+
+    # Normalize to polygons only (drop GeometryCollections with no surface)
+    gdf = gdf[gdf.geometry.geom_type.isin(["Polygon","MultiPolygon"])]
+
+    # Split MultiPolygons; keep attributes
+    gdf = gdf.explode(index_parts=False, ignore_index=True)
+
+    # Add a stable ID to help debugging
+    if "shapeID" not in gdf.columns:
+        gdf["shapeID"] = gdf.index.astype("int64")
+
+    return gdf
+
 def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path: str, output_path: str, ADM_level: str):
     logging.info(f"Summarizing BEM data for ADM level {ADM_level}")
     gdf = gpd.read_file(adm_path)
@@ -48,6 +81,11 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
         if gdf.crs != res_src.crs:
             logging.info("Reprojecting admin boundaries to match raster CRS.")
             gdf = gdf.to_crs(res_src.crs)
+
+        # Clean geometries
+        logging.info("Cleaning geometries.")
+        gdf = clean_admin_geoms(gdf)
+        logging.info(f"{len(gdf)} valid polygons after cleaning geometries.")
 
         chunk_size = 200  # can be larger now
         all_results = []
