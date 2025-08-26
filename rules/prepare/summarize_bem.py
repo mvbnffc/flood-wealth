@@ -8,7 +8,7 @@ import glob
 import os
 
 import rasterio
-from rasterstats import zonal_stats
+import exactextract as ee
 import pandas as pd
 import geopandas as gpd
 
@@ -35,11 +35,6 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
     
     logging.info("Loading the GIRI BEM raster.")
     with rasterio.open(bem_res_raster_path) as res_src, rasterio.open(bem_nres_raster_path) as nres_src:
-        res_data = res_src.read(1)
-        nres_data = nres_src.read(1)
-        res_affine = res_src.transform
-        nres_affine = nres_src.transform
-
         # Check that the shapefile and rasters have the same CRS
         # If not, reproject the shapefile to match the raster CRS
         if gdf.crs != res_src.crs:
@@ -47,20 +42,19 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
             gdf = gdf.to_crs(res_src.crs)
 
         logging.info("Calculating zonal statistics for residential BEM.")
-        res_stats = zonal_stats(
-            gdf, 
+        res_stats = ee.exact_extract(
             bem_res_raster_path,
-            stats=['sum'],
-            all_touched=True,
-            nodata=res_src.nodata,
-        )
-        logging.info("Calculating zonal statistics for non-residential BEM.")
-        nres_stats = zonal_stats(
             gdf, 
+            ['sum'],
+            include_geom=False
+        )
+        
+        logging.info("Calculating zonal statistics for non-residential BEM.")
+        nres_stats = ee.exact_extract(
             bem_nres_raster_path,
-            stats=['sum'],
-            all_touched=True,
-            nodata=nres_src.nodata,
+            gdf, 
+            ['sum'],
+            include_geom=False
         )
     
     logging.info("Converting stats to DataFrame and merging with original GeoDataFrame.")
