@@ -40,7 +40,8 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
     gdf = gpd.read_file(adm_path)
     logging.info(f"Loaded {len(gdf)} polygons")
     
-    with rasterio.open(bem_res_raster_path) as res_src:
+    # Keep raster files open during processing to avoid "too many open files"
+    with rasterio.open(bem_res_raster_path) as res_src, rasterio.open(bem_nres_raster_path) as nres_src:
         logging.info(f"Raster dimensions: {res_src.width} x {res_src.height}")
         logging.info(f"Raster CRS: {res_src.crs}")
         
@@ -49,73 +50,76 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
             logging.info("Reprojecting admin boundaries to match raster CRS.")
             gdf = gdf.to_crs(res_src.crs)
 
-    # Process in chunks to avoid memory issues
-    chunk_size = 20  
-    all_results = []
-    
-    logging.info(f"Processing {len(gdf)} polygons in chunks of {chunk_size}")
-    
-    for i in tqdm(range(0, len(gdf), chunk_size)):
-        chunk = gdf.iloc[i:i + chunk_size]
-        chunk_num = i//chunk_size + 1
-        total_chunks = (len(gdf)-1)//chunk_size + 1
+        # Process in very small chunks to avoid memory issues
+        chunk_size = 10  # Even smaller chunks
+        all_results = []
+        successful_chunks = 0
         
-        try:
-            res_stats = ee.exact_extract(
-                bem_res_raster_path,
-                chunk, 
-                ['sum'],
-                include_geom=False
-            )
+        logging.info(f"Processing {len(gdf)} polygons in chunks of {chunk_size}")
+        
+        # Fixed tqdm syntax
+        for i in tqdm(range(0, len(gdf), chunk_size), desc=f"Processing {ADM_level}"):
+            chunk = gdf.iloc[i:i + chunk_size]
+            chunk_num = i//chunk_size + 1
+            total_chunks = (len(gdf)-1)//chunk_size + 1
             
-            nres_stats = ee.exact_extract(
-                bem_nres_raster_path,
-                chunk, 
-                ['sum'],
-                include_geom=False
-            )
-
-            # Convert stats to DataFrame - handle GeoJSON format
-            # exactextract returns [{'type': 'Feature', 'properties': {'sum': value}}, ...]
-            res_values = [feature['properties'] for feature in res_stats if 'properties' in feature]
-            nres_values = [feature['properties'] for feature in nres_stats if 'properties' in feature]
-            
-            res_df = pd.DataFrame(res_values).add_prefix('res_')
-            nres_df = pd.DataFrame(nres_values).add_prefix('nres_')
-            
-            # Combined with chunk
-            chunk_results = chunk.copy()
-            chunk_results = pd.concat([
-                chunk_results.reset_index(drop=True), 
-                res_df.reset_index(drop=True), 
-                nres_df.reset_index(drop=True)
-            ], axis=1)
-
-            all_results.append(chunk_results)
-            
-            # Force garbage collection after each chunk
-            del res_stats, nres_stats, res_df, nres_df, chunk_results, chunk
-            gc.collect()
-
-            # Also force Python to release memory every 50 chunks
-            if chunk_num % 50 == 0:
-                gc.collect()
-                gc.collect()  # Call twice for more aggressive cleanup
-            
-        except Exception as e:
-            logging.error(f"Error processing chunk {chunk_num}: {e}")
-            logging.info("Attempting to free memory and continue...")
-            
-            # Aggressive cleanup on error
             try:
-                del chunk
-            except:
-                pass
-            gc.collect()
-            gc.collect()
-            
-            # Skip this chunk and continue
-            continue
+                res_stats = ee.exact_extract(
+                    bem_res_raster_path,
+                    chunk, 
+                    ['sum'],
+                    include_geom=False
+                )
+                
+                nres_stats = ee.exact_extract(
+                    bem_nres_raster_path,
+                    chunk, 
+                    ['sum'],
+                    include_geom=False
+                )
+                
+                # Convert stats to DataFrame - handle GeoJSON format
+                # exactextract returns [{'type': 'Feature', 'properties': {'sum': value}}, ...]
+                res_values = [feature['properties'] for feature in res_stats if 'properties' in feature]
+                nres_values = [feature['properties'] for feature in nres_stats if 'properties' in feature]
+                
+                res_df = pd.DataFrame(res_values).add_prefix('res_')
+                nres_df = pd.DataFrame(nres_values).add_prefix('nres_')
+                
+                # Combined with chunk
+                chunk_results = chunk.copy()
+                chunk_results = pd.concat([
+                    chunk_results.reset_index(drop=True), 
+                    res_df.reset_index(drop=True), 
+                    nres_df.reset_index(drop=True)
+                ], axis=1)
+                
+                all_results.append(chunk_results)
+                successful_chunks += 1
+                
+                # Force garbage collection after each chunk
+                del res_stats, nres_stats, res_values, nres_values, res_df, nres_df, chunk_results, chunk
+                gc.collect()
+                
+                # Also force Python to release memory every 50 chunks
+                if chunk_num % 50 == 0:
+                    gc.collect()
+                    gc.collect()  # Call twice for more aggressive cleanup
+                
+            except Exception as e:
+                logging.error(f"Error processing chunk {chunk_num}: {e}")
+                logging.info("Attempting to free memory and continue...")
+                
+                # Aggressive cleanup on error
+                try:
+                    del chunk
+                except:
+                    pass
+                gc.collect()
+                gc.collect()
+                
+                # Skip this chunk and continue
+                continue
     
     if len(all_results) == 0:
         logging.error("No chunks processed successfully!")
