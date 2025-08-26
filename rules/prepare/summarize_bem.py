@@ -6,7 +6,8 @@ import logging
 import sys
 import glob
 import os
-
+import gc
+from tqdm import tqdm
 import rasterio
 import exactextract as ee
 import pandas as pd
@@ -32,47 +33,79 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
     logging.info(f"Summarizing BEM data for ADM level {ADM_level}")
     logging.info("Loading the admin layer.")
     gdf = gpd.read_file(adm_path)
+    logging.info(f"Loaded {len(gdf)} polygons")
     
     with rasterio.open(bem_res_raster_path) as res_src:
+        logging.info(f"Raster dimensions: {res_src.width} x {res_src.height}")
+        logging.info(f"Raster CRS: {res_src.crs}")
+        
         # Check that the shapefile and rasters have the same CRS
         if gdf.crs != res_src.crs:
             logging.info("Reprojecting admin boundaries to match raster CRS.")
             gdf = gdf.to_crs(res_src.crs)
 
-    # Process in chunks to avoid memory issues
-    chunk_size = 100  # Adjust this if still having memory issues
+    # Process in very small chunks to avoid memory issues
+    chunk_size = 50  # Even smaller chunks
     all_results = []
     
     logging.info(f"Processing {len(gdf)} polygons in chunks of {chunk_size}")
     
-    for i in range(0, len(gdf), chunk_size):
+    for i in tqdm(range(0, len(gdf), chunk_size)):
         chunk = gdf.iloc[i:i + chunk_size]
-        logging.info(f"Processing chunk {i//chunk_size + 1}/{(len(gdf)-1)//chunk_size + 1}")
+        chunk_num = i//chunk_size + 1
+        total_chunks = (len(gdf)-1)//chunk_size + 1
+        logging.info(f"Processing chunk {chunk_num}/{total_chunks} ({len(chunk)} polygons)")
         
-        logging.info("Calculating zonal statistics for residential BEM.")
-        res_stats = ee.exact_extract(
-            bem_res_raster_path,
-            chunk, 
-            ['sum'],
-            include_geom=False
-        )
-        
-        logging.info("Calculating zonal statistics for non-residential BEM.")
-        nres_stats = ee.exact_extract(
-            bem_nres_raster_path,
-            chunk, 
-            ['sum'],
-            include_geom=False
-        )
-        
-        # Convert stats to DataFrame
-        res_df = pd.DataFrame(res_stats).add_prefix('res_')
-        nres_df = pd.DataFrame(nres_stats).add_prefix('nres_')
-        # Combined with chunk
-        chunk_results = chunk.copy()
-        chunk_results = pd.concat([chunk_results.reset_index(drop=True), res_df.reset_index(drop=True), nres_df.reset_index(drop=True)], axis=1)
-        
-        all_results.append(chunk_results)
+        try:
+            logging.info("Calculating zonal statistics for residential BEM.")
+            res_stats = ee.exact_extract(
+                bem_res_raster_path,
+                chunk, 
+                ['sum'],
+                include_geom=False
+            )
+            
+            logging.info("Calculating zonal statistics for non-residential BEM.")
+            nres_stats = ee.exact_extract(
+                bem_nres_raster_path,
+                chunk, 
+                ['sum'],
+                include_geom=False
+            )
+            
+            # Convert stats to DataFrame
+            res_df = pd.DataFrame(res_stats).add_prefix('res_')
+            nres_df = pd.DataFrame(nres_stats).add_prefix('nres_')
+            # Combined with chunk
+            chunk_results = chunk.copy()
+            chunk_results = pd.concat([chunk_results.reset_index(drop=True), res_df.reset_index(drop=True), nres_df.reset_index(drop=True)], axis=1)
+            
+            all_results.append(chunk_results)
+            
+            # Force garbage collection after each chunk
+            del res_stats, nres_stats, res_df, nres_df, chunk_results, chunk
+            gc.collect()
+            
+            # Also force Python to release memory every 50 chunks
+            if chunk_num % 50 == 0:
+                logging.info(f"Forcing aggressive garbage collection at chunk {chunk_num}")
+                gc.collect()
+                gc.collect()  # Call twice for more aggressive cleanup
+            
+        except Exception as e:
+            logging.error(f"Error processing chunk {chunk_num}: {e}")
+            logging.info("Attempting to free memory and continue...")
+            
+            # Aggressive cleanup on error
+            try:
+                del chunk
+            except:
+                pass
+            gc.collect()
+            gc.collect()
+            
+            # Skip this chunk and continue
+            continue
     
     logging.info("Combining all chunks.")
     results_gdf = pd.concat(all_results, ignore_index=True)
