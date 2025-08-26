@@ -40,6 +40,8 @@ gdf = gpd.read_file(adm_path, layer="ADM2")
 
 logging.info(f"Load GIRI BEM CSV and filter for {country}")
 df = pd.read_csv(bem_path)
+# Debug 
+print(df.columns)
 df = df[df["shapeGroup"] == country].copy()
 
 
