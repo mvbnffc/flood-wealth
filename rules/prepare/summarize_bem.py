@@ -77,7 +77,7 @@ def summarize_bem(adm_path: str, res_path: str, nres_path: str, output_path: str
 
     out = pd.DataFrame(rows)
     # one row per shapeName (in case of duplicates)
-    out = out.groupby("shapeName", as_index=False)[["res_sum","nres_sum"]].sum(min_count=1)
+    out = out.groupby(["shapeName", "shapeGroup"], as_index=False)[["res_sum","nres_sum"]].sum(min_count=1)
 
     logging.info(f"Writing {len(out)} rows → {output_path}")
     out.to_csv(output_path, index=False)
