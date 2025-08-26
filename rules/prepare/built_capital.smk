@@ -2,6 +2,28 @@
 Disaggregate GIRI built capital on GHS volume grids and clip for countries
 """
 
+rule summarise_giri_bem_admin_chunked:
+    """
+    Summarize BEM data at admin level.
+    Note: ADM2 fails for SDN - but that's fine; SDN isn't needed.
+    """
+    input:
+        adm2="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM2.gpkg",
+        adm1="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM1.gpkg",
+        adm0="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM0.gpkg",
+        res_raster="data/inputs/giri/bem_5x5_valfis_res.tif",
+        nres_raster="data/inputs/giri/bem_5x5_valfis_nres.tif"
+    output:
+        adm2="data/inputs/giri/bem_5x5_valfis_adm2.csv",
+        adm1="data/inputs/giri/bem_5x5_valfis_adm1.csv",
+        adm0="data/inputs/giri/bem_5x5_valfis_adm0.csv"
+    script:
+        "./summarize_bem.py"
+"""
+Test with
+snakemake -c1 data/inputs/giri/bem_5x5_valfis_adm2.csv"
+"""
+
 rule clip_GIRI_BEM:
     """
     Clip GIRI BEM layer for a country
