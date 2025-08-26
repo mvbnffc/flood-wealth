@@ -1,0 +1,86 @@
+"""
+Use rasterio zonalstatistics to summarize BEM data within each admin unit.
+"""
+
+import logging
+import sys
+import glob
+import os
+
+import rasterio
+from rasterstats import zonal_stats
+import pandas as pd
+import geopandas as gpd
+
+if __name__ == "__main__":
+    try:
+        adm2_path: str = snakemake.input["adm2"]
+        adm1_path: str = snakemake.input["adm1"]
+        adm0_path: str = snakemake.input["adm0"]
+        res_path: str = snakemake.input["res_raster"]
+        nres_path: str = snakemake.input["nres_raster"]
+        adm2_output_path: str = snakemake.output["adm2"]
+        adm1_output_path: str = snakemake.output["adm1"]
+        adm0_output_path: str = snakemake.output["adm0"]
+    except:
+        raise ValueError("Must be run via snakemake.")
+
+logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
+
+# ----------------------------- Common functions -----------------------------
+def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path: str, output_path: str, ADM_level: str):
+    logging.info(f"Summarizing BEM data for ADM level {ADM_level}")
+    logging.info("Loading the admin layer.")
+    gdf = gpd.read_file(adm_path)
+    
+    logging.info("Loading the GIRI BEM raster.")
+    with rasterio.open(bem_res_raster_path) as res_src, rasterio.open(bem_nres_raster_path) as nres_src:
+        res_data = res_src.read(1)
+        nres_data = nres_src.read(1)
+        res_affine = res_src.transform
+        nres_affine = nres_src.transform
+
+        # Check that the shapefile and rasters have the same CRS
+        # If not, reproject the shapefile to match the raster CRS
+        if gdf.crs != res_src.crs:
+            logging.info("Reprojecting admin boundaries to match raster CRS.")
+            gdf = gdf.to_crs(res_src.crs)
+
+        logging.info("Calculating zonal statistics for residential BEM.")
+        res_stats = zonal_stats(
+            gdf, 
+            bem_res_raster_path,
+            stats=['sum'],
+            all_touched=True,
+            nodata=res_src.nodata,
+        )
+        logging.info("Calculating zonal statistics for non-residential BEM.")
+        nres_stats = zonal_stats(
+            gdf, 
+            bem_nres_raster_path,
+            stats=['sum'],
+            all_touched=True,
+            nodata=nres_src.nodata,
+        )
+    
+    logging.info("Converting stats to DataFrame and merging with original GeoDataFrame.")
+    # Convert stats to DataFrame
+    res_df = pd.DataFrame(res_stats).add_prefix('res_')
+    nres_df = pd.DataFrame(nres_stats).add_prefix('nres_')
+    # Combined with original GeoDataFrame
+    results_gdf = gdf.copy()
+    results_gdf = pd.concat([results_gdf.reset_index(drop=True), res_df.reset_index(drop=True), nres_df.reset_index(drop=True)], axis=1)
+
+    logging.info(f"Saving summarized data to CSV.")
+    # Only keep relevant columns
+    columns_to_keep = ['shapeName', 'res_sum', 'nres_sum']
+    results_gdf[columns_to_keep].to_csv(output_path, index=False)
+
+# -----------------------------------------------------------------------
+
+# Run the analysis for each admin level
+summarize_bem(adm2_path, res_path, nres_path, adm2_output_path, 'ADM2')
+summarize_bem(adm1_path, res_path, nres_path, adm1_output_path, 'ADM1')
+summarize_bem(adm0_path, res_path, nres_path, adm0_output_path, 'ADM0')
+
+logging.info("Done.")

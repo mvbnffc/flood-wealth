@@ -2,7 +2,7 @@
 Disaggregate GIRI built capital on GHS volume grids and clip for countries
 """
 
-rule summarise_giri_bem_admin_chunked:
+rule summarise_giri_bem_admin:
     """
     Summarize BEM data at admin level.
     Note: ADM2 fails for SDN - but that's fine; SDN isn't needed.
