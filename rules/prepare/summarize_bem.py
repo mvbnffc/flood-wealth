@@ -48,23 +48,38 @@ def summarize_bem(adm_path: str, res_path: str, nres_path: str, output_path: str
             logging.info("Reprojecting admin to match raster CRS")
             gdf = gdf.to_crs(res_src.crs)
 
+        rows = []
+        skipped = 0
 
-        # Single-shot exactextract calls (no chunking)
-        res_stats  = ee.exact_extract(res_src,  gdf, ['sum'], include_geom=False)
-        nres_stats = ee.exact_extract(nres_src, gdf, ['sum'], include_geom=False)
+        for _, row in tqdm(gdf.iterrows(), total=len(gdf), desc=f"{ADM_level}"):
+            geom = row.geometry
+            name = row.get("shapeName", str(_))
 
-        res_df  = pd.DataFrame([f.get('properties', {}) for f in res_stats]).add_prefix('res_')
-        nres_df = pd.DataFrame([f.get('properties', {}) for f in nres_stats]).add_prefix('nres_')
+            # 1-row GeoDataFrame for this feature
+            feat = gpd.GeoDataFrame({"shapeName":[name]}, geometry=[geom], crs=gdf.crs)
 
-        out = pd.concat([gdf.reset_index(drop=True)[["shapeName"]], res_df, nres_df], axis=1)
+            try:
+                # exactextract returns a list (len=1 here)
+                r = ee.exact_extract(res_src,  feat, ['sum'], include_geom=False)
+                n = ee.exact_extract(nres_src, feat, ['sum'], include_geom=False)
 
-    # Collapse to one row per shapeName with sums
-    out = out.groupby("shapeName", as_index=False)[["res_sum", "nres_sum"]].sum(min_count=1)
+                res_sum  = (r[0].get("properties", {}).get("sum")  if r else None)
+                nres_sum = (n[0].get("properties", {}).get("sum") if n else None)
+                rows.append({"shapeName": name, "res_sum": res_sum, "nres_sum": nres_sum})
+            except Exception as e:
+                logging.warning(f"Error processing {name}: {e}")
+                skipped += 1    
+                continue
+
+        if skipped:
+            logging.warning(f"Skipped {skipped} admins (invalid/non-polygonal geometries).")
+
+    out = pd.DataFrame(rows)
+    # one row per shapeName (in case of duplicates)
+    out = out.groupby("shapeName", as_index=False)[["res_sum","nres_sum"]].sum(min_count=1)
 
     logging.info(f"Writing {len(out)} rows → {output_path}")
     out.to_csv(output_path, index=False)
-
-
 
 # -----------------------------------------------------------------------
 

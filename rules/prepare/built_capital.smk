@@ -8,9 +8,9 @@ rule summarise_giri_bem_admin:
     Note: ADM2 fails for SDN - but that's fine; SDN isn't needed.
     """
     input:
-        adm2="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM2.gpkg",
-        adm1="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM1.gpkg",
-        adm0="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM0.gpkg",
+        adm2="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM2_fixed.gpkg",
+        adm1="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM1_fixed.gpkg",
+        adm0="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM0_fixed.gpkg",
         res_raster="data/inputs/giri/bem_5x5_valfis_res.tif",
         nres_raster="data/inputs/giri/bem_5x5_valfis_nres.tif"
     output:
