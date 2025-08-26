@@ -41,6 +41,33 @@ rule geobounds_all:
         wget "https://github.com/wmgeolab/geoBoundaries/raw/main/releaseData/CGAZ/geoBoundariesCGAZ_ADM2.gpkg"
         """
 
+rule fix_geobounds:
+    input:
+        adm0="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM0.gpkg",
+        adm1="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM1.gpkg",
+        adm2="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM2.gpkg",
+    output:
+        adm0="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM0_fixed.gpkg",
+        adm1="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM1_fixed.gpkg",
+        adm2="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM2_fixed.gpkg",
+    shell:
+        """
+        ogr2ogr -f GPKG "{output.adm0}" "{input.adm0}" "globalADM0" \
+          -nln "globalADM0" -overwrite \
+          -makevalid -explodecollections -nlt MULTIPOLYGON -dim 2 -wrapdateline \
+          -lco SPATIAL_INDEX=YES
+
+        ogr2ogr -f GPKG "{output.adm1}" "{input.adm1}" "globalADM1" \
+          -nln "globalADM1" -overwrite \
+          -makevalid -explodecollections -nlt MULTIPOLYGON -dim 2 -wrapdateline \
+          -lco SPATIAL_INDEX=YES
+        
+        ogr2ogr -f GPKG "{output.adm2}" "{input.adm2}" "globalADM2" \
+          -nln "globalADM2" -overwrite \
+          -makevalid -explodecollections -nlt MULTIPOLYGON -dim 2 -wrapdateline \
+          -lco SPATIAL_INDEX=YES
+        """
+
 rule geobounds_iso:
     input:
         adm0="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM0.gpkg",
