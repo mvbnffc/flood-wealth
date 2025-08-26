@@ -39,8 +39,8 @@ def summarize_bem(adm_path: str, bem_res_raster_path: str, bem_nres_raster_path:
     gdf = gpd.read_file(adm_path)
 
     # Open once (ExactExtract's Raster) and reuse
-    res_r = ee.Raster(bem_res_raster_path)
-    nres_r = ee.Raster(bem_nres_raster_path)
+    res_r = ee.raster(bem_res_raster_path)
+    nres_r = ee.raster(bem_nres_raster_path)
     try:
         # Use rasterio only to fetch CRS, but don't keep it open
         with rasterio.open(bem_res_raster_path) as res_src:
