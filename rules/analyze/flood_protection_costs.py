@@ -9,7 +9,7 @@ import logging
 import rasterio
 from rasterio.mask import mask
 from pyproj import Geod
-from shapely.geometry import LineString
+from shapely.geometry import LineString, MultiLineString
 import pandas as pd
 import geopandas as gpd
 import numpy as np
@@ -42,18 +42,32 @@ logging.info(f"Minimum urban area to be protected is DUC{urban_class} to RP {RP}
 
 # -------------------HELPER FUNCTIONS -----------------------------------
 
-def calculate_geod_length(line):
+def calculate_geod_length(geom):  # Changed parameter name from 'line' to 'geom'
     '''
-    Function to caluclate the geodetic length of a LineString
+    Function to calculate the geodetic length of a LineString or MultiLineString
     '''
     geod = Geod(ellps="WGS84") # our data is in WGS84 projection
     length = 0
-    if isinstance(line, LineString):
-        for i in range(len(line.coords)-1):
-            lon1, lat1 = line.coords[i]
-            lon2, lat2 = line.coords[i + 1]
+
+    if isinstance(geom, LineString):  
+        for i in range(len(geom.coords)-1):
+            lon1, lat1 = geom.coords[i]  
+            lon2, lat2 = geom.coords[i + 1] 
             _, _, distance = geod.inv(lon1, lat1, lon2, lat2)
             length += distance
+    elif isinstance(geom, MultiLineString): 
+        # Handle MultiLineString - iterate through each component LineString
+        for line_segment in geom.geoms:  
+            if isinstance(line_segment, LineString):
+                for i in range(len(line_segment.coords)-1):
+                    lon1, lat1 = line_segment.coords[i]
+                    lon2, lat2 = line_segment.coords[i + 1]
+                    _, _, distance = geod.inv(lon1, lat1, lon2, lat2)
+                    length += distance
+    else:
+        # Handle unexpected geometry types
+        print(f"Warning: Unexpected geometry type {type(geom)}")
+        return 0
 
     return length / 1000 # convert to km
 
@@ -138,6 +152,7 @@ rivers = gpd.read_file(river_path)
 logging.info("Reading urbanization data")
 urban = gpd.read_file(urban_path)
 
+
 logging.info("Calculating the flood protection per urban area")
 with rasterio.open(flopros_path) as src:
     # Ensure geometries are in the raster CRS
@@ -153,7 +168,7 @@ urban_areas = urban[urban['DEGURBA_L2'] >= int(urban_class)] # Filter only by ur
 urban_rivers = gpd.overlay(rivers, urban_areas, how='intersection')
 urban_rivers['riv_len_km'] = urban_rivers['geometry'].apply(calculate_geod_length)
 
-urban_areas.to_file("tests/debug_urban_areas.gpkg", driver="GPKG")
+urban_rivers.to_file("tests/debug_urban_rivers.gpkg", driver="GPKG")
 
 # logging.info("Calculating the protection cost per urban area")
 # # Get the GDP adjustment
@@ -186,4 +201,7 @@ urban_areas.to_file("tests/debug_urban_areas.gpkg", driver="GPKG")
 # results_gdf = gpd.GeoDataFrame(admin_areas, geometry="geometry")
 # results_gdf.to_file(output_path, driver="GPKG")
 
-# logging.info("Done.")
+# # Debug
+# print(results_gdf['adaptation_cost'].sum())
+
+logging.info("Done.")
