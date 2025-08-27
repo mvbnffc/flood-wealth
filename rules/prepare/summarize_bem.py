@@ -55,7 +55,7 @@ def summarize_bem(adm_path: str, res_path: str, nres_path: str, output_path: str
             geom = row.geometry
             name = row.get("shapeName")
             group = row.get("shapeGroup", str(_))
-            fid = row.get("fid", int)
+            fid = row.get("shapeID")
 
             # 1-row GeoDataFrame for this feature
             feat = gpd.GeoDataFrame({"shapeName":[name]}, geometry=[geom], crs=gdf.crs)
@@ -78,7 +78,7 @@ def summarize_bem(adm_path: str, res_path: str, nres_path: str, output_path: str
 
     out = pd.DataFrame(rows)
     # one row per shapeName (in case of duplicates)
-    out = out.groupby(["shapeName", "shapeGroup", 'fid'], as_index=False)[["res_sum","nres_sum"]].sum(min_count=1)
+    out = out.groupby(["shapeName", "shapeGroup", "shapeID"], as_index=False)[["res_sum","nres_sum"]].sum(min_count=1)
 
     logging.info(f"Writing {len(out)} rows → {output_path}")
     out.to_csv(output_path, index=False)
