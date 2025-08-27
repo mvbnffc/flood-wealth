@@ -164,44 +164,40 @@ urban['FLOPROS'] = modes
 
 logging.info("Calculating the river length per urban area")
 urban_areas = urban[urban['DEGURBA_L2'] >= int(urban_class)] # Filter only by urban classes we are interested in
-# Intersect rivers with the urbanization layer
-urban_rivers = gpd.overlay(rivers, urban_areas, how='intersection')
-urban_rivers['riv_len_km'] = urban_rivers['geometry'].apply(calculate_geod_length)
+# Intersect rivers with the urbanization layer and admin layer (nested intersection)
+urban_admin_rivers = gpd.overlay(rivers, gpd.overlay(urban_areas, admin_areas, how='intersection'), how='intersection')
+urban_admin_rivers['riv_len_km'] = urban_admin_rivers['geometry'].apply(calculate_geod_length)
 
-urban_rivers.to_file("tests/debug_urban_rivers.gpkg", driver="GPKG")
+logging.info("Calculating the protection cost per urban area")
+# Get the GDP adjustment
+gdp_df = pd.read_csv(gdppc_path)
+country_gdp = gdp_df.loc[gdp_df["ISO"].eq(country), "GDP_pc"].iloc[0]
+global_gdp  = gdp_df.loc[gdp_df["ISO"].eq("WORLD"), "GDP_pc"].iloc[0]
+gdp_adjustment = country_gdp / global_gdp
+# Calculate the protection cost for each urban area
+urban_admin_rivers[['adaptation_cost', 'adj_adaptation_cost']] = (
+    urban_admin_rivers.apply(
+        lambda r: pd.Series(
+            calculate_protection_costs(
+                r, protection_level=int(RP), country_cost_adjustment=gdp_adjustment
+        )
+    ), axis = 1 
+    )
+)
 
-# logging.info("Calculating the protection cost per urban area")
-# # Get the GDP adjustment
-# gdp_df = pd.read_csv(gdppc_path)
-# country_gdp = gdp_df.loc[gdp_df["ISO"].eq(country), "GDP_pc"].iloc[0]
-# global_gdp  = gdp_df.loc[gdp_df["ISO"].eq("WORLD"), "GDP_pc"].iloc[0]
-# gdp_adjustment = country_gdp / global_gdp
-# # Calculate the protection cost for each urban area
-# urban_rivers[['adaptation_cost', 'adj_adaptation_cost']] = (
-#     urban_rivers.apply(
-#         lambda r: pd.Series(
-#             calculate_protection_costs(
-#                 r, protection_level=int(RP), country_cost_adjustment=gdp_adjustment
-#         )
-#     ), axis = 1 
-#     )
-# )
+logging.info("Sum the protection costs per Admin region")
+# Group by admin region and sum sugment lengths
+costs_per_admin = urban_admin_rivers.groupby('shapeName')['adaptation_cost'].sum().reset_index()
+adj_costs_per_admin = urban_admin_rivers.groupby('shapeName')['adj_adaptation_cost'].sum().reset_index()
+# Add total costs the the admin area dataframe
+admin_areas = admin_areas.merge(costs_per_admin, how='left', left_on='shapeName', right_on='shapeName')
+admin_areas = admin_areas.merge(adj_costs_per_admin, how='left', left_on='shapeName', right_on='shapeName')
 
-# logging.info("Sum the protection costs per Admin region")
-# # Intersect urban river data with admin data
-# intersected_rivers = gpd.overlay(urban_rivers, admin_areas, how='intersection')
-# # Group by admin region and sum sugment lengths
-# costs_per_admin = intersected_rivers.groupby('shapeName')['adaptation_cost'].sum().reset_index()
-# adj_costs_per_admin = intersected_rivers.groupby('shapeName')['adj_adaptation_cost'].sum().reset_index()
-# # Add total costs the the admin area dataframe
-# admin_areas = admin_areas.merge(costs_per_admin, how='left', left_on='shapeName', right_on='shapeName')
-# admin_areas = admin_areas.merge(adj_costs_per_admin, how='left', left_on='shapeName', right_on='shapeName')
+logging.info("Writing reults to GeoPackage.")
+results_gdf = gpd.GeoDataFrame(admin_areas, geometry="geometry")
+results_gdf.to_file(output_path, driver="GPKG")
 
-# logging.info("Writing reults to GeoPackage.")
-# results_gdf = gpd.GeoDataFrame(admin_areas, geometry="geometry")
-# results_gdf.to_file(output_path, driver="GPKG")
-
-# # Debug
-# print(results_gdf['adaptation_cost'].sum())
+# Debug
+print(results_gdf['adaptation_cost'].sum())
 
 logging.info("Done.")
