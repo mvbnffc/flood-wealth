@@ -55,7 +55,8 @@ def summarize_bem(adm_path: str, res_path: str, nres_path: str, output_path: str
             geom = row.geometry
             name = row.get("shapeName")
             group = row.get("shapeGroup", str(_))
-            id = row.get("shapeID")
+            if ADM_level != 'ADM0': # ADM0 does not have shapeID
+                id = row.get("shapeID")
 
             # 1-row GeoDataFrame for this feature
             feat = gpd.GeoDataFrame({"shapeName":[name]}, geometry=[geom], crs=gdf.crs)
@@ -67,7 +68,10 @@ def summarize_bem(adm_path: str, res_path: str, nres_path: str, output_path: str
 
                 res_sum  = (r[0].get("properties", {}).get("sum")  if r else None)
                 nres_sum = (n[0].get("properties", {}).get("sum") if n else None)
-                rows.append({"shapeName": name, "shapeGroup": group, "shapeID": id, "res_sum": res_sum, "nres_sum": nres_sum})
+                if ADM_level =! 'ADM0':
+                    rows.append({"shapeName": name, "shapeGroup": group, "shapeID": id, "res_sum": res_sum, "nres_sum": nres_sum})
+                else:
+                    rows.append({"shapeName": name, "shapeGroup": group, "res_sum": res_sum, "nres_sum": nres_sum})
             except Exception as e:
                 logging.warning(f"Error processing {name}: {e}")
                 skipped += 1    
@@ -79,7 +83,10 @@ def summarize_bem(adm_path: str, res_path: str, nres_path: str, output_path: str
     out = pd.DataFrame(rows)
 
     # one row per shapeName (in case of duplicates)
-    out = out.groupby(["shapeName", "shapeGroup", "shapeID"], as_index=False)[["res_sum","nres_sum"]].sum(min_count=1)
+    if ADM_level != 'ADM0':
+        out = out.groupby(["shapeName", "shapeGroup", "shapeID"], as_index=False)[["res_sum","nres_sum"]].sum(min_count=1)
+    else:
+        out = out.groupby(["shapeName", "shapeGroup"], as_index=False)[["res_sum","nres_sum"]].sum(min_count=1)
 
     logging.info(f"Writing {len(out)} rows → {output_path}")
     out.to_csv(output_path, index=False)
