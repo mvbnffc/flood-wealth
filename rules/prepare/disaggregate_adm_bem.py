@@ -42,7 +42,6 @@ logging.info(f"Load GIRI BEM CSV and filter for {country}")
 df = pd.read_csv(bem_path)
 df = df[df["shapeGroup"] == country].copy()
 
-
 logging.info("Joining relevant CSV columns with admin layer.")
 common_column = "shapeID"
 # What columns do we need
@@ -51,6 +50,8 @@ gdf_use = gdf[[common_column, "geometry"]].copy()
 gdfm = gdf_use.merge(df_use, on=common_column, how='left')
 # Fill missing totals with 0
 gdfm[["res_sum", "nres_sum"]] = gdfm[["res_sum", "nres_sum"]].fillna(0.0)
+
+print(gdfm.head())
 
 logging.info("Building look-up arrays for raster disaggregation")
 # Build an intiger index per admin
