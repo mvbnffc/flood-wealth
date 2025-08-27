@@ -51,8 +51,6 @@ gdfm = gdf_use.merge(df_use, on=common_column, how='left')
 # Fill missing totals with 0
 gdfm[["res_sum", "nres_sum"]] = gdfm[["res_sum", "nres_sum"]].fillna(0.0)
 
-print(gdfm.head())
-
 logging.info("Building look-up arrays for raster disaggregation")
 # Build an intiger index per admin
 gdfm = gdfm.reset_index(drop=True)
