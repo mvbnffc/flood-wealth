@@ -455,7 +455,7 @@ rule summarize_baseline_capital_stock_losses:
         infr_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_inf_capstock.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif"
     output:
-        regional_losses = "data/results/flood_risk/countries/{ISO3}/summary/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_AALs_baseline_capstock.gpkg",
+        regional_losses = "data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_AALs_baseline_capstock.gpkg",
     wildcard_constraints:
         MODEL="giri|jrc|wri",
         ADMIN_SLUG="ADM0|ADM1|ADM2"
@@ -463,7 +463,7 @@ rule summarize_baseline_capital_stock_losses:
         "./capital_stock_losses.py"
 """
 Test with
-snakemake -c1 data/results/flood_risk/countries/RWA/summary/RWA_ADM2_metrics_jrc-flood_AALs_baseline_capstock.gpkg 
+snakemake -c1 data/results/flood_risk/summary/countries/RWA/RWA_ADM2_metrics_jrc-flood_AALs_baseline_capstock.gpkg 
 """
 
 rule summarize_adapted_capital_stock_losses:
@@ -480,7 +480,7 @@ rule summarize_adapted_capital_stock_losses:
         infr_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_inf_capstock.tif",
         mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif"
     output:
-        regional_losses = "data/results/flood_risk/countries/{ISO3}/summary/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_AALs_adapted_fp_rp{RP}_duc{urban_class}_capstock.gpkg",
+        regional_losses = "data/results/flood_risk/summary/country/{ISO3}/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_AALs_adapted_fp_rp{RP}_duc{urban_class}_capstock.gpkg",
     wildcard_constraints:
         MODEL="giri|jrc|wri",
         ADMIN_SLUG="ADM0|ADM1|ADM2",
@@ -489,5 +489,5 @@ rule summarize_adapted_capital_stock_losses:
         "./capital_stock_losses.py"
 """
 Test with
-snakemake -c1 data/results/flood_risk/countries/RWA/summary/RWA_ADM2_metrics_jrc-flood_AALs_adapted_fp_rp100_duc30_capstock.gpkg 
+snakemake -c1 data/results/flood_risk/summary/country/RWA/RWA_ADM2_metrics_jrc-flood_AALs_adapted_fp_rp100_duc30_capstock.gpkg 
 """
