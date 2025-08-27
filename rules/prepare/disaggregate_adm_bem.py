@@ -42,7 +42,6 @@ logging.info(f"Load GIRI BEM CSV and filter for {country}")
 df = pd.read_csv(bem_path)
 df = df[df["shapeGroup"] == country].copy()
 
-
 logging.info("Joining relevant CSV columns with admin layer.")
 common_column = "shapeID"
 # What columns do we need

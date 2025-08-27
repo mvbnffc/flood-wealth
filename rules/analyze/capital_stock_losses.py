@@ -5,7 +5,7 @@ This script calculates the capital stock losses for a country and sums them per 
 import logging
 
 import rasterio
-from rasterio.features import geometry_mask
+from rasterio.features import geometry_mask, rasterize
 import pandas as pd
 import geopandas as gpd
 import numpy as np
@@ -51,8 +51,19 @@ with rasterio.open(res_risk_path) as res_risk_src, rasterio.open(nres_risk_path)
     water_mask = mask_src.read(1)
     affine = res_risk_src.transform
     
-# Create the water mask
-water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
+logging.info("Pre-computing masks.")
+water_mask = np.where(water_mask > 50, False, True)  # Boolean mask instead of NaN
+
+# Pre-compute global validity mask (areas where all rasters have valid data)
+global_valid_mask = (
+    ~np.isnan(res_risk) &
+    ~np.isnan(nres_risk) &
+    ~np.isnan(infr_risk) &
+    ~np.isnan(res_capstock) &
+    ~np.isnan(nres_capstock) &
+    ~np.isnan(infr_capstock) &
+    water_mask
+)
 
 logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM{admin_level}"
@@ -61,48 +72,41 @@ area_unique_id_col = "shapeName"
 admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
+# OPTIMIZATION: vectorize geometry masking
+# Create a dictionary mapping region index to geometry
+geom_dict = {idx: geom for idx, geom in enumerate(admin_areas.geometry)}
+
+# Create a single raster where each pixel contains the region ID it belongs to
+region_ids = rasterize(
+    [(geom, idx) for idx, geom in geom_dict.items()],
+    out_shape=res_risk.shape,
+    transform=affine,
+    fill=-1,  # -1 for pixels not in any region
+    dtype=np.int32
+)
+
 logging.info("Looping over admin regions and calculating capital stock losses")
 results = [] # List for collecting results
  # Loop over each admin region
 for idx, region in tqdm(admin_areas.iterrows()):
-    # Get the geometry for the current admin region
-    geom = region["geometry"].__geo_interface__
-    # Create a mask from the geometry
-    mask_array = geometry_mask([geom],
-                                transform=affine,
-                                invert=True,
-                                out_shape=res_risk.shape)
-    # Use the mask to clip each raster by setting values outside the region to nan
-    res_risk_clip = np.where(mask_array, res_risk, np.nan)
-    nres_risk_clip = np.where(mask_array, nres_risk, np.nan)
-    infr_risk_clip = np.where(mask_array, infr_risk, np.nan)
-    res_capstock_clip = np.where(mask_array, res_capstock, np.nan)
-    nres_capstock_clip = np.where(mask_array, nres_capstock, np.nan)
-    infr_capstock_clip = np.where(mask_array, infr_capstock, np.nan)
-    water_mask_clip = np.where(mask_array, water_mask, np.nan)
+    # Create boolean mask for this specific region
+    region_mask = (region_ids == idx) & global_valid_mask
     
-    # Mask out areas where not all rasters are valid
-    mask = (
-        ~np.isnan(res_risk_clip) &
-        ~np.isnan(nres_risk_clip) &
-        ~np.isnan(infr_risk_clip) &
-        ~np.isnan(res_capstock_clip) &
-        ~np.isnan(nres_capstock_clip) &
-        ~np.isnan(infr_capstock_clip) &
-        ~np.isnan(water_mask_clip)
-    )
-    # Flatten data
-    res_risk_flat = res_risk_clip[mask]
-    nres_risk_flat = nres_risk_clip[mask]
-    infr_risk_flat = infr_risk_clip[mask]
-    res_capstock_flat = res_capstock_clip[mask]
-    nres_capstock_flat = nres_capstock_clip[mask]
-    infr_capstock_flat = infr_capstock_clip[mask]
+    if not np.any(region_mask):  # Skip if no valid pixels in this region
+        results.append({
+            area_unique_id_col: region[area_unique_id_col],
+            "res_losses": 0.0,
+            "nres_losses": 0.0,
+            "infr_losses": 0.0,
+            "total_losses": 0.0,
+            "geometry": region["geometry"]
+        })
+        continue
 
     # Calculate sectoral capital stock losses for the region
-    res_losses = np.nansum(res_risk_flat * res_capstock_flat)
-    nres_losses = np.nansum(nres_risk_flat * nres_capstock_flat)
-    infr_losses = np.nansum(infr_risk_flat * infr_capstock_flat)
+    res_losses = np.nansum(res_risk[region_mask] * res_capstock[region_mask])
+    nres_losses = np.nansum(nres_risk[region_mask] * nres_capstock[region_mask])
+    infr_losses = np.nansum(infr_risk[region_mask] * infr_capstock[region_mask])
 
     # Append risk metrics to results list
     results.append({

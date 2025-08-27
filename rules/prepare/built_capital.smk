@@ -71,7 +71,7 @@ rule disaggregate_capital:
     Disaggregates GIRI capital stock (at ADM2) across GHS volume grids for a country
     """
     input:
-        adm2_file="data/inputs/boundaries/RWA/geobounds_RWA.gpkg",
+        adm2_file="data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
         giri_bem="data/inputs/giri/bem_5x5_valfis_adm2.csv",
         res_volume="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-res_v.tif",
         nres_volume="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-nres_v.tif",
