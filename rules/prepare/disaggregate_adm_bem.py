@@ -44,7 +44,7 @@ df = df[df["shapeGroup"] == country].copy()
 
 
 logging.info("Joining relevant CSV columns with admin layer.")
-common_column = "fid"
+common_column = "shapeID"
 # What columns do we need
 df_use = df[[common_column, "res_sum", "nres_sum"]].copy()
 gdf_use = gdf[[common_column, "geometry"]].copy()
