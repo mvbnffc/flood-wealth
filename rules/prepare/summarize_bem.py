@@ -68,7 +68,7 @@ def summarize_bem(adm_path: str, res_path: str, nres_path: str, output_path: str
 
                 res_sum  = (r[0].get("properties", {}).get("sum")  if r else None)
                 nres_sum = (n[0].get("properties", {}).get("sum") if n else None)
-                if ADM_level =! 'ADM0':
+                if ADM_level != 'ADM0':
                     rows.append({"shapeName": name, "shapeGroup": group, "shapeID": id, "res_sum": res_sum, "nres_sum": nres_sum})
                 else:
                     rows.append({"shapeName": name, "shapeGroup": group, "res_sum": res_sum, "nres_sum": nres_sum})
