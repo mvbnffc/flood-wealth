@@ -491,3 +491,14 @@ rule summarize_adapted_capital_stock_losses:
 Test with
 snakemake -c1 data/results/flood_risk/summary/countries/RWA/RWA_ADM2_metrics_jrc-flood_AALs_adapted_fp_rp100_duc30_capstock.gpkg 
 """
+
+
+configfile: "config/config.yaml"
+ADMINS = ["ADM1", "ADM2"]
+RPs = [50, 100]
+DUC_protection = [21, 22, 23, 30]
+
+rule baseline_losses_for_all_countries:
+    input:
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_baseline_capstock.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS)
