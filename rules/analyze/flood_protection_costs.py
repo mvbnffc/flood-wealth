@@ -123,8 +123,13 @@ def calculate_protection_costs(geom, protection_level, country_cost_adjustment):
     # Protection delta
     delta_fp = np.max((protection_level-baseline_protection), 0)
 
-    # Standard adaptation cost
-    adaptation_cost = standard_unit_cost * river_length * np.log2(delta_fp)
+    # Guard against log2(0) or negatives
+    if delta_fp <= 0:
+        adaptation_cost = 0.0
+        adj_adaptation_cost = 0.0
+    else:
+        adaptation_cost = standard_unit_cost * river_length * np.log2(delta_fp)
+        adj_adaptation_cost = adjusted_unit_cost * river_length * np.log2(delta_fp)
 
     # Adjusted adaptation cost
     adjusted_unit_cost = country_cost_adjustment * standard_unit_cost
