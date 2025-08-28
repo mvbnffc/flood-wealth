@@ -24,3 +24,13 @@ rule flood_protection_costs:
 Test with
 snakemake -c1 data/results/adaptation/costs/countries/RWA/RWA_adaptation-cost_fp_rp100_duc30_ADM2.gpkg
 """
+
+configfile: "config/config.yaml"
+ADMINS = ["ADM1", "ADM2"]
+RPs = [50, 100]
+DUC_protection = [21, 22, 23, 30]
+
+rule fP_costs_for_all_countries:
+    input:
+        expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_fp_rp{RP}_duc{urban}_{ADM}.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS, RP=RPs, urban=DUC_protection)
