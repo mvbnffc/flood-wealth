@@ -1,4 +1,5 @@
 AGO, https://download.geofabrik.de/africa/angola-latest-free.shp.zip
+ALB, https://download.geofabrik.de/europe/albania-latest-free.shp.zip
 ARM, https://download.geofabrik.de/asia/armenia-latest-free.shp.zip
 AZE, https://download.geofabrik.de/asia/azerbaijan-latest-free.shp.zip 
 BDI, https://download.geofabrik.de/africa/burundi-latest-free.shp.zip 
