@@ -496,7 +496,7 @@ snakemake -c1 data/results/flood_risk/summary/countries/RWA/RWA_ADM2_metrics_jrc
 configfile: "config/config.yaml"
 ADMINS = ["ADM1", "ADM2"]
 RPs = [100]
-DUC_protection = [30]
+DUC_protection = [21, 22, 23, 30]
 
 rule baseline_losses_for_all_countries:
     input:
