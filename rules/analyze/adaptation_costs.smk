@@ -27,7 +27,7 @@ snakemake -c1 data/results/adaptation/costs/countries/RWA/RWA_adaptation-cost_fp
 
 configfile: "config/config.yaml"
 ADMINS = ["ADM1", "ADM2"]
-RPs = [100]
+RPs = [50, 100]
 DUC_protection = [21, 22, 23, 30]
 
 rule fp_costs_for_all_countries:
