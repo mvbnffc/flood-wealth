@@ -25,6 +25,52 @@ Test with
 snakemake -c1 data/results/adaptation/costs/countries/RWA/RWA_adaptation-cost_fp_rp100_duc30_ADM2.gpkg
 """
 
+rule relocation_costs:
+    """
+    This rule calculates the sub-national costs of relocation adaptation scenario.
+    """
+    input:
+        admin_areas="data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        flopros_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_flopros.tif",
+        flood_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP10.tif",
+        pop_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        urbanization_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-mod.tif",
+        res_area="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-res_a.tif",
+        res_capstock="data/inputs/analysis/countries/{ISO3}/{ISO3}_res_capstock.tif"
+    output:
+        relocation_costs="data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_rl_m-{model}_duc{urban_class}_{ADMIN_SLUG}.gpkg"
+    wildcard_constraints:
+        urban_class="11|12|13|21|22|23|30",
+        ADMIN_SLUG="ADM0|ADM1|ADM2",
+        model="giri|jrc|wri"
+    script:
+        "./relocation_costs.py"
+""" 
+Test with
+snakemake -c1 data/results/adaptation/costs/countries/RWA/RWA_adaptation-cost_rl_m-jrc_duc11_ADM2.gpkg
+"""
+
+rule dry_proofing_costs:
+    """
+    This rule calculates the sub-national costs of dry-proofing adaptation scenario.
+    """
+    input:
+        admin_areas="data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        rp10_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP10.tif",
+        rp500_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP500.tif",
+        res_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-res_a.tif"
+    output:
+        dry_proofing_costs="data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_dp_m-{model}_{ADMIN_SLUG}.gpkg"
+    wildcard_constraints:
+        ADMIN_SLUG="ADM0|ADM1|ADM2",
+        model="giri|jrc|wri"
+    script:
+        "./dry_proofing_costs.py"
+""" 
+Test with
+snakemake -c1 data/results/adaptation/costs/countries/RWA/RWA_adaptation-cost_dp_m-jrc_ADM2.gpkg
+"""
+
 configfile: "config/config.yaml"
 ADMINS = ["ADM1", "ADM2"]
 RPs = [50, 100]
