@@ -229,6 +229,34 @@ Test with
 snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_rl_duc23.gpkg
 """
 
+rule inequality_metrics_relocation_admin_decomposed:
+    """
+    This rule calculates the natioanl CI and its geospatial decomposition at the specified administrative level for the relocation scenario
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
+        urban_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-mod.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_adapted_AAR_V-{VULN_CURVE}_rl_duc{urban_class}.tif",
+    output:
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_{MODEL}-flood_adapted_AAR_V-{VULN_CURVE}_S-{SOCIAL}_rl_duc{urban_class}.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        VULN_CURVE="BER|JRC|EXP",
+        SOCIAL="rwi|gdp",
+        urban_class="11|12|13|21|22|23|30",
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
+    script:
+        "./inequality_metrics_admin_decomposed.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_admin-decomposed_jrc-flood_adapted_AAR_V-JRC_S-rwi_rl_duc23.gpkg
+"""
+
 rule inequality_metrics_dry_proofing:
     """
     This rule calcualtes two inequality metrics at the specified administrative level for the dry proofing adaptation scenario.
@@ -254,6 +282,33 @@ rule inequality_metrics_dry_proofing:
 """
 Test with
 snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg
+"""
+
+rule inequality_metrics_dry_proofing_admin_decomposed:
+    """
+    This rule calculates the natioanl CI and its geospatial decomposition at the specified administrative level for the dry-proofing scenario
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        urban_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-mod.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_adapted_AAR_V-{VULN_CURVE}_dp.tif",
+    output:
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_{MODEL}-flood_adapted_AAR_V-{VULN_CURVE}_S-{SOCIAL}_dp.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        VULN_CURVE="BER|JRC|EXP",
+        SOCIAL="rwi|gdp",
+        ADMIN_SLUG="ADM0|ADM1|ADM2"
+    script:
+        "./inequality_metrics_admin_decomposed.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_metrics_admin-decomposed_jrc-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg
 """
 
 rule inequality_metrics_observed:
@@ -406,3 +461,22 @@ events = glob_wildcards("data/inputs/gfd/prep/DFO_{event_id}.tif").event_id
 rule metrics_all_gfd_events:
     input:
         expand("data/results/social_flood/events/DFO_{event_id}/DFO_{event_id}_results.csv", event_id=events)
+
+
+countries = ['RWA', 'CRI', 'THA', 'VNM', 'KHM', 'LAO', 'KEN']
+ADMINS = ["ADM1", "ADM2"]
+RPs = [50, 100]
+fp_urban = [21, 22, 23, 30]
+DUC_protection = [21, 22, 23, 30]
+rl_urban = [11, 12, 13, 21, 22, 23, 30]
+
+rule pc_admin_CI_decomposed:
+    input:
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_protected_AAR_V-JRC_S-rwi.gpkg",
+            ADMIN_SLUG=ADMINS, ISO3=countries),
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_fp_rp{RP}_duc{urban}.gpkg",
+            ADMIN_SLUG=ADMINS, ISO3=countries, RP=RPs, urban=fp_urban),
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_rl_duc{urban}.gpkg",
+            ADMIN_SLUG=ADMINS, ISO3=countries, urban=rl_urban),
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg",
+            ADMIN_SLUG=ADMINS, ISO3=countries)

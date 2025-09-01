@@ -39,7 +39,7 @@ rule relative_flood_risk_dry_proofing:
     output:
         risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_RP{RP}_V-{VULN_CURVE}_dp.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP",
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
         MODEL="giri|jrc|wri"
     script:
         "./relative_flood_risk_dp.py"
@@ -144,7 +144,7 @@ rule giri_average_annual_risk_adapted_rl:
     output:
         flood_aar_adapted="data/results/flood_risk/countries/{ISO3}/{ISO3}_giri-flood-risk_adapted_AAR_V-{VULN_CURVE}_rl_duc{urban_class}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP",
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
         urban_class="11|12|13|21|22|23|30"
     script:
         "./giri_average_annual_risk_adapted_rl.py"
@@ -171,7 +171,7 @@ rule giri_average_annual_risk_adapted_dp:
     output:
         flood_aar_protected="data/results/flood_risk/countries/{ISO3}/{ISO3}_giri-flood-risk_adapted_AAR_V-{VULN_CURVE}_dp.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP"
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR"
     script:
         "./giri_average_annual_risk_protected.py"
 """
@@ -271,7 +271,7 @@ rule jrc_average_annual_risk_adapted_rl:
     output:
         flood_aar_adapted="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_adapted_AAR_V-{VULN_CURVE}_rl_duc{urban_class}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP",
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
         urban_class="11|12|13|21|22|23|30"
     script:
         "./jrc_average_annual_risk_adapted_rl.py"
@@ -297,7 +297,7 @@ rule jrc_average_annual_risk_adapted_dp:
     output:
         flood_aar_protected="data/results/flood_risk/countries/{ISO3}/{ISO3}_jrc-flood-risk_adapted_AAR_V-{VULN_CURVE}_dp.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP"
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR"
     script:
         "./jrc_average_annual_risk_protected.py"
 """
@@ -405,7 +405,7 @@ rule wri_average_annual_risk_adapted_rl:
     output:
         flood_aar_adapted="data/results/flood_risk/countries/{ISO3}/{ISO3}_wri-flood-risk_adapted_AAR_V-{VULN_CURVE}_rl_duc{urban_class}.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP",
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR",
         urban_class="11|12|13|21|22|23|30"
     script:
         "./wri_average_annual_risk_adapted_rl.py"
@@ -433,7 +433,7 @@ rule wri_average_annual_risk_adapted_dp:
     output:
         flood_aar_protected="data/results/flood_risk/countries/{ISO3}/{ISO3}_wri-flood-risk_adapted_AAR_V-{VULN_CURVE}_dp.tif"
     wildcard_constraints:
-        VULN_CURVE="BER|JRC|EXP"
+        VULN_CURVE="BER|JRC|EXP|NRES|INFR"
     script:
         "./wri_average_annual_risk_protected.py"
 """
@@ -492,11 +492,67 @@ Test with
 snakemake -c1 data/results/flood_risk/summary/countries/RWA/RWA_ADM2_metrics_jrc-flood_AALs_adapted_fp_rp100_duc30_capstock.gpkg 
 """
 
+rule summarize_relocated_capital_stock_losses:
+    """
+    Rule summarizes capital stock losses per admin region (relocation adaptation scenario)
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        res_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_adapted_AAR_V-JRC_rl_duc{urban_class}.tif",
+        nres_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_protected_AAR_V-NRES.tif",
+        infr_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_protected_AAR_V-INFR.tif",
+        res_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_res_capstock.tif",
+        nres_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_nres_capstock.tif",
+        infr_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_inf_capstock.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif"
+    output:
+        regional_losses = "data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_AALs_adapted_rl_duc{urban_class}_capstock.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        ADMIN_SLUG="ADM0|ADM1|ADM2",
+        urban_class="11|12|13|21|22|23|30"
+    script:
+        "./capital_stock_losses.py"
+"""
+Test with
+snakemake -c1 data/results/flood_risk/summary/countries/RWA/RWA_ADM2_metrics_jrc-flood_AALs_adapted_rl_duc11_capstock.gpkg 
+"""
+
+
+rule summarize_dry_proofing_capital_stock_losses:
+    """
+    Rule summarizes capital stock losses per admin region (relocation adaptation scenario)
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        res_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_adapted_AAR_V-JRC_dp.tif",
+        nres_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_protected_AAR_V-NRES.tif",
+        infr_risk_file="data/results/flood_risk/countries/{ISO3}/{ISO3}_{MODEL}-flood-risk_protected_AAR_V-INFR.tif",
+        res_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_res_capstock.tif",
+        nres_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_nres_capstock.tif",
+        infr_capstock_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_inf_capstock.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif"
+    output:
+        regional_losses = "data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADMIN_SLUG}_metrics_{MODEL}-flood_AALs_adapted_dp_capstock.gpkg",
+    wildcard_constraints:
+        MODEL="giri|jrc|wri",
+        ADMIN_SLUG="ADM0|ADM1|ADM2",
+        urban_class="11|12|13|21|22|23|30"
+    script:
+        "./capital_stock_losses.py"
+"""
+Test with
+snakemake -c1 data/results/flood_risk/summary/countries/RWA/RWA_ADM2_metrics_jrc-flood_AALs_adapted_dp_capstock.gpkg 
+"""
+
 
 configfile: "config/config.yaml"
+countries = ['RWA', 'CRI', 'THA', 'VNM', 'KHM', 'LAO', 'KEN']
 ADMINS = ["ADM1", "ADM2"]
 RPs = [50, 100]
+fp_urban = [21, 22, 23, 30]
 DUC_protection = [21, 22, 23, 30]
+rl_urban = [11, 12, 13, 21, 22, 23, 30]
 
 rule baseline_losses_for_all_countries:
     input:
@@ -507,3 +563,14 @@ rule adapted_losses_for_all_countries:
     input:
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_fp_rp{RP}_duc{urban}_capstock.gpkg",
                 ISO3=config['iso_codes'], ADM=ADMINS, RP=RPs, urban=DUC_protection)
+
+rule pc_losses_for_all_countries:
+    input:
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_baseline_capstock.gpkg",
+                ISO3=countries, ADM=ADMINS),
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_fp_rp{RP}_duc{urban}_capstock.gpkg",
+                ISO3=countries, ADM=ADMINS, RP=RPs, urban=fp_urban),
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_rl_duc{urban}_capstock.gpkg",
+                ISO3=countries, ADM=ADMINS, urban=fp_urban),
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_dp_capstock.gpkg",
+                ISO3=countries, ADM=ADMINS)
