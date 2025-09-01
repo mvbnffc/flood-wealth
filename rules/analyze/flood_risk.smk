@@ -502,3 +502,8 @@ rule baseline_losses_for_all_countries:
     input:
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_baseline_capstock.gpkg",
                 ISO3=config['iso_codes'], ADM=ADMINS)
+
+rule adapted_losses_for_all_countries:
+    input:
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_fp_rp{RP}_duc{urban}_capstock.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS, RP=RPs, urban=DUC_protection)

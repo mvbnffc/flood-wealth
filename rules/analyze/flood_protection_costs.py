@@ -170,16 +170,28 @@ gdp_df = pd.read_csv(gdppc_path)
 country_gdp = gdp_df.loc[gdp_df["ISO"].eq(country), "GDP_pc"].iloc[0]
 global_gdp  = gdp_df.loc[gdp_df["ISO"].eq("WORLD"), "GDP_pc"].iloc[0]
 gdp_adjustment = country_gdp / global_gdp
-# Calculate the protection cost for each urban area
-urban_admin_rivers[['adaptation_cost', 'adj_adaptation_cost']] = (
-    urban_admin_rivers.apply(
-        lambda r: pd.Series(
-            calculate_protection_costs(
-                r, protection_level=int(RP), country_cost_adjustment=gdp_adjustment
-        )
-    ), axis = 1 
-    )
+
+# Calculate costs and store in temporary series
+costs_series = urban_admin_rivers.apply(
+    lambda r: calculate_protection_costs(
+        r, protection_level=int(RP), country_cost_adjustment=gdp_adjustment
+    ), axis=1
 )
+# Extract the two values from each tuple
+urban_admin_rivers['adaptation_cost'] = costs_series.apply(lambda x: x[0])
+urban_admin_rivers['adj_adaptation_cost'] = costs_series.apply(lambda x: x[1])
+
+# TODO: remove hashed code below... 
+# # Calculate the protection cost for each urban area
+# urban_admin_rivers[['adaptation_cost', 'adj_adaptation_cost']] = (
+#     urban_admin_rivers.apply(
+#         lambda r: pd.Series(
+#             calculate_protection_costs(
+#                 r, protection_level=int(RP), country_cost_adjustment=gdp_adjustment
+#         )
+#     ), axis = 1 
+#     )
+# )
 
 logging.info("Sum the protection costs per Admin region")
 # Group by admin region and sum sugment lengths
