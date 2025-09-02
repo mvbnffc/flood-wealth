@@ -101,12 +101,20 @@ for idx, region in tqdm(admin_areas.iterrows()):
             "total_losses": 0.0,
             "geometry": region["geometry"]
         })
+        # Debug
+        print(f"Skipping region {region[area_unique_id_col]} (index {idx}) with no valid data.")
         continue
 
     # Calculate sectoral capital stock losses for the region
     res_losses = np.nansum(res_risk[region_mask] * res_capstock[region_mask])
     nres_losses = np.nansum(nres_risk[region_mask] * nres_capstock[region_mask])
     infr_losses = np.nansum(infr_risk[region_mask] * infr_capstock[region_mask])
+
+    # Debug
+    print(f"Region {region[area_unique_id_col]} (index {idx}):")
+    print('res_losses:', res_losses)
+    print('nres_losses:', nres_losses)
+    print('infr_losses:', infr_losses)        
 
     # Append risk metrics to results list
     results.append({
