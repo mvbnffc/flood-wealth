@@ -89,6 +89,6 @@ rule pc_costs_for_all_countries:
         expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_fp_rp{RP}_duc{urban}_{ADM}.gpkg",
                 ISO3=countries, ADM=ADMINS, RP=RPs, urban=fp_urban),
         expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_rl_m-jrc_duc{urban}_{ADM}.gpkg",
-                ISO3=countries, ADM=ADMINS, urban=fp_urban),
+                ISO3=countries, ADM=ADMINS, urban=rl_urban),
         expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_dp_m-jrc_{ADM}.gpkg",
                 ISO3=countries, ADM=ADMINS)

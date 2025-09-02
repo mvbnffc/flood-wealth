@@ -571,6 +571,6 @@ rule pc_losses_for_all_countries:
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_fp_rp{RP}_duc{urban}_capstock.gpkg",
                 ISO3=countries, ADM=ADMINS, RP=RPs, urban=fp_urban),
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_rl_duc{urban}_capstock.gpkg",
-                ISO3=countries, ADM=ADMINS, urban=fp_urban),
+                ISO3=countries, ADM=ADMINS, urban=rl_urban),
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_dp_capstock.gpkg",
                 ISO3=countries, ADM=ADMINS)
