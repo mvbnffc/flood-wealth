@@ -110,13 +110,16 @@ for idx, region in tqdm(admin_areas.iterrows()):
     # Calculate sectoral capital stock losses for the region
     area_protected = int(np.nansum(res_area[region_mask]))
     # Calculate average unit cost for the region
-    avg_unit_cost = np.nanmean(cost[region_mask])
-    
+    avg_unit_cost = np.nanmean(cost[region_mask][cost[region_mask]!=0]) # Guard against zero cells
+    max_unit_cost = np.nanmax(cost[region_mask][cost[region_mask]!=0]) # Guard against zero cells
+    std_unit_cost = np.nanstd(cost[region_mask][cost[region_mask]!=0]) # Guard against zero cells
     # Append risk metrics to results list
     results.append({
          area_unique_id_col: region[area_unique_id_col],
          "area_dry-proofed": area_protected,
          "average_unit_cost": avg_unit_cost,
+         "max_unit_cost": max_unit_cost,
+         "std_unit_cost": std_unit_cost,
          "geometry": region["geometry"]
     })
 
