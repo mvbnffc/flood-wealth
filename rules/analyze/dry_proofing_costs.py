@@ -30,6 +30,7 @@ if __name__ == "__main__":
         rp10_path: str = snakemake.input["rp10_path"]
         rp500_path: str = snakemake.input["rp500_path"]
         res_path: str = snakemake.input["res_path"]
+        cost_path: str = snakemake.input["res_unit_cost"]
         output_path: str = snakemake.output["dry_proofing_costs"]
         country: str = snakemake.wildcards["ISO3"]
         model: str = snakemake.wildcards["model"]
@@ -50,10 +51,11 @@ os.makedirs(out_dir, exist_ok=True)
 
 logging.info("Load files.")
 with rasterio.open(rp10_path) as rp10_src, rasterio.open(rp500_path) as rp500_src, \
-     rasterio.open(res_path) as res_area_src:
+     rasterio.open(res_path) as res_area_src, rasterio.open(cost_path) as cost_src:
     rp10 = rp10_src.read(1)
     rp500 = rp500_src.read(1)
     res_area = res_area_src.read(1)
+    cost = cost_src.read(1)
     profile = rp10_src.profile.copy()
     affine = rp10_src.transform
 
@@ -67,7 +69,8 @@ global_dry_proofing_mask = (
 global_valid_mask = (
     ~np.isnan(rp10) &
     ~np.isnan(rp500) &
-    ~np.isnan(res_area)
+    ~np.isnan(res_area) &
+    ~np.isnan(cost)
 )
 
 logging.info(f"Reading level {administrative_level} admin boundaries")
@@ -106,11 +109,14 @@ for idx, region in tqdm(admin_areas.iterrows()):
 
     # Calculate sectoral capital stock losses for the region
     area_protected = int(np.nansum(res_area[region_mask]))
+    # Calculate average unit cost for the region
+    avg_unit_cost = np.nanmean(cost[region_mask])
     
     # Append risk metrics to results list
     results.append({
          area_unique_id_col: region[area_unique_id_col],
          "area_dry-proofed": area_protected,
+         "average_unit_cost": avg_unit_cost,
          "geometry": region["geometry"]
     })
 

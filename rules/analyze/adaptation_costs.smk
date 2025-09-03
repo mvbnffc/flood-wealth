@@ -58,7 +58,8 @@ rule dry_proofing_costs:
         admin_areas="data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
         rp10_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP10.tif",
         rp500_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_{model}-flood_RP500.tif",
-        res_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-res_a.tif"
+        res_path="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-res_a.tif",
+        res_unit_cost="data/inputs/analysis/countries/{ISO3}/{ISO3}_res_unit_cost.tif"
     output:
         dry_proofing_costs="data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_dp_m-{model}_{ADMIN_SLUG}.gpkg"
     wildcard_constraints:
@@ -70,6 +71,25 @@ rule dry_proofing_costs:
 Test with
 snakemake -c1 data/results/adaptation/costs/countries/RWA/RWA_adaptation-cost_dp_m-jrc_ADM2.gpkg
 """
+
+rule capstock_unit_cost:
+    """
+    This rule calculates the gridded unit cost of the residential capital stock.
+    """
+    input:
+        res_capstock="data/inputs/analysis/countries/{ISO3}/{ISO3}_res_capstock.tif",
+        res_area="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-res_a.tif"
+    output:
+        res_unit_cost="data/inputs/analysis/countries/{ISO3}/{ISO3}_res_unit_cost.tif"
+    shell:
+        """
+        gdal_calc.py -A {input.res_capstock} -B {input.res_area} \
+            --outfile={output.res_unit_cost} \
+            --calc="A/B" \
+            --NoDataValue=0 \
+            --type=Float32
+        """
+    
 
 configfile: "config/config.yaml"
 countries = ['RWA', 'CRI', 'THA', 'VNM', 'KHM', 'LAO', 'KEN']
