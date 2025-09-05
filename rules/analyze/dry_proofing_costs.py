@@ -113,9 +113,17 @@ for i, region in tqdm(admin_areas.iterrows(), total=len(admin_areas)):
     # Calculate sectoral capital stock losses for the region
     area_protected = int(np.nansum(res_area[region_mask]))
     # Calculate average unit cost for the region
-    avg_unit_cost = np.nanmean(cost[region_mask][cost[region_mask]!=0]) # Guard against zero cells
-    max_unit_cost = np.nanmax(cost[region_mask][cost[region_mask]!=0]) # Guard against zero cells
-    std_unit_cost = np.nanstd(cost[region_mask][cost[region_mask]!=0]) # Guard against zero cells
+    valid_costs = cost[region_mask][cost[region_mask] != 0]
+
+    if valid_costs.size == 0:
+        avg_unit_cost = np.nan
+        max_unit_cost = np.nan
+        std_unit_cost = np.nan
+    else:
+        avg_unit_cost = np.nanmean(valid_costs)
+        max_unit_cost = np.nanmax(valid_costs)
+        std_unit_cost = np.nanstd(valid_costs)
+
     sum_capital_stock = np.nansum(res_area[region_mask] * cost[region_mask])
     # Append risk metrics to results list
     results.append({
