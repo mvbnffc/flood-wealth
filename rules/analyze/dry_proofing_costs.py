@@ -76,16 +76,15 @@ global_valid_mask = (
 logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
+admin_areas = admin_areas.reset_index(drop=True)
 area_unique_id_col = "shapeName"
 admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
 # OPTIMIZATION: vectorize geometry masking
-# Create a dictionary mapping region index to geometry
-geom_dict = {idx: geom for idx, geom in enumerate(admin_areas.geometry)}
 # Create a single raster where each pixel contains the region ID it belongs to
 region_ids = rasterize(
-    [(geom, idx) for idx, geom in geom_dict.items()],
+    [(geom, i) for i, geom in enumerate(admin_areas.geometry)],
     out_shape=rp500.shape,
     transform=affine,
     fill=-1,  # -1 for pixels not in any region
@@ -95,14 +94,18 @@ region_ids = rasterize(
 logging.info("Looping over admin regions and calculating dry-proofing costs.")
 results = [] # List for collecting results
  # Loop over each admin region
-for idx, region in tqdm(admin_areas.iterrows()):
+for i, region in tqdm(admin_areas.iterrows(), total=len(admin_areas)):
     # Create boolean mask for this specific region
-    region_mask = (region_ids == idx) & global_valid_mask & global_dry_proofing_mask
+    region_mask = (region_ids == i) & global_valid_mask & global_dry_proofing_mask
     
     if not np.any(region_mask):  # Skip if no valid pixels in this region
         results.append({
             area_unique_id_col: region[area_unique_id_col],
             "area_dry-proofed": 0.0,
+            "average_unit_cost": np.nan,
+            "max_unit_cost": np.nan,
+            "std_unit_cost": np.nan,
+            "sum_res_capstock": np.nan,
             "geometry": region["geometry"]
         })
         continue
@@ -113,6 +116,7 @@ for idx, region in tqdm(admin_areas.iterrows()):
     avg_unit_cost = np.nanmean(cost[region_mask][cost[region_mask]!=0]) # Guard against zero cells
     max_unit_cost = np.nanmax(cost[region_mask][cost[region_mask]!=0]) # Guard against zero cells
     std_unit_cost = np.nanstd(cost[region_mask][cost[region_mask]!=0]) # Guard against zero cells
+    sum_capital_stock = np.nansum(res_area[region_mask] * cost[region_mask])
     # Append risk metrics to results list
     results.append({
          area_unique_id_col: region[area_unique_id_col],
@@ -120,6 +124,7 @@ for idx, region in tqdm(admin_areas.iterrows()):
          "average_unit_cost": avg_unit_cost,
          "max_unit_cost": max_unit_cost,
          "std_unit_cost": std_unit_cost,
+         "sum_res_capstock": sum_capital_stock,
          "geometry": region["geometry"]
     })
 
