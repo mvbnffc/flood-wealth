@@ -1,5 +1,5 @@
 """
-Distribute IMF capital stock data across an infrastructure density layer.
+Distribute GIRI infra capital stock data across an infrastructure density layer.
 This is used to estimate the infrastructure capital stock at risk from flooding.
 """
 
@@ -32,17 +32,17 @@ logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", l
 
 logging.info(f"Assigning capital stock values to the the OSM infrastructure layer for {country}.")
 
-logging.info("Reading 2019 public capital stock value from IMF spreadsheet.")
-df = pd.read_excel(capstock_path, sheet_name="Dataset")
-df['isocode'] = df['isocode'].astype(str).str.upper()  # Ensure ISO codes are uppercase
+logging.info("Reading infrastructure capital stock value from GIRI CSV.")
+df = pd.read_csv(capstock_path)
+df['ISO3'] = df['ISO3'].astype(str).str.upper()  # Ensure ISO codes are uppercase
+
 # Find the row for the given country
-rows = df[(df['isocode'] == country) & (df['year'] == 2019)] # want latest year, which for this dataset is 2019
-if rows.empty:
-    raise ValueError(f"No capital stock data found for {country} in 2019.")
-if len(rows) > 1:
-    raise ValueError(f"Multiple rows found for {country} in 2019. Please check the dataset.")
-capital_stock = rows.iloc[0]['kgov_rppp'] # public capital stock in 2019 in billions of USD
-logging.info(f"Public capital stock for {country} in 2019: {capital_stock} billion USD.")
+row = df[df['ISO3'] == country.upper()]
+if row.empty:
+    raise ValueError(f"No capital stock data found for {country}.")
+capital_stock = float(row.iloc[0]['INF_capstock'])
+
+logging.info(f"Public capital stock for {country}: {capital_stock} USD.")
 
 logging.info("Reading infrastructure raster.")
 with rasterio.open(infra_path) as src:
@@ -76,9 +76,9 @@ if w_sum <= 0.0:
         raise ValueError("No valid pixels found in the infrastructure raster.")
     logging.warning("No positive weights found in the infrastructure raster. Allocating capital stock uniformly over valid pixels.")
     alloc = np.zeros_like(weights, dtype=np.float64)
-    alloc[valid_mask] = capital_stock * 1e9 / n_valid  # convert billion USD to USD
+    alloc[valid_mask] = capital_stock / n_valid 
 else:
-    alloc = (capital_stock * 1e9 * weights) / w_sum  # convert billion USD to USD
+    alloc = (capital_stock * weights) / w_sum
 
 logging.info("Writing the capital stock allocation to a GeoTIFF.")
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -88,6 +88,6 @@ with rasterio.open(output_path, "w", **meta) as dst:
 
 logging.info("Sanity check")
 sum_out = float(alloc.sum())
-logging.info(f"Check: sum(output) = {sum_out:.0f} (billions USD) vs IMF total {(capital_stock*1e9):.0f}.")
+logging.info(f"Check: sum(output) = {sum_out:.0f} vs GIRI total {(capital_stock):.0f}.")
 
 logging.info("Done.")
