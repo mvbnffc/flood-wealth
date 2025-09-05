@@ -9,9 +9,40 @@ rule rasterize_osm_infra:
         osm_folder="data/inputs/analysis/countries/{ISO3}/{ISO3}_osm/",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif"
     output:
-        infrastructure_raster="data/inputs/analysis/countries/{ISO3}/{ISO3}_infra.tif"
+        infrastructure_raster="data/inputs/analysis/countries/{ISO3}/{ISO3}_infra_raw.tif"
     script:
         "./rasterize_infra.py"
+
+"""
+Test with
+snakemake -c1 data/inputs/analysis/countries/RWA/RWA_infra.tif"
+"""
+
+rule clip_rasterized_infra:
+    """
+    This rule clips the rasterized infrastructure layer.
+    """
+    input:
+        raw_infrastructure_raster="data/inputs/analysis/countries/{ISO3}/{ISO3}_infra_raw.tif",
+        boundary_file="data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.geojson",
+    output:
+        infrastructure_raster="data/inputs/analysis/countries/{ISO3}/{ISO3}_infra.tif"
+    shell:
+        """
+        set -ex
+
+        mkdir --parents $(dirname {output.infrastructure_raster})
+        
+        # Clip raster using GeoJSON geometry
+        gdalwarp \
+            -cutline {input.boundary_file} \
+            -crop_to_cutline \
+            -of GTiff \
+            -co BIGTIFF=YES \
+            -co compress=lzw \
+            {input.raw_infrastructure_raster} \
+            {output.infrastructure_raster}
+        """
 
 """
 Test with
