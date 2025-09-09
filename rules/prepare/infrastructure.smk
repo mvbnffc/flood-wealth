@@ -6,7 +6,7 @@ rule rasterize_osm_infra:
     Population dataset is used as reference for gridded layer
     """
     input:
-        osm_folder="data/inputs/analysis/countries/{ISO3}/{ISO3}_osm/",
+        inf_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_osm_roads.gpkg",
         pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif"
     output:
         infrastructure_raster="data/inputs/analysis/countries/{ISO3}/{ISO3}_infra_raw.tif"
@@ -15,7 +15,7 @@ rule rasterize_osm_infra:
 
 """
 Test with
-snakemake -c1 data/inputs/analysis/countries/RWA/RWA_infra.tif"
+snakemake -c1 data/inputs/analysis/countries/RWA/RWA_infra_raw.tif"
 """
 
 rule clip_rasterized_infra:

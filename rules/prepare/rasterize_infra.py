@@ -18,12 +18,10 @@ import numpy as np
 import pyproj
 import fiona
 
-
-
 if __name__ == "__main__":
 
     try:
-        osm_path: str = snakemake.input["osm_folder"]
+        inf_path: str = snakemake.input["inf_file"]
         pop_path: str = snakemake.input["pop_file"]
         output_path: str = snakemake.output["infrastructure_raster"]
         country: str = snakemake.wildcards["ISO3"]
@@ -50,18 +48,14 @@ with rasterio.open(pop_path) as ref:
     dst_crs = ref.crs
 
 logging.info("Reading road network data.")
-road_file = os.path.join(osm_path, "gis_osm_roads_free_1.shp")
-roads = gpd.read_file(road_file)
-roads = roads[['osm_id', 'fclass', 'name', 'geometry']]
+roads = gpd.read_file(inf_path, layer='lines')
+roads = roads[['osm_id', 'geometry']]
 roads = roads[roads.geometry.notnull()]  # Remove rows with null geometries
 roads = roads[roads.geometry.type.isin(['LineString', 'MultiLineString'])]  # Keep only LineString and MultiLineString
 if roads.crs is None:
     roads = roads.set_crs(dst_crs)
 if roads.crs != dst_crs:
     roads = roads.To_crs(dst_crs)
-# Filter road classes
-keep = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'residential', 'unclassified', 'service'}
-roads = roads[roads['fclass'].isin(keep)]
 
 # Densify road lines to ~1/2 pixel so we can rasterize them properly
 step_deg = 0.5 * min(res_x, res_y)  # Half pixel step in degrees
