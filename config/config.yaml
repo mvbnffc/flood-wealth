@@ -33,7 +33,7 @@ iso_codes:
 #  - "DMA" # PBF issue
  - "DOM"
 #  - "DZA" # fails on PC
-#  - "ECU" # PBF issue
+ - "ECU" # PBF issue
  - "EGY"
  - "ERI"
 #  - "ETH" # fails on PC
@@ -44,7 +44,7 @@ iso_codes:
  - "GMB"
  - "GNB"
  - "GNQ"
-#  - "GRD" # PBF issue 
+ - "GRD" # PBF issue 
  - "GTM"
  - "GUY"
  - "HND"
@@ -60,7 +60,7 @@ iso_codes:
  - "LAO"
  - "LBR"
 #  - "LBY" # fails on PC
-#  - "LCA" # PBF issue
+ - "LCA" # PBF issue
  - "LKA"
  - "LSO"
  - "MAR"
@@ -80,7 +80,7 @@ iso_codes:
 #  - "NAM" # fails on PC NEW
 #  - "NER" # fails on PC
  - "NGA"
-#  - "NIC" # PBF issue
+ - "NIC" # PBF issue
  - "NPL"
 #  - "PAK" # fails on PC
 #  - "PER" # fails on PC
@@ -107,7 +107,7 @@ iso_codes:
  - "UGA"
  - "UKR"
  - "UZB"
-#  - "VCT" # PBF issue
+ - "VCT" # PBF issue
  - "VNM"
 #  - "ZAF" # fails on PC
  - "ZMB"
