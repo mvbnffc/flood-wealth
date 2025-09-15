@@ -72,31 +72,24 @@ def calculate_geod_length(geom):  # Changed parameter name from 'line' to 'geom'
     return length / 1000 # convert to km
 
 def zonal_mode_for_polygon(src, geom):
-    '''
-    Function for raster stats per polygon (will calculate mode - for FLOPROS)
-    '''
-    # Mask raster to polygon, crop to bbox for speed
-    out, _ = mask(src, [geom], crop=True, filled=False)
-    
-    # Handle masked array properly
+    """
+    Return modal FLOPROS value inside a polygon. If no overlap, return NaN.
+    """
+    try:
+        out, _ = mask(src, [geom], crop=True, filled=False)
+    except ValueError:
+        # "Input shapes do not overlap raster."
+        return np.nan
+
     masked_arr = out[0]
-    
-    # Convert masked array to regular array, getting only valid (unmasked) values
-    if hasattr(masked_arr, 'compressed'):
-        # This extracts only the unmasked values
-        arr = masked_arr.compressed()
-    else:
-        # Fallback if not a masked array
-        arr = masked_arr[~np.isnan(masked_arr)]
-    
-    # Remove explicit nodata values if they exist
+    arr = masked_arr.compressed() if hasattr(masked_arr, "compressed") else masked_arr[~np.isnan(masked_arr)]
+
     if src.nodata is not None:
         arr = arr[arr != src.nodata]
-    
-    if arr.size == 0:
-        return 0  # Match Script 1 behavior
 
-    # Compute mode (works for int or float)
+    if arr.size == 0:
+        return np.nan
+
     vals, counts = np.unique(arr, return_counts=True)
     return float(vals[np.argmax(counts)])
 
