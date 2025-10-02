@@ -5,8 +5,9 @@ for each flooded grid cell.
 
 import logging
 
-import rasterio
+import numba
 import numpy as np
+import rasterio
 
 if __name__ == "__main__":
 
@@ -46,6 +47,7 @@ flood_maps.insert(0, RP2) # insert this array at beginning of list.
 flood_maps = np.array(flood_maps)
 
 ### Function for Loss-Probabiltiy Curve
+@numba.jit
 def integrate_truncated_risk(risk_curve, T, RPs):
     """
     Integrate the risk curve above a protection threshold T.
@@ -77,20 +79,21 @@ def integrate_truncated_risk(risk_curve, T, RPs):
             # Linearly interpolate between the two adjacent RPs.
             risk_T = risk_curve[idx-1] + (risk_curve[idx] - risk_curve[idx-1]) * (T - RPs[idx-1]) / (RPs[idx] - RPs[idx-1])
         # Construct a new risk curve starting at T.
-        new_RPs = np.concatenate(([T], RPs[idx:]))
-        new_risk = np.concatenate(([risk_T], risk_curve[idx:]))
-    
+        new_RPs = np.concatenate((np.array([T]), RPs[idx:]))
+        new_risk = np.concatenate((np.array([risk_T]), risk_curve[idx:]))
+
     # Calculate the annual exceedance probabilities for the new return periods.
-    new_aep = 1 / new_RPs
+    new_aep = np.pow(new_RPs, -1)
     # Because aep decreases with increasing RP, reverse arrays to get increasing x values.
-    sorted_aep = new_aep[::-1]
-    sorted_risk = new_risk[::-1]
-    
+    sorted_aep = new_aep[::-1].copy()
+    sorted_risk = new_risk[::-1].copy()
+
     # Compute the integrated risk using the trapezoidal rule.
-    return np.trapezoid(sorted_risk, x=sorted_aep)
+    return np.trapezoid(sorted_risk, x=sorted_aep, dx=None)
+
 
 logging.info("Reshaping flood maps")
-RPs = np.array([2, 10, 20, 50, 75, 100, 200, 500]) # define return periods
+RPs = np.array([2, 10, 20, 50, 75, 100, 200, 500], dtype="float32") # define return periods
 rows, cols = flopros.shape # for writing back to normal shape later
 n_rps = len(RPs)
 risk_flat = flood_maps.reshape(n_rps, -1) # each column is now a cell's risk curve
