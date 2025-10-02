@@ -5,15 +5,17 @@ channels:
 - conda-forge
 - nodefaults
 dependencies:
-- python=3.10
+- python=3.12
 - pip
 - pip:
-  - download_surface_water # for downloading JRC surface water dataset
-- ipykernel           
-- jupyter notebook 
+  - download-water-data # for downloading JRC surface water dataset
+- ipykernel
+- jupyter
+- notebook
 - fiona
 - gdal
-- pandas==2.0.3
+- pandas~=2.0
+- numba
 - geopandas
 - rasterio    
 - rasterstats 
