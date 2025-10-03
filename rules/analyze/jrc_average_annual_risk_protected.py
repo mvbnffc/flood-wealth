@@ -4,6 +4,7 @@ for each flooded grid cell.
 """
 
 import logging
+import sys
 
 import numba
 import numpy as np
@@ -23,7 +24,32 @@ if __name__ == "__main__":
         aar_output_path: str = snakemake.output["flood_aar_protected"]
         vuln_dataset: str = snakemake.wildcards["VULN_CURVE"]
     except NameError:
-        raise ValueError("Must be run via snakemake.")
+        try:
+            RP10_path: str = sys.argv[1]
+            RP20_path: str = sys.argv[2]
+            RP50_path: str = sys.argv[3]
+            RP75_path: str = sys.argv[4]
+            RP100_path: str = sys.argv[5]
+            RP200_path: str = sys.argv[6]
+            RP500_path: str = sys.argv[7]
+            flopros_path: str = sys.argv[8]
+            aar_output_path: str = sys.argv[9]
+            vuln_dataset: str = sys.argv[10]
+        except IndexError:
+            print("""\
+Example usage: python rules/analyze/jrc_average_annual_risk_protected.py \\
+    data/results/flood_risk/countries/CRI/CRI_jrc-flood-risk_RP10_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_jrc-flood-risk_RP20_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_jrc-flood-risk_RP50_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_jrc-flood-risk_RP75_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_jrc-flood-risk_RP100_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_jrc-flood-risk_RP200_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_jrc-flood-risk_RP500_V-JRC.tif \\
+    data/inputs/analysis/countries/CRI/CRI_flopros.tif \\
+    data/results/flood_risk/countries/CRI/CRI_jrc-flood-risk_protected_AAR_V-JRC.tif \\
+    JRC
+""")
+            raise ValueError("Must be run via snakemake or with all parameters supplied.")
     
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
