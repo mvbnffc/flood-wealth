@@ -56,7 +56,7 @@ logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", l
 logging.info(f"Calculating JRC average annual relative risk using {vuln_dataset} vulnerability curve.")
 
 logging.info("Reading raster data.")
-raster_paths = [RP10_path, RP20_path, RP50_path, RP75_path, RP100_path, RP200_path, RP500_path]
+raster_paths = [RP500_path, RP200_path, RP100_path, RP75_path, RP50_path, RP20_path, RP10_path]
 flood_maps = [] # going to load rasters into this list
 for path in raster_paths:
     with rasterio.open(path) as src:
@@ -68,13 +68,13 @@ with rasterio.open(flopros_path) as src:
 
 # Create an empty array for bankful (2-year) flood
 RP2 = np.zeros_like(flood_maps[0])
-flood_maps.insert(0, RP2) # insert this array at beginning of list.
+flood_maps.append(RP2) # insert this array at beginning of list.
 # Convert to numpy array
 flood_maps = np.array(flood_maps)
 
 ### Function for Loss-Probabiltiy Curve
 @numba.jit
-def integrate_truncated_risk(risk_curve, T, RPs):
+def integrate_truncated_risk(risk_curve, T, RPs, RPs_r):
     """
     Integrate the risk curve above a protection threshold T.
     
@@ -88,16 +88,17 @@ def integrate_truncated_risk(risk_curve, T, RPs):
     """
     # If the protection threshold is less than or equal to the smallest RP,
     # no truncation is applied.
-    if T <= RPs[0]:
+    if T <= RPs[-1]:
         new_RPs = RPs
-        new_risk = risk_curve
+        protected_risk = risk_curve
     # If the protection threshold is above the highest RP,
     # assume full protection (i.e. no risk).
-    elif T >= RPs[-1]:
+    elif T >= RPs[0]:
         return 0.0
     else:
         # Find the first index where the discrete RP is >= T.
-        idx = np.searchsorted(RPs, T, side='left')
+        ridx = np.searchsorted(RPs_r, T, side='left')
+        idx = (RPs.size - ridx) 
         # If T exactly matches one of the RPs, use that risk value.
         if T == RPs[idx]:
             risk_T = risk_curve[idx]
@@ -105,21 +106,20 @@ def integrate_truncated_risk(risk_curve, T, RPs):
             # Linearly interpolate between the two adjacent RPs.
             risk_T = risk_curve[idx-1] + (risk_curve[idx] - risk_curve[idx-1]) * (T - RPs[idx-1]) / (RPs[idx] - RPs[idx-1])
         # Construct a new risk curve starting at T.
-        new_RPs = np.concatenate((np.array([T]), RPs[idx:]))
-        new_risk = np.concatenate((np.array([risk_T]), risk_curve[idx:]))
+        new_RPs = RPs[:idx+1].copy()
+        new_RPs[idx] = T
+        protected_risk = risk_curve[:idx+1].copy()
+        protected_risk[idx] = risk_T
 
     # Calculate the annual exceedance probabilities for the new return periods.
-    new_aep = np.pow(new_RPs, -1)
-    # Because aep decreases with increasing RP, reverse arrays to get increasing x values.
-    sorted_aep = new_aep[::-1].copy()
-    sorted_risk = new_risk[::-1].copy()
+    protected_aep = np.pow(new_RPs, -1)
 
     # Compute the integrated risk using the trapezoidal rule.
-    return np.trapezoid(sorted_risk, x=sorted_aep, dx=None)
+    return np.trapezoid(protected_risk, x=protected_aep, dx=None)
 
 
 logging.info("Reshaping flood maps")
-RPs = np.array([2, 10, 20, 50, 75, 100, 200, 500], dtype="float32") # define return periods
+RPs = np.array([500, 200, 100, 75, 50, 20, 10, 2], dtype="float32") # define return periods
 rows, cols = flopros.shape # for writing back to normal shape later
 n_rps = len(RPs)
 risk_flat = flood_maps.reshape(n_rps, -1) # each column is now a cell's risk curve
