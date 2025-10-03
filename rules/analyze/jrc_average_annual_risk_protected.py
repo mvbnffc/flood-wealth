@@ -117,6 +117,11 @@ def integrate_truncated_risk(risk_curve, T, RPs, RPs_r):
     # Compute the integrated risk using the trapezoidal rule.
     return np.trapezoid(protected_risk, x=protected_aep, dx=None)
 
+@numba.guvectorize([(numba.float32[:,:], numba.float32[:], numba.float32[:], numba.float32[:])], '(m,n),(n),(m)->(n)')
+def protected_risk(risk, protection, rps, out):
+    rps_r = rps[::-1].copy()
+    for i in range(protection.shape[0]):
+        out[i] = integrate_truncated_risk(risk[:, i], protection[i], rps, rps_r)
 
 logging.info("Reshaping flood maps")
 RPs = np.array([500, 200, 100, 75, 50, 20, 10, 2], dtype="float32") # define return periods
@@ -124,11 +129,10 @@ rows, cols = flopros.shape # for writing back to normal shape later
 n_rps = len(RPs)
 risk_flat = flood_maps.reshape(n_rps, -1) # each column is now a cell's risk curve
 flopros_flat = flopros.flatten()
-aar_protected_flat = np.empty(flopros_flat.shape) # array to store integrated risk for each cell.
+aar_protected_flat = np.empty(flopros_flat.shape, dtype="float32") # array to store integrated risk for each cell.
 
 logging.info("Calculating average annual risk (protected) using vectorization")
-for i in range(flopros_flat.size):
-    aar_protected_flat[i] = integrate_truncated_risk(risk_flat[:, i], flopros_flat[i], RPs)
+protected_risk(risk_flat, flopros_flat, RPs, aar_protected_flat)
 aar_protected = aar_protected_flat.reshape(rows, cols) # reshape to original dimensions
 
 # Update for compression
