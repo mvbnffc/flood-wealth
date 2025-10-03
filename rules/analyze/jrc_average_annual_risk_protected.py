@@ -86,15 +86,19 @@ def integrate_truncated_risk(risk_curve, T, RPs, RPs_r):
     Returns:
       Integrated risk value after truncating the risk curve at T.
     """
+    # If the protection threshold is above the highest RP,
+    # assume full protection (i.e. no risk).
+    if T >= RPs[0]:
+        return 0.0
+    # Or if the highest RP risk value is zero, assume no risk
+    if risk_curve[0] <= 0:
+        return 0.0
+    
     # If the protection threshold is less than or equal to the smallest RP,
     # no truncation is applied.
     if T <= RPs[-1]:
         new_RPs = RPs
         protected_risk = risk_curve
-    # If the protection threshold is above the highest RP,
-    # assume full protection (i.e. no risk).
-    elif T >= RPs[0]:
-        return 0.0
     else:
         # Find the first index where the discrete RP is >= T.
         ridx = np.searchsorted(RPs_r, T, side='left')
