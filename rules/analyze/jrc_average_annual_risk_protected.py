@@ -74,7 +74,7 @@ flood_maps = np.array(flood_maps)
 
 ### Function for Loss-Probabiltiy Curve
 @numba.jit
-def integrate_truncated_risk(risk_curve, T, RPs, RPs_r):
+def integrate_truncated_risk(risk_curve, T, RPs, RPs_r, aep):
     """
     Integrate the risk curve above a protection threshold T.
     
@@ -97,8 +97,8 @@ def integrate_truncated_risk(risk_curve, T, RPs, RPs_r):
     # If the protection threshold is less than or equal to the smallest RP,
     # no truncation is applied.
     if T <= RPs[-1]:
-        new_RPs = RPs
         protected_risk = risk_curve
+        protected_aep = aep
     else:
         # Find the first index where the discrete RP is >= T.
         ridx = np.searchsorted(RPs_r, T, side='left')
@@ -110,13 +110,11 @@ def integrate_truncated_risk(risk_curve, T, RPs, RPs_r):
             # Linearly interpolate between the two adjacent RPs.
             risk_T = risk_curve[idx-1] + (risk_curve[idx] - risk_curve[idx-1]) * (T - RPs[idx-1]) / (RPs[idx] - RPs[idx-1])
         # Construct a new risk curve starting at T.
-        new_RPs = RPs[:idx+1].copy()
-        new_RPs[idx] = T
         protected_risk = risk_curve[:idx+1].copy()
         protected_risk[idx] = risk_T
-
-    # Calculate the annual exceedance probabilities for the new return periods.
-    protected_aep = np.pow(new_RPs, -1)
+        # Calculate the annual exceedance probabilities for the new return periods.
+        protected_aep = aep[:idx+1].copy()
+        protected_aep[idx] = 1 / T
 
     # Compute the integrated risk using the trapezoidal rule.
     return np.trapezoid(protected_risk, x=protected_aep, dx=None)
@@ -124,8 +122,9 @@ def integrate_truncated_risk(risk_curve, T, RPs, RPs_r):
 @numba.guvectorize([(numba.float32[:,:], numba.float32[:], numba.float32[:], numba.float32[:])], '(m,n),(n),(m)->(n)')
 def protected_risk(risk, protection, rps, out):
     rps_r = rps[::-1].copy()
+    aep = np.pow(rps, -1)
     for i in range(protection.shape[0]):
-        out[i] = integrate_truncated_risk(risk[:, i], protection[i], rps, rps_r)
+        out[i] = integrate_truncated_risk(risk[:, i], protection[i], rps, rps_r, aep)
 
 logging.info("Reshaping flood maps")
 RPs = np.array([500, 200, 100, 75, 50, 20, 10, 2], dtype="float32") # define return periods
