@@ -17,6 +17,7 @@ dependencies:
 - pandas~=2.0
 - numba
 - geopandas
+- osmium
 - openpyxl
 - rasterio    
 - rasterstats 
