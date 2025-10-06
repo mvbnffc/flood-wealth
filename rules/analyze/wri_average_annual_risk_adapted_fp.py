@@ -4,9 +4,111 @@ for each flooded grid cell. This is for the flood protection adaptation scenario
 """
 
 import logging
+import sys
 
+import numba
 import rasterio
 import numpy as np
+
+### Function for Loss-Probabiltiy Curve
+@numba.jit
+def integrate_truncated_risk(risk_curve, T, RPs, RPs_r, aep):
+    """
+    Integrate the risk curve above a protection threshold T.
+    
+    Parameters:
+    risk_curve : 1D numpy array of risk values corresponding to each return period in RPs.
+    T          : Protection threshold for the cell (e.g., 7, 10, 100, etc.)
+    RPs        : 1D numpy array of discrete return periods.
+    
+    Returns:
+    Integrated risk value after truncating the risk curve at T.
+    """
+    # If the protection threshold is above the highest RP,
+    # assume full protection (i.e. no risk).
+    if T >= RPs[0]:
+        return 0.0
+    # Or if the highest RP risk value is zero, assume no risk
+    if risk_curve[0] <= 0:
+        return 0.0
+    
+    # If the protection threshold is less than or equal to the smallest RP,
+    # no truncation is applied.
+    if T <= RPs[-1]:
+        protected_risk = risk_curve
+        protected_aep = aep
+    else:
+        # Find the first index where the discrete RP is >= T.
+        ridx = np.searchsorted(RPs_r, T, side='left')
+        idx = (RPs.size - ridx) 
+        # If T exactly matches one of the RPs, use that risk value.
+        if T == RPs[idx]:
+            risk_T = risk_curve[idx]
+        else:
+            # Linearly interpolate between the two adjacent RPs.
+            risk_T = risk_curve[idx-1] + (risk_curve[idx] - risk_curve[idx-1]) * (T - RPs[idx-1]) / (RPs[idx] - RPs[idx-1])
+        # Construct a new risk curve starting at T.
+        protected_risk = risk_curve[:idx+1].copy()
+        protected_risk[idx] = risk_T
+        # Calculate the annual exceedance probabilities for the new return periods.
+        protected_aep = aep[:idx+1].copy()
+        protected_aep[idx] = 1 / T
+
+    # Compute the integrated risk using the trapezoidal rule.
+    return np.trapezoid(protected_risk, x=protected_aep, dx=None)
+
+@numba.guvectorize([(numba.float32[:,:], numba.float32[:], numba.float32[:], numba.float32[:])], '(m,n),(n),(m)->(n)')
+def protected_risk(risk, protection, rps, out):
+    rps_r = rps[::-1].copy()
+    aep = np.pow(rps, -1)
+    for i in range(protection.shape[0]):
+        out[i] = integrate_truncated_risk(risk[:, i], protection[i], rps, rps_r, aep)
+
+def main(RP2_path, RP5_path, RP10_path, RP25_path, RP50_path, RP100_path, RP250_path, RP500_path, RP1000_path, flopros_path, aar_output_path, rp_protection, urban_class, vuln_dataset):
+    logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
+
+    logging.info(f"Calculating (adapted) WRI average annual relative risk using {vuln_dataset} vulnerability curve." \
+             f"Flood protection adaptation scenario. Return period for flood protection: {rp_protection}, Urbanization class: {urban_class}.")
+
+    logging.info("Reading raster data.")
+    raster_paths = [RP1000_path, RP500_path, RP250_path, RP100_path, RP50_path, RP25_path, RP10_path, RP5_path, RP2_path]
+    flood_maps = [] # going to load rasters into this list
+    for path in raster_paths:
+        with rasterio.open(path) as src:
+            flood_maps.append(src.read(1))
+            transform = src.transform
+            meta = src.meta
+    with rasterio.open(flopros_path) as src:
+        flopros = src.read(1)
+
+    # Creat flood map array
+    flood_maps = np.array(flood_maps, dtype="float32") # convert to numpy array for calculation
+
+    logging.info("Reshaping flood maps")
+    RPs = np.array([1000, 500, 250, 100, 50, 25, 10, 5, 2], dtype="float32") # define return periods
+    rows, cols = flopros.shape # for writing back to normal shape later
+    n_rps = len(RPs)
+    risk_flat = flood_maps.reshape(n_rps, -1) # each column is now a cell's risk curve
+    flopros_flat = flopros.flatten()
+    aar_protected_flat = np.empty(flopros_flat.shape, dtype="float32") # array to store integrated risk for each cell.
+
+    logging.info("Calculating average annual risk (protected) using vectorization")
+    protected_risk(risk_flat, flopros_flat, RPs, aar_protected_flat)
+    aar_protected = aar_protected_flat.reshape(rows, cols) # reshape to original dimensions
+
+    # Update for compression
+    meta.update(
+        compress='lzw',
+        tiled=True
+    )
+
+    logging.info("Writing output rasters.")
+    with rasterio.open(aar_output_path, "w", **meta) as dst:
+        dst.write(aar_protected.astype(np.float32), 1)
+
+    logging.info("Done.")
+
+
 
 if __name__ == "__main__":
 
@@ -26,92 +128,39 @@ if __name__ == "__main__":
         urban_class: str = snakemake.wildcards["urban_class"]
         vuln_dataset: str = snakemake.wildcards["VULN_CURVE"]
     except NameError:
-        raise ValueError("Must be run via snakemake.")
-    
-logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
-
-logging.info(f"Calculating (adapted) WRI average annual relative risk using {vuln_dataset} vulnerability curve." \
-             f"Flood protection adaptation scenario. Return period for flood protection: {rp_protection}, Urbanization class: {urban_class}.")
-
-logging.info("Reading raster data.")
-raster_paths = [RP2_path, RP5_path, RP10_path, RP25_path, RP50_path, RP100_path, RP250_path, RP500_path, RP1000_path]
-flood_maps = [] # going to load rasters into this list
-for path in raster_paths:
-    with rasterio.open(path) as src:
-        flood_maps.append(src.read(1))
-        transform = src.transform
-        meta = src.meta
-with rasterio.open(flopros_path) as src:
-    flopros = src.read(1)
-
-# Convert to numpy array
-flood_maps = np.array(flood_maps)
-
-### Function for Loss-Probabiltiy Curve
-def integrate_truncated_risk(risk_curve, T, RPs):
-    """
-    Integrate the risk curve above a protection threshold T.
-    
-    Parameters:
-      risk_curve : 1D numpy array of risk values corresponding to each return period in RPs.
-      T          : Protection threshold for the cell (e.g., 7, 10, 100, etc.)
-      RPs        : 1D numpy array of discrete return periods.
-    
-    Returns:
-      Integrated risk value after truncating the risk curve at T.
-    """
-    # If the protection threshold is less than or equal to the smallest RP,
-    # no truncation is applied.
-    if T <= RPs[0]:
-        new_RPs = RPs
-        new_risk = risk_curve
-    # If the protection threshold is above the highest RP,
-    # assume full protection (i.e. no risk).
-    elif T >= RPs[-1]:
-        return 0.0
-    else:
-        # Find the first index where the discrete RP is >= T.
-        idx = np.searchsorted(RPs, T, side='left')
-        # If T exactly matches one of the RPs, use that risk value.
-        if T == RPs[idx]:
-            risk_T = risk_curve[idx]
-        else:
-            # Linearly interpolate between the two adjacent RPs.
-            risk_T = risk_curve[idx-1] + (risk_curve[idx] - risk_curve[idx-1]) * (T - RPs[idx-1]) / (RPs[idx] - RPs[idx-1])
-        # Construct a new risk curve starting at T.
-        new_RPs = np.concatenate(([T], RPs[idx:]))
-        new_risk = np.concatenate(([risk_T], risk_curve[idx:]))
-    
-    # Calculate the annual exceedance probabilities for the new return periods.
-    new_aep = 1 / new_RPs
-    # Because aep decreases with increasing RP, reverse arrays to get increasing x values.
-    sorted_aep = new_aep[::-1]
-    sorted_risk = new_risk[::-1]
-    
-    # Compute the integrated risk using the trapezoidal rule.
-    return np.trapezoid(sorted_risk, x=sorted_aep)
-
-logging.info("Reshaping flood maps")
-RPs = np.array([2, 5, 10, 25, 50, 100, 200, 500, 1000]) # define return periods
-rows, cols = flopros.shape # for writing back to normal shape later
-n_rps = len(RPs)
-risk_flat = flood_maps.reshape(n_rps, -1) # each column is now a cell's risk curve
-flopros_flat = flopros.flatten()
-aar_protected_flat = np.empty(flopros_flat.shape) # array to store integrated risk for each cell.
-
-logging.info("Calculating average annual risk (adapted) using vectorization")
-for i in range(flopros_flat.size):
-    aar_protected_flat[i] = integrate_truncated_risk(risk_flat[:, i], flopros_flat[i], RPs)
-aar_protected = aar_protected_flat.reshape(rows, cols) # reshape to original dimensions
-
-# Update for compression
-meta.update(
-    compress='lzw',
-    tiled=True
-)
-
-logging.info("Writing output rasters.")
-with rasterio.open(aar_output_path, "w", **meta) as dst:
-    dst.write(aar_protected.astype(np.float32), 1)
-
-logging.info("Done.")
+        try:
+            RP2_path: str = sys.argv[1]
+            RP5_path: str = sys.argv[2]
+            RP10_path: str = sys.argv[3]
+            RP25_path: str = sys.argv[4]
+            RP50_path: str = sys.argv[5]
+            RP100_path: str = sys.argv[6]
+            RP250_path: str = sys.argv[7]
+            RP500_path: str = sys.argv[8]
+            RP1000_path: str = sys.argv[9]
+            flopros_path: str = sys.argv[10]
+            aar_output_path: str = sys.argv[11]
+            rp_protection: str = sys.argv[12]
+            urban_class: str = sys.argv[13]
+            vuln_dataset: str = sys.argv[14]
+        except IndexError:
+            print("""\
+Example usage: python rules/analyze/wri_average_annual_risk_adapted_fp.py \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_RP2_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_RP5_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_RP10_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_RP25_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_RP50_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_RP100_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_RP250_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_RP500_V-JRC.tif \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_RP1000_V-JRC.tif \\
+    data/inputs/analysis/countries/CRI/CRI_adaptation_fp_rp100_duc23.tif \\
+    data/results/flood_risk/countries/CRI/CRI_wri-flood-risk_protected_AAR_V-JRC.tif \\
+    100 \\
+    23 \\
+    JRC
+""")
+            raise ValueError("Must be run via snakemake or with all parameters supplied.")
+        
+    main(RP2_path, RP5_path, RP10_path, RP25_path, RP50_path, RP100_path, RP250_path, RP500_path, RP1000_path, flopros_path, aar_output_path, rp_protection, urban_class, vuln_dataset)
