@@ -17,6 +17,7 @@ dependencies:
 - pandas~=2.0
 - numba
 - geopandas
+- openpyxl
 - rasterio    
 - rasterstats 
 - bioconda::snakemake==7.18.2
