@@ -9,7 +9,6 @@ dependencies:
 - pip
 - pip:
   - download-water-data # for downloading JRC surface water dataset
-  - osmium
 - ipykernel
 - jupyter
 - notebook
@@ -19,6 +18,7 @@ dependencies:
 - numba
 - geopandas
 - openpyxl
+- osmium-tool
 - rasterio    
 - rasterstats 
 - bioconda::snakemake==7.18.2
