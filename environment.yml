@@ -9,6 +9,7 @@ dependencies:
 - pip
 - pip:
   - download-water-data # for downloading JRC surface water dataset
+  - osmium
 - ipykernel
 - jupyter
 - notebook
@@ -17,7 +18,6 @@ dependencies:
 - pandas~=2.0
 - numba
 - geopandas
-- osmium
 - openpyxl
 - rasterio    
 - rasterstats 
