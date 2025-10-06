@@ -44,7 +44,7 @@ logging.info("Calculating annual average risk - unprotected")
 RPs = np.array([2, 10, 20, 50, 75, 100, 200, 500]) # define return peridos
 aep = 1 / RPs # convert to annual exceedance probability
 flood_maps = np.array(flood_maps) # convert to numpy array for calculation
-aar = np.trapz(flood_maps[::-1], x=aep[::-1], axis=0) # debug: need to reverse list to avoid negative AAR values
+aar = np.trapezoid(flood_maps[::-1], x=aep[::-1], axis=0) # debug: need to reverse list to avoid negative AAR values
 
 # Update for compression
 meta.update(
