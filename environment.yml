@@ -28,3 +28,4 @@ dependencies:
 - jq
 - gsutil
 - exactextract
+- rasterio
