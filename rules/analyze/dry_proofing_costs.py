@@ -67,10 +67,10 @@ global_dry_proofing_mask = (
 
 # Pre-compute global validity mask (areas where all rasters have valid data)
 global_valid_mask = (
-    ~np.isnan(rp10) &
-    ~np.isnan(rp500) &
-    ~np.isnan(res_area) &
-    ~np.isnan(cost)
+    np.isfinite(rp10) &
+    np.isfinite(rp500) &
+    np.isfinite(res_area) &
+    np.isfinite(cost)
 )
 
 logging.info(f"Reading level {administrative_level} admin boundaries")
