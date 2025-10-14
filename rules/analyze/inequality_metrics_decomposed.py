@@ -59,7 +59,10 @@ water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PER
 logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
-area_unique_id_col = "shapeName"
+if layer_name == "ADM0":
+    area_unique_id_col = "shapeName"
+else:
+    area_unique_id_col = "shapeID"
 admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
@@ -199,6 +202,7 @@ for idx, region in tqdm(admin_areas.iterrows()):
 
     results.append({
         area_unique_id_col: region[area_unique_id_col],
+        "shapeName": region["shapeName"],
         "CI": CI,
         "Population": total_pop,
         "Population Coverage (%)": (pop_social/total_pop)*100,

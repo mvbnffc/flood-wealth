@@ -131,8 +131,13 @@ def calculate_protection_costs(geom, protection_level, country_cost_adjustment):
 logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
-area_unique_id_col = "shapeID"
-admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]]
+if layer_name == "ADM0":
+    area_unique_id_col = "shapeName"
+    admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
+else:
+    area_unique_id_col = "shapeID"
+    admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
+
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
 logging.info(f"Reading the river network data")
@@ -188,11 +193,11 @@ urban_admin_rivers['adj_adaptation_cost'] = costs_series.apply(lambda x: x[1])
 
 logging.info("Sum the protection costs per Admin region")
 # Group by admin region and sum sugment lengths
-costs_per_admin = urban_admin_rivers.groupby('shapeID')['adaptation_cost'].sum().reset_index()
-adj_costs_per_admin = urban_admin_rivers.groupby('shapeID')['adj_adaptation_cost'].sum().reset_index()
+costs_per_admin = urban_admin_rivers.groupby(area_unique_id_col)['adaptation_cost'].sum().reset_index()
+adj_costs_per_admin = urban_admin_rivers.groupby(area_unique_id_col)['adj_adaptation_cost'].sum().reset_index()
 # Add total costs the the admin area dataframe
-admin_areas = admin_areas.merge(costs_per_admin, how='left', left_on='shapeID', right_on='shapeID')
-admin_areas = admin_areas.merge(adj_costs_per_admin, how='left', left_on='shapeID', right_on='shapeID')
+admin_areas = admin_areas.merge(costs_per_admin, how='left', left_on=area_unique_id_col, right_on=area_unique_id_col)
+admin_areas = admin_areas.merge(adj_costs_per_admin, how='left', left_on=area_unique_id_col, right_on=area_unique_id_col)
 
 logging.info("Writing reults to GeoPackage.")
 results_gdf = gpd.GeoDataFrame(admin_areas, geometry="geometry")

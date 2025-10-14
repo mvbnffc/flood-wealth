@@ -82,7 +82,10 @@ global_valid_mask = (
 logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
-area_unique_id_col = "shapeID"
+if layer_name == "ADM0":
+    area_unique_id_col = "shapeName"
+else:
+    area_unique_id_col = "shapeID"
 admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]]
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
