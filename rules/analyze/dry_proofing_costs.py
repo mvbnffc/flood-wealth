@@ -77,8 +77,8 @@ logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
 admin_areas = admin_areas.reset_index(drop=True)
-area_unique_id_col = "shapeName"
-admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
+area_unique_id_col = "shapeID"
+admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]]
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
 # OPTIMIZATION: vectorize geometry masking
@@ -101,6 +101,7 @@ for i, region in tqdm(admin_areas.iterrows(), total=len(admin_areas)):
     if not np.any(region_mask):  # Skip if no valid pixels in this region
         results.append({
             area_unique_id_col: region[area_unique_id_col],
+            "shapeName": region["shapeName"],
             "area_dry-proofed": 0.0,
             "average_unit_cost": np.nan,
             "max_unit_cost": np.nan,
@@ -128,6 +129,7 @@ for i, region in tqdm(admin_areas.iterrows(), total=len(admin_areas)):
     # Append risk metrics to results list
     results.append({
          area_unique_id_col: region[area_unique_id_col],
+         "shapeName": region["shapeName"],
          "area_dry-proofed": area_protected,
          "average_unit_cost": avg_unit_cost,
          "max_unit_cost": max_unit_cost,
