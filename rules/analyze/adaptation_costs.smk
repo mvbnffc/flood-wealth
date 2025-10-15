@@ -92,9 +92,9 @@ rule capstock_unit_cost:
     
 
 configfile: "config/config.yaml"
-countries = ['RWA', 'CRI', 'THA', 'VNM', 'KHM', 'LAO', 'KEN']
-ADMINS = ["ADM1", "ADM2"]
-RPs = [50, 100]
+countries = ['KEN']
+ADMINS = ["ADM0", "ADM1", "ADM2"]
+RPs = [10, 20, 50, 100]
 fp_urban = [21, 22, 23, 30]
 DUC_protection = [21, 22, 23, 30]
 rl_urban = [11, 12, 13, 21, 22, 23, 30]
@@ -107,8 +107,8 @@ rule fp_costs_for_all_countries:
 rule pc_costs_for_all_countries:
     input:
         expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_fp_rp{RP}_duc{urban}_{ADM}.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS, RP=RPs, urban=fp_urban),
+                ISO3=countries, ADM=ADMINS, RP=RPs, urban=fp_urban),
         expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_rl_m-jrc_duc{urban}_{ADM}.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS, urban=rl_urban),
+                ISO3=countries, ADM=ADMINS, urban=rl_urban),
         expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_dp_m-jrc_{ADM}.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS)
+                ISO3=countries, ADM=ADMINS)
