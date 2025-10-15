@@ -136,7 +136,7 @@ if layer_name == "ADM0":
     admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
 else:
     area_unique_id_col = "shapeID"
-    admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
+    admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]]
 
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
