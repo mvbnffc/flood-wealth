@@ -88,12 +88,21 @@ region_ids = rasterize(
     dtype=np.int32
 )
 
+logging.info("Precompute national risk maps.")
+res_loss_arr = res_risk * res_capstock
+nres_loss_arr = nres_risk * nres_capstock
+infr_loss_arr = infr_risk * infr_capstock
+# Set invalid areas to 0 for faster summing
+res_loss_arr[~global_valid_mask] = 0
+nres_loss_arr[~global_valid_mask] = 0
+infr_loss_arr[~global_valid_mask] = 0
+
 logging.info("Looping over admin regions and calculating capital stock losses")
 results = [] # List for collecting results
  # Loop over each admin region
 for idx, region in tqdm(admin_areas.iterrows()):
     # Create boolean mask for this specific region
-    region_mask = (region_ids == idx) & global_valid_mask
+    region_mask = (region_ids == idx)
     
     if not np.any(region_mask):  # Skip if no valid pixels in this region
         results.append({
@@ -108,10 +117,10 @@ for idx, region in tqdm(admin_areas.iterrows()):
         continue
 
     # Calculate sectoral capital stock losses for the region
-    res_losses = np.nansum(res_risk[region_mask] * res_capstock[region_mask])
-    nres_losses = np.nansum(nres_risk[region_mask] * nres_capstock[region_mask])
-    infr_losses = np.nansum(infr_risk[region_mask] * infr_capstock[region_mask])     
-
+    res_losses = np.sum(res_loss_arr[region_mask])
+    nres_losses = np.sum(nres_loss_arr[region_mask])
+    infr_losses = np.sum(infr_loss_arr[region_mask])
+    
     # Append risk metrics to results list
     results.append({
          area_unique_id_col: region[area_unique_id_col],
