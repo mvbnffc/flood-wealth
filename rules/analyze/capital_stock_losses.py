@@ -98,17 +98,43 @@ res_loss_arr[~global_valid_mask] = 0
 nres_loss_arr[~global_valid_mask] = 0
 infr_loss_arr[~global_valid_mask] = 0
 
-logging.info("Calculating capital stock losses across the admin regions.")
-res_losses = ndimage.sum_labels(res_loss_arr, labels=region_ids, index=np.arange(len(admin_areas)))
-nres_losses = ndimage.sum_labels(nres_loss_arr, labels=region_ids, index=np.arange(len(admin_areas)))
-infr_losses = ndimage.sum_labels(infr_loss_arr, labels=region_ids, index=np.arange(len(admin_areas)))
+logging.info("Calculating capital stock losses across the admin")
+results = [] # List for collecting results
+ # Loop over each admin region
+for idx, region in tqdm(admin_areas.iterrows()):
+    # Create boolean mask for this specific region
+    region_mask = (region_ids == idx)
+    
+    if not np.any(region_mask):  # Skip if no valid pixels in this region
+        results.append({
+            area_unique_id_col: region[area_unique_id_col],
+            "shapeName": region["shapeName"],
+            "res_losses": 0.0,
+            "nres_losses": 0.0,
+            "infr_losses": 0.0,
+            "total_losses": 0.0,
+            "geometry": region["geometry"]
+        })
+        continue
+
+    # Calculate sectoral capital stock losses for the region
+    res_losses = np.sum(res_loss_arr[region_mask])
+    nres_losses = np.sum(nres_loss_arr[region_mask])
+    infr_losses = np.sum(infr_loss_arr[region_mask])
+    
+    # Append risk metrics to results list
+    results.append({
+         area_unique_id_col: region[area_unique_id_col],
+         "shapeName": region["shapeName"],
+         "res_losses": res_losses,
+         "nres_losses": nres_losses,
+         "infr_losses": infr_losses,
+         "total_losses": res_losses + nres_losses + infr_losses,
+         "geometry": region["geometry"]
+    })
 
 logging.info("Writing reults to GeoPackage.")
-results_gdf = admin_areas.copy()
-results_gdf["res_losses"] = res_losses
-results_gdf["nres_losses"] = nres_losses
-results_gdf["infr_losses"] = infr_losses
-results_gdf["total_losses"] = res_losses + nres_losses + infr_losses
+results_gdf = gpd.GeoDataFrame(results, geometry="geometry")
 results_gdf.to_file(output_path, driver="GPKG")
 
 logging.info("Done.")
