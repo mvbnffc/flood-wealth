@@ -71,9 +71,10 @@ layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
 if layer_name == "ADM0":
     area_unique_id_col = "shapeName"
+    admin_areas = admin_areas[[area_unique_id_col, "geometry"]]
 else:
     area_unique_id_col = "shapeID"
-admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]]
+    admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]]
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
 # OPTIMIZATION: vectorize geometry masking
@@ -117,6 +118,7 @@ infr_losses = np.bincount(flat_region_ids, weights=flat_infr_losses, minlength=l
 total_losses = res_losses + nres_losses + infr_losses
 
 logging.info("Writing reults to GeoPackage.")
+# Debug
 results_gdf = admin_areas.copy()
 results_gdf["res_losses"] = res_losses
 results_gdf["nres_losses"] = nres_losses
