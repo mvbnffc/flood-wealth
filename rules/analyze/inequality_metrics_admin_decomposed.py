@@ -61,7 +61,7 @@ logging.info(f"Reading level {administrative_level} admin boundaries.")
 layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
 area_unique_id_col = "shapeName"
-admin_areas = admin_areas[[area_unique_id_col, "geometry"]].reset_index(drop=True)
+admin_areas = admin_areas[[area_unique_id_col, "shapeID", "geometry"]].reset_index(drop=True)
 
 logging.info(f"Rasterizing {len(admin_areas)} admin areas to a grid...")
 # Map each admin feature to an integer ID (0 = no admin)
