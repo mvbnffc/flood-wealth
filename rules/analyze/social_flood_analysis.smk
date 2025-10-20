@@ -464,11 +464,17 @@ rule metrics_all_gfd_events:
 
 
 countries = ['RWA', 'CRI', 'THA', 'VNM', 'KHM', 'LAO', 'KEN']
-ADMINS = ["ADM1", "ADM2"]
+ADMINS = ["ADM1"]
 RPs = [50, 100]
+MODELS = ['jrc', 'wri', 'giri']
 fp_urban = [21, 22, 23, 30]
 DUC_protection = [21, 22, 23, 30]
 rl_urban = [11, 12, 13, 21, 22, 23, 30]
+
+rule model_admin_CI_decomposed:
+    input:
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_{MODEL}-flood_protected_AAR_V-JRC_S-rwi.gpkg",
+            ADMIN_SLUG=ADMINS, ISO3=config['iso_codes'], MODEL=MODELS),
 
 rule pc_admin_CI_decomposed:
     input:
