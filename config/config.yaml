@@ -4,114 +4,119 @@
 
 # ISO Codes for all analysis countries (108 total)
 iso_codes:
- - "AGO" # fails on PC NEW
- - "ALB"
- - "ARG" # fails on PC
- - "ARM"
- - "AZE"   
- - "BDI"
- - "BEN"
- - "BFA"
- - "BGD"
- - "BGR"
- - "BIH"
- - "BLZ"
- - "BOL" # fails on PC NEW
-#  - "BRA" # fails on PC
- - "BTN"
- - "BWA"
- - "CAF"
- - "CIV"
- - "CMR"
- - "COD" # fails on PC
- - "COG"
- - "COL" # fails on PC
- - "COM"
- - "CPV"
- - "CRI"
- - "DJI"
- - "DMA" # PBF issue
- - "DOM"
- - "DZA" # fails on PC
- - "ECU" # PBF issue
- - "EGY"
- - "ERI"
- - "ETH" # fails on PC
- - "GAB"
- - "GEO"
- - "GHA"
- - "GIN"
- - "GMB"
- - "GNB"
- - "GNQ"
- - "GRD" # PBF issue 
- - "GTM"
- - "GUY"
- - "HND"
- - "HTI"
- - "IDN" # fails on PC
-#  - "IND" # fails on PC
- - "JAM"
- - "JOR"
- - "KAZ" # fails on PC
- - "KEN"
- - "KGZ"
- - "KHM"
- - "LAO"
- - "LBR"
- - "LBY" # fails on PC
- - "LCA" # PBF issue
- - "LKA"
- - "LSO"
- - "MAR"
- - "MDA"
- - "MDG"
- - "MDV"
- - "MEX" # fails on PC
- - "MKD"
- - "MLI" # fails on PC
- - "MNE"
- - "MNG" # fails on PC
- - "MOZ" # fails on PC NEW
- - "MRT"
- - "MUS"
- - "MWI"
- - "MYS"
- - "NAM" # fails on PC NEW
- - "NER" # fails on PC
- - "NGA"
- - "NIC" # PBF issue
- - "NPL"
- - "PAK" # fails on PC
- - "PER" # fails on PC
- - "PHL" # fails on PC  NEW
- - "PRY"
- - "ROU"
- - "RWA"
- - "SEN"
- - "SLE"
- - "SLV"
- - "SRB"
- - "STP"
- - "SUR"
- - "SWZ"
- - "TCD" # fails on PC NEW
- - "TGO"
- - "THA"
- - "TJK"
- - "TKM"
- - "TLS"
- - "TUN"
- - "TUR"
- - "TZA"
- - "UGA"
- - "UKR"
- - "UZB"
- - "VCT" # PBF issue
- - "VNM"
- - "ZAF" # fails on PC
- - "ZMB"
- - "ZWE"
+- "BRA"
+- "IND"
+
+
+# iso_codes:
+#  - "AGO" # fails on PC NEW
+#  - "ALB"
+#  - "ARG" # fails on PC
+#  - "ARM"
+#  - "AZE"   
+#  - "BDI"
+#  - "BEN"
+#  - "BFA"
+#  - "BGD"
+#  - "BGR"
+#  - "BIH"
+#  - "BLZ"
+#  - "BOL" # fails on PC NEW
+# #  - "BRA" # fails on PC
+#  - "BTN"
+#  - "BWA"
+#  - "CAF"
+#  - "CIV"
+#  - "CMR"
+#  - "COD" # fails on PC
+#  - "COG"
+#  - "COL" # fails on PC
+#  - "COM"
+#  - "CPV"
+#  - "CRI"
+#  - "DJI"
+#  - "DMA" # PBF issue
+#  - "DOM"
+#  - "DZA" # fails on PC
+#  - "ECU" # PBF issue
+#  - "EGY"
+#  - "ERI"
+#  - "ETH" # fails on PC
+#  - "GAB"
+#  - "GEO"
+#  - "GHA"
+#  - "GIN"
+#  - "GMB"
+#  - "GNB"
+#  - "GNQ"
+#  - "GRD" # PBF issue 
+#  - "GTM"
+#  - "GUY"
+#  - "HND"
+#  - "HTI"
+#  - "IDN" # fails on PC
+# #  - "IND" # fails on PC
+#  - "JAM"
+#  - "JOR"
+#  - "KAZ" # fails on PC
+#  - "KEN"
+#  - "KGZ"
+#  - "KHM"
+#  - "LAO"
+#  - "LBR"
+#  - "LBY" # fails on PC
+#  - "LCA" # PBF issue
+#  - "LKA"
+#  - "LSO"
+#  - "MAR"
+#  - "MDA"
+#  - "MDG"
+#  - "MDV"
+#  - "MEX" # fails on PC
+#  - "MKD"
+#  - "MLI" # fails on PC
+#  - "MNE"
+#  - "MNG" # fails on PC
+#  - "MOZ" # fails on PC NEW
+#  - "MRT"
+#  - "MUS"
+#  - "MWI"
+#  - "MYS"
+#  - "NAM" # fails on PC NEW
+#  - "NER" # fails on PC
+#  - "NGA"
+#  - "NIC" # PBF issue
+#  - "NPL"
+#  - "PAK" # fails on PC
+#  - "PER" # fails on PC
+#  - "PHL" # fails on PC  NEW
+#  - "PRY"
+#  - "ROU"
+#  - "RWA"
+#  - "SEN"
+#  - "SLE"
+#  - "SLV"
+#  - "SRB"
+#  - "STP"
+#  - "SUR"
+#  - "SWZ"
+#  - "TCD" # fails on PC NEW
+#  - "TGO"
+#  - "THA"
+#  - "TJK"
+#  - "TKM"
+#  - "TLS"
+#  - "TUN"
+#  - "TUR"
+#  - "TZA"
+#  - "UGA"
+#  - "UKR"
+#  - "UZB"
+#  - "VCT" # PBF issue
+#  - "VNM"
+#  - "ZAF" # fails on PC
+#  - "ZMB"
+#  - "ZWE"
 
 problem_iso_codes: # []
 #  - "AGO" # fails on PC NEW
