@@ -17,7 +17,7 @@ iso_codes:
  - "BIH"
  - "BLZ"
  - "BOL" # fails on PC NEW
- - "BRA" # fails on PC
+#  - "BRA" # fails on PC
  - "BTN"
  - "BWA"
  - "CAF"
@@ -50,7 +50,7 @@ iso_codes:
  - "HND"
  - "HTI"
  - "IDN" # fails on PC
- - "IND" # fails on PC
+#  - "IND" # fails on PC
  - "JAM"
  - "JOR"
  - "KAZ" # fails on PC
