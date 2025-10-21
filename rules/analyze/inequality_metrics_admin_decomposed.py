@@ -27,6 +27,7 @@ if __name__ == "__main__":
         output_path: str = snakemake.output["regional_CI"]
         administrative_level: int = snakemake.wildcards.ADMIN_SLUG
         model: str = snakemake.wildcards.MODEL
+        country: str = snakemake.wildcards.ISO3
         social_name: str = snakemake.wildcards.SOCIAL
     except NameError:
         raise ValueError("Must be run via snakemake.")
@@ -208,6 +209,7 @@ admin_areas["% of total CI"] = np.where(
 )
 # Add national CI back to column (for reference)
 admin_areas["Nat_CI"] = CI
+admin_areas['ISO3'] = country
 
 logging.info("Writing results to GeoPackage.")
 admin_areas.drop(columns=["region_id"], inplace=True)
