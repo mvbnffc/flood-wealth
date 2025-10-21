@@ -52,8 +52,8 @@ with rasterio.open(social_path) as social_src, rasterio.open(pop_path) as pop_sr
 
 if social_name == "rwi":
     social[social==-999] = np.nan # convert -999 in RWI dataset to NaN
-urban[urban==10] = np.nan # convert 10 in urban dataset (water class) to NaN
-urban[urban==-200] = np.nan # convert -200 in urban dataset (no data) to NaN
+urban[urban==10] = 0 # convert 10 in urban dataset (water class) to 0
+urban[urban==-200] = 0 # convert -200 in urban dataset (no data) to 0
 # Create the water mask
 water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
@@ -208,6 +208,9 @@ admin_areas["% of total CI"] = np.where(
 )
 # Add national CI back to column (for reference)
 admin_areas["Nat_CI"] = CI
+
+# Debug
+logging.info("National CI is:", CI)
 
 logging.info("Writing results to GeoPackage.")
 admin_areas.drop(columns=["region_id"], inplace=True)

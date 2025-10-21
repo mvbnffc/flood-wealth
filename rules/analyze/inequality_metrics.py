@@ -217,6 +217,10 @@ for idx, region in tqdm(admin_areas.iterrows()):
         "geometry": region["geometry"]
     })
 
+# Debug
+if administrative_level == "ADM0":
+    logging.info("National CI is:", CI)
+
 logging.info("Writing reults to GeoPackage.")
 results_gdf = gpd.GeoDataFrame(results, geometry="geometry")
 results_gdf.to_file(output_path, driver="GPKG")
