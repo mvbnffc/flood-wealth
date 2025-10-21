@@ -83,7 +83,7 @@ base_valid_mask = (
     np.isfinite(social) &
     np.isfinite(risk) &
     np.isfinite(urban) &
-    np.isfinite(water_mask) &
+    np.isfinite(water_mask)
 )
 
 # Checking for unassigned pixels
