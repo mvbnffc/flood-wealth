@@ -9,6 +9,7 @@ import logging
 
 import rasterio
 from rasterio.features import geometry_mask, rasterize
+from scipy.ndimage import distance_transform_edt
 import pandas as pd
 import geopandas as gpd
 import numpy as np
@@ -75,16 +76,27 @@ region_id_arr = rasterize(
     dtype=np.int32,
 )
 
-logging.info("Build nationa dataframe for metric calculation")
-valid_mask = (
+logging.info("Build national dataframe for metric calculation")
+base_valid_mask = (
     (pop > 0) &
     np.isfinite(pop) &
     np.isfinite(social) &
     np.isfinite(risk) &
     np.isfinite(urban) &
     np.isfinite(water_mask) &
-    (region_id_arr > 0)  # Only consider areas that fall within an admin region
 )
+
+# Checking for unassigned pixels
+unassigned_mask = base_valid_mask & (region_id_arr == 0)
+num_unassigned = np.sum(unassigned_mask)
+if num_unassigned > 0:
+    logging.info(f"Found {num_unassigned} pixels outside defined regions. Assigning to nearest region...")
+    # Assign to nearest region
+    invalid_mask = (region_id_arr==0) & base_valid_mask
+    indices = distance_transform_edt(invalid_mask, return_distances=False, return_indices=True)
+    region_id_arr[invalid_mask] = region_id_arr[tuple(indices[:, invalid_mask])]
+
+valid_mask = base_valid_mask & (region_id_arr > 0)
 
 pop_flat = pop[valid_mask]
 social_flat = social[valid_mask]
