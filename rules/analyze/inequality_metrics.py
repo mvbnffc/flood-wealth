@@ -219,7 +219,7 @@ for idx, region in tqdm(admin_areas.iterrows()):
 
 # Debug
 if administrative_level == "ADM0":
-    logging.info("National CI is:", float(CI))
+    print("National CI is:", float(CI))
 
 logging.info("Writing reults to GeoPackage.")
 results_gdf = gpd.GeoDataFrame(results, geometry="geometry")
