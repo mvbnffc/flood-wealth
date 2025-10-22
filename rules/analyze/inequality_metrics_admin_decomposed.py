@@ -211,6 +211,8 @@ admin_areas["% of total CI"] = np.where(
 admin_areas["Nat_CI"] = CI
 admin_areas['ISO3'] = country
 
+print(admin_areas.head())
+
 logging.info("Writing results to GeoPackage.")
 admin_areas.drop(columns=["region_id"], inplace=True)
 admin_areas.to_file(output_path, driver="GPKG")
