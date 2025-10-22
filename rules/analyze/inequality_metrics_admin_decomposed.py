@@ -9,6 +9,7 @@ import logging
 
 import rasterio
 from rasterio.features import geometry_mask, rasterize
+from scipy.ndimage import distance_transform_edt
 import pandas as pd
 import geopandas as gpd
 import numpy as np
@@ -53,8 +54,8 @@ with rasterio.open(social_path) as social_src, rasterio.open(pop_path) as pop_sr
 
 if social_name == "rwi":
     social[social==-999] = np.nan # convert -999 in RWI dataset to NaN
-urban[urban==10] = np.nan # convert 10 in urban dataset (water class) to NaN
-urban[urban==-200] = np.nan # convert -200 in urban dataset (no data) to NaN
+urban[urban==10] = 0 # convert 10 in urban dataset (water class) to 0
+urban[urban==-200] = 0 # convert -200 in urban dataset (no data) to 0
 # Create the water mask
 water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
@@ -76,16 +77,27 @@ region_id_arr = rasterize(
     dtype=np.int32,
 )
 
-logging.info("Build nationa dataframe for metric calculation")
-valid_mask = (
+logging.info("Build national dataframe for metric calculation")
+base_valid_mask = (
     (pop > 0) &
     np.isfinite(pop) &
     np.isfinite(social) &
     np.isfinite(risk) &
     np.isfinite(urban) &
-    np.isfinite(water_mask) &
-    (region_id_arr > 0)  # Only consider areas that fall within an admin region
+    np.isfinite(water_mask)
 )
+
+# Checking for unassigned pixels
+unassigned_mask = base_valid_mask & (region_id_arr == 0)
+num_unassigned = np.sum(unassigned_mask)
+if num_unassigned > 0:
+    logging.info(f"Found {num_unassigned} pixels outside defined regions. Assigning to nearest region...")
+    # Assign to nearest region
+    invalid_mask = (region_id_arr==0) & base_valid_mask
+    indices = distance_transform_edt(invalid_mask, return_distances=False, return_indices=True)
+    region_id_arr[invalid_mask] = region_id_arr[tuple(indices[:, invalid_mask])]
+
+valid_mask = base_valid_mask & (region_id_arr > 0)
 
 pop_flat = pop[valid_mask]
 social_flat = social[valid_mask]
@@ -212,6 +224,9 @@ admin_areas["Nat_CI"] = CI
 admin_areas['ISO3'] = country
 
 print(admin_areas.head())
+
+# Debug
+print("National CI is:", float(CI))
 
 logging.info("Writing results to GeoPackage.")
 admin_areas.drop(columns=["region_id"], inplace=True)

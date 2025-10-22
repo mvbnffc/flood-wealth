@@ -476,6 +476,16 @@ rule model_admin_CI_decomposed:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_{MODEL}-flood_protected_AAR_V-JRC_S-rwi.gpkg",
             ADMIN_SLUG=ADMINS, ISO3=config['iso_codes'], MODEL=MODELS),
 
+rule model_ADM0_CI_bulk:
+    input:
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_{MODEL}-flood_protected_AAR_V-JRC_S-rwi.gpkg",
+            ISO3=config['iso_codes'], MODEL=MODELS),
+
+rule model_ADM0_decomposed_CI_bulk:
+    input:
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_decomposed_metrics_{MODEL}-flood_protected_AAR_V-JRC_S-rwi.gpkg",
+            ISO3=config['iso_codes'], MODEL=MODELS),
+
 rule pc_admin_CI_decomposed:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_protected_AAR_V-JRC_S-rwi.gpkg",
