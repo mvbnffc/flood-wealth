@@ -93,7 +93,7 @@ num_unassigned = np.sum(unassigned_mask)
 if num_unassigned > 0:
     logging.info(f"Found {num_unassigned} pixels outside defined regions. Assigning to nearest region...")
     # Assign to nearest region
-    invalid_mask = (region_id_arr==0) & base_valid_mask
+    invalid_mask = (region_id_arr==0)
     indices = distance_transform_edt(invalid_mask, return_distances=False, return_indices=True)
     region_id_arr[invalid_mask] = region_id_arr[tuple(indices[:, invalid_mask])]
 
@@ -130,6 +130,7 @@ def calculate_decomposed_CI(df, group_col=None, expected_groups=None):
     
     # Sort dataframe by wealth
     df = df.sort_values(by="social", ascending=True).copy()
+    print('DEBUG... df length:', len(df))
     # Calculate cumulative population rank (to represent distribution of people)
     df['cum_pop'] = df['pop'].cumsum()
     # # Calculate total pop of sample
