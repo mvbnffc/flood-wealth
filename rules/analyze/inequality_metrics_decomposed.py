@@ -186,7 +186,7 @@ for idx, region in tqdm(admin_areas.iterrows()):
         # ------------------------------------------------------------------
         # Console output
         # ------------------------------------------------------------------
-        print(f"\n\033[1mOverall concentration index (CI):\033[0m {ci_total:+.4f}\n")
+        print(f"\n\033[1mOverall concentration index (CI):\033[0m {ci_total:+.6f}\n")
         print(df.to_markdown(floatfmt=".4f"))
 
     CI, contrib = calculate_CI(df)
