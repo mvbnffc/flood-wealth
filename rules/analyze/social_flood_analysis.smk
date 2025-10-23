@@ -404,44 +404,45 @@ snakemake -c1 data/results/social_flood/events/DFO_1595/DFO_1595_results.csv
 # Run modelled metrics for all ISO3 codes, models, and admins
 
 configfile: "config/config.yaml"
+countries = ['KEN']
 ADMINS = ["ADM0"]
 MODELS = ["jrc", "giri", "wri"]
 TYPES = ["AAR"]
 VULN_CURVES = ["JRC"]
 SOCIALS = ['rwi']
-RPs = [100]
-DUC_protection = [21, 30]
-DUC_relocation = [11, 13]
+RPs = [10, 20, 50, 100]
+DUC_protection = [21, 22, 23, 30]
+DUC_relocation = [11, 12, 13, 21, 22, 23, 30]
 
 rule metrics_for_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_{TYPE}_V-{VULN_CURVE}_S-{SOCIAL}.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, TYPE=TYPES, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
+                ISO3=countries, ADM=ADMINS, MODEL=MODELS, TYPE=TYPES, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
 
 rule protected_metrics_for_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_protected_AAR_V-{VULN_CURVE}_S-{SOCIAL}.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
+                ISO3=countries, ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
 
 rule protected_metrics_decomposed_for_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_decomposed_metrics_{MODEL}-flood_protected_AAR_V-{VULN_CURVE}_S-{SOCIAL}.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
+                ISO3=countries, ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
 
 rule adapted_flood_protection_metrics_for_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_adapted_AAR_V-{VULN_CURVE}_S-{SOCIAL}_fp_rp{RP}_duc{DUC}.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS, RP=RPs, DUC=DUC_protection)
+                ISO3=countries, ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS, RP=RPs, DUC=DUC_protection)
 
 rule adapted_relocation_metrics_for_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_adapted_AAR_V-{VULN_CURVE}_S-{SOCIAL}_rl_duc{DUC}.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS, DUC=DUC_relocation)
+                ISO3=countries, ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS, DUC=DUC_relocation)
 
 rule adapted_dry_proofing_metrics_for_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADM}_metrics_{MODEL}-flood_adapted_AAR_V-{VULN_CURVE}_S-{SOCIAL}_dp.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
+                ISO3=countries, ADM=ADMINS, MODEL=MODELS, VULN_CURVE=VULN_CURVES, SOCIAL=SOCIALS)
 
 
 
