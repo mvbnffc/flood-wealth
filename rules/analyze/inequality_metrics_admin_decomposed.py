@@ -130,7 +130,6 @@ def calculate_decomposed_CI(df, group_col=None, expected_groups=None):
     
     # Sort dataframe by wealth
     df = df.sort_values(by="social", ascending=True).copy()
-    print('DEBUG... df length:', len(df))
     # Calculate cumulative population rank (to represent distribution of people)
     df['cum_pop'] = df['pop'].cumsum()
     # # Calculate total pop of sample
