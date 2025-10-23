@@ -463,9 +463,9 @@ rule metrics_all_gfd_events:
         expand("data/results/social_flood/events/DFO_{event_id}/DFO_{event_id}_results.csv", event_id=events)
 
 
-countries = ['RWA', 'CRI', 'THA', 'VNM', 'KHM', 'LAO', 'KEN']
-ADMINS = ["ADM1"]
-RPs = [50, 100]
+countries = ['KEN']
+ADMINS = ["ADM1", "ADM2"]
+RPs = [10, 20, 50, 100]
 MODELS = ['jrc', 'wri', 'giri']
 fp_urban = [21, 22, 23, 30]
 DUC_protection = [21, 22, 23, 30]
@@ -489,10 +489,10 @@ rule model_ADM0_decomposed_CI_bulk:
 rule pc_admin_CI_decomposed:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_protected_AAR_V-JRC_S-rwi.gpkg",
-            ADMIN_SLUG=ADMINS, ISO3=config['iso_codes']),
+            ADMIN_SLUG=ADMINS, ISO3=countries),
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_fp_rp{RP}_duc{urban}.gpkg",
-            ADMIN_SLUG=ADMINS, ISO3=config['iso_codes'], RP=RPs, urban=fp_urban),
+            ADMIN_SLUG=ADMINS, ISO3=countries, RP=RPs, urban=fp_urban),
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_rl_duc{urban}.gpkg",
-            ADMIN_SLUG=ADMINS, ISO3=config['iso_codes'], urban=rl_urban),
+            ADMIN_SLUG=ADMINS, ISO3=countries, urban=rl_urban),
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg",
-            ADMIN_SLUG=ADMINS, ISO3=config['iso_codes'])
+            ADMIN_SLUG=ADMINS, ISO3=countries)
