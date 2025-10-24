@@ -11,7 +11,7 @@
 iso_codes:
  - "AGO" # fails on PC NEW
  - "ALB"
- - "ARG" # fails on PC
+#  - "ARG" # fails on PC
  - "ARM"
  - "AZE"   
  - "BDI"
@@ -22,7 +22,7 @@ iso_codes:
  - "BIH"
  - "BLZ"
  - "BOL" # fails on PC NEW
- - "BRA" # fails on PC
+#  - "BRA" # fails on PC
  - "BTN"
  - "BWA"
  - "CAF"
@@ -54,8 +54,8 @@ iso_codes:
  - "GUY"
  - "HND"
  - "HTI"
- - "IDN" # fails on PC
- - "IND" # fails on PC
+#  - "IDN" # fails on PC
+#  - "IND" # fails on PC
  - "JAM"
  - "JOR"
  - "KAZ" # fails on PC
@@ -120,7 +120,7 @@ iso_codes:
 
 problem_iso_codes: # []
 #  - "AGO" # fails on PC NEW
-#  - "ARG" # fails on PC
+ - "ARG" # fails on PC
 #  - "BOL" # fails on PC NEW
  - "BRA" # fails on PC
 #  - "COD" # fails on PC
