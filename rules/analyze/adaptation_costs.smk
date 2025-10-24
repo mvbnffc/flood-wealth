@@ -94,7 +94,7 @@ rule capstock_unit_cost:
 configfile: "config/config.yaml"
 countries = ['IND']
 ADMINS = ["ADM0", "ADM1", "ADM2"]
-RPs = [10, 20, 50, 100]
+RPs = [100]
 fp_urban = [21, 22, 23, 30]
 DUC_protection = [21, 22, 23, 30]
 rl_urban = [11, 12, 13, 21, 22, 23, 30]

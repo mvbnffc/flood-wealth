@@ -466,7 +466,7 @@ rule metrics_all_gfd_events:
 
 countries = ['KEN']
 ADMINS = ["ADM1", "ADM2"]
-RPs = [10, 20, 50, 100]
+RPs = [100]
 MODELS = ['jrc', 'wri', 'giri']
 fp_urban = [21, 22, 23, 30]
 DUC_protection = [21, 22, 23, 30]
