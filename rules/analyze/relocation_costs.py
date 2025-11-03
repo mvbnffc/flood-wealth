@@ -82,11 +82,13 @@ global_valid_mask = (
 logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
-if layer_name == "ADM0":
+if layer_name == "ADM0":  
+    # 🔧 Ensure one feature per country
+    admin_areas = admin_areas.dissolve(by="shapeName", as_index=False)
     area_unique_id_col = "shapeName"
 else:
     area_unique_id_col = "shapeID"
-admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]]
+    admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]].copy()
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
 
 # OPTIMIZATION: vectorize geometry masking
@@ -125,14 +127,23 @@ for idx, region in tqdm(admin_areas.iterrows()):
     capstock_relocated = int(np.nansum(res_capstock[region_mask]))
     
     # Append risk metrics to results list
-    results.append({
+    if layer_name == "ADM0":
+        results.append({
          area_unique_id_col: region[area_unique_id_col],
-         "shapeName": region["shapeName"],
          "people_relocated": people_relocated,
          "area_relocated": area_relocated,
          "capstock_relocated": capstock_relocated,
          "geometry": region["geometry"]
-    })
+         })
+    else:
+        results.append({
+            area_unique_id_col: region[area_unique_id_col],
+            "shapeName": region["shapeName"],
+            "people_relocated": people_relocated,
+            "area_relocated": area_relocated,
+            "capstock_relocated": capstock_relocated,
+            "geometry": region["geometry"]
+        })
 
 logging.info("Writing reults to GeoPackage.")
 results_gdf = gpd.GeoDataFrame(results, geometry="geometry")
