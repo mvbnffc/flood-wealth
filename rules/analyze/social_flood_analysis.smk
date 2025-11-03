@@ -481,6 +481,12 @@ rule model_ADM0_CI_bulk:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_{MODEL}-flood_protected_AAR_V-JRC_S-rwi.gpkg",
             ISO3=config['iso_codes'], MODEL=MODELS),
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_{MODEL}-flood_adapted_AAR_V-JRC_S-rwi_fp_rp{RP}_duc{urban}.gpkg",
+            ISO3=config['iso_codes'], MODEL=MODELS, RP=RPs, urban=fp_urban),
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_{MODEL}-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg",
+            ISO3=config['iso_codes'], MODEL=MODELS),
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_{MODEL}-flood_adapted_AAR_V-JRC_S-rwi_rl_duc{urban}.gpkg",
+            ISO3=config['iso_codes'], MODEL=MODELS, urban=rl_urban),                        
 
 rule model_ADM0_decomposed_CI_bulk:
     input:
