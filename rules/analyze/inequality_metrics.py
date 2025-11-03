@@ -54,12 +54,15 @@ water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PER
 logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM{admin_level}"
 admin_areas: gpd.GeoDataFrame = gpd.read_file(admin_path, layer=layer_name)
-if layer_name == "ADM0":
+if layer_name == "ADM0":  
+    # 🔧 Ensure one feature per country
+    admin_areas = admin_areas.dissolve(by="shapeName", as_index=False)
     area_unique_id_col = "shapeName"
 else:
     area_unique_id_col = "shapeID"
-admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]]
+    admin_areas = admin_areas[[area_unique_id_col, "shapeName", "geometry"]].copy()
 logging.info(f"There are {len(admin_areas)} admin areas to analyze.")
+
 
 logging.info("Looping over admin regions and calculating concentration indices")
 results = [] # List for collecting results
