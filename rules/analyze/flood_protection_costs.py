@@ -120,11 +120,20 @@ def calculate_protection_costs(geom, protection_level, country_cost_adjustment):
     if delta_fp <= 0:
         adaptation_cost = 0.0
         adj_adaptation_cost = 0.0
+        min_adaptation_cost = 0.0
+        max_adaptation_cost = 0.0
     else:
         adaptation_cost = standard_unit_cost * river_length * np.log2(delta_fp)
         adj_adaptation_cost = standard_unit_cost * country_cost_adjustment * river_length * np.log2(delta_fp)
+        min_adaptation_cost = min_unit_cost * river_length * np.log2(delta_fp)
+        max_adaptation_cost = max_unit_cost * river_length * np.log2(delta_fp)
+        # Sanity check - ensure within min/max bounds
+        if adj_adaptation_cost < min_adaptation_cost:
+            adj_adaptation_cost = min_adaptation_cost
+        if adj_adaptation_cost > max_adaptation_cost:
+            adj_adaptation_cost = max_adaptation_cost
 
-    return adaptation_cost, adj_adaptation_cost
+    return adaptation_cost, adj_adaptation_cost, min_adaptation_cost, max_adaptation_cost
 
 # -----------------------------------------------------------
 
@@ -178,32 +187,23 @@ costs_series = urban_admin_rivers.apply(
 # Extract the two values from each tuple
 urban_admin_rivers['adaptation_cost'] = costs_series.apply(lambda x: x[0])
 urban_admin_rivers['adj_adaptation_cost'] = costs_series.apply(lambda x: x[1])
-
-# TODO: remove hashed code below... 
-# # Calculate the protection cost for each urban area
-# urban_admin_rivers[['adaptation_cost', 'adj_adaptation_cost']] = (
-#     urban_admin_rivers.apply(
-#         lambda r: pd.Series(
-#             calculate_protection_costs(
-#                 r, protection_level=int(RP), country_cost_adjustment=gdp_adjustment
-#         )
-#     ), axis = 1 
-#     )
-# )
+urban_admin_rivers['min_adaptation_cost']  = costs_series.apply(lambda x: x[2])  # lower bound
+urban_admin_rivers['max_adaptation_cost']  = costs_series.apply(lambda x: x[3])  # upper bound
 
 logging.info("Sum the protection costs per Admin region")
 # Group by admin region and sum sugment lengths
 costs_per_admin = urban_admin_rivers.groupby(area_unique_id_col)['adaptation_cost'].sum().reset_index()
 adj_costs_per_admin = urban_admin_rivers.groupby(area_unique_id_col)['adj_adaptation_cost'].sum().reset_index()
+min_costs_per_admin  = urban_admin_rivers.groupby(area_unique_id_col)['min_adaptation_cost'].sum().reset_index()
+max_costs_per_admin  = urban_admin_rivers.groupby(area_unique_id_col)['max_adaptation_cost'].sum().reset_index()
 # Add total costs the the admin area dataframe
 admin_areas = admin_areas.merge(costs_per_admin, how='left', left_on=area_unique_id_col, right_on=area_unique_id_col)
 admin_areas = admin_areas.merge(adj_costs_per_admin, how='left', left_on=area_unique_id_col, right_on=area_unique_id_col)
+admin_areas = admin_areas.merge(min_costs_per_admin, on=area_unique_id_col, how='left')
+admin_areas = admin_areas.merge(max_costs_per_admin, on=area_unique_id_col, how='left')
 
 logging.info("Writing reults to GeoPackage.")
 results_gdf = gpd.GeoDataFrame(admin_areas, geometry="geometry")
 results_gdf.to_file(output_path, driver="GPKG")
-
-# Debug
-print(results_gdf['adaptation_cost'].sum())
 
 logging.info("Done.")
