@@ -11,7 +11,7 @@
 iso_codes:
  - "AGO" # fails on PC NEW
  - "ALB"
-#  - "ARG" # fails on PC
+ - "ARG" # fails on PC
  - "ARM"
  - "AZE"   
  - "BDI"
@@ -22,7 +22,7 @@ iso_codes:
  - "BIH"
  - "BLZ"
  - "BOL" # fails on PC NEW
-#  - "BRA" # fails on PC
+ - "BRA" # fails on PC
  - "BTN"
  - "BWA"
  - "CAF"
@@ -31,8 +31,8 @@ iso_codes:
  - "COD" # fails on PC
  - "COG"
  - "COL" # fails on PC
- - "COM"
- - "CPV"
+#  - "COM"
+#  - "CPV"
  - "CRI"
  - "DJI"
 #  - "DMA" # PBF issue
@@ -49,13 +49,13 @@ iso_codes:
  - "GMB"
  - "GNB"
  - "GNQ"
- - "GRD" # PBF issue 
+#  - "GRD" # PBF issue 
  - "GTM"
  - "GUY"
  - "HND"
  - "HTI"
-#  - "IDN" # fails on PC
-#  - "IND" # fails on PC
+ - "IDN" # fails on PC
+ - "IND" # fails on PC
  - "JAM"
  - "JOR"
  - "KAZ" # fails on PC
@@ -65,13 +65,13 @@ iso_codes:
  - "LAO"
  - "LBR"
  - "LBY" # fails on PC
- - "LCA" # PBF issue
+#  - "LCA" # PBF issue
  - "LKA"
  - "LSO"
  - "MAR"
  - "MDA"
  - "MDG"
- - "MDV"
+#  - "MDV"
  - "MEX" # fails on PC
  - "MKD"
  - "MLI" # fails on PC
@@ -79,7 +79,7 @@ iso_codes:
  - "MNG" # fails on PC
  - "MOZ" # fails on PC NEW
  - "MRT"
- - "MUS"
+#  - "MUS"
  - "MWI"
  - "MYS"
  - "NAM" # fails on PC NEW
@@ -97,7 +97,7 @@ iso_codes:
  - "SLE"
  - "SLV"
  - "SRB"
- - "STP"
+#  - "STP"
  - "SUR"
  - "SWZ"
  - "TCD" # fails on PC NEW
@@ -112,7 +112,7 @@ iso_codes:
  - "UGA"
  - "UKR"
  - "UZB"
- - "VCT" # PBF issue
+#  - "VCT" # PBF issue
  - "VNM"
  - "ZAF" # fails on PC
  - "ZMB"
