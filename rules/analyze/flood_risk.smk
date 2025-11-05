@@ -548,9 +548,9 @@ snakemake -c1 data/results/flood_risk/summary/countries/RWA/RWA_ADM2_metrics_jrc
 
 configfile: "config/config.yaml"
 countries = ['KEN']
-ADMINS = ["ADM0", "ADM1", "ADM2"]
-RPs = [100]
-fp_urban = [21, 22, 23, 30]
+ADMINS = ["ADM0"]
+RPs = [50]
+fp_urban = [23, 30]
 DUC_protection = [21, 22, 23, 30]
 rl_urban = [11, 12, 13, 21, 22, 23, 30]
 
@@ -567,10 +567,10 @@ rule adapted_losses_for_all_countries:
 rule pc_losses_for_all_countries:
     input:
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_baseline_capstock.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS),
+                ISO3=config['iso_codes'], ADM=ADMINS),
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_fp_rp{RP}_duc{urban}_capstock.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS, RP=RPs, urban=fp_urban),
+                ISO3=config['iso_codes'], ADM=ADMINS, RP=RPs, urban=fp_urban),
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_rl_duc{urban}_capstock.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS, urban=rl_urban),
+                ISO3=config['iso_codes'], ADM=ADMINS, urban=rl_urban),
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_{ADM}_metrics_jrc-flood_AALs_adapted_dp_capstock.gpkg",
-                ISO3=config['problem_iso_codes'], ADM=ADMINS)
+                ISO3=config['iso_codes'], ADM=ADMINS)
