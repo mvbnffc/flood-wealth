@@ -364,6 +364,32 @@ Test with
 snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM0_decomposed_metrics_gfd-flood_S-rwi.gpkg
 """
 
+rule inequality_metrics_observed_admin_decomposed:
+    """
+    This rule calculates the natioanl CI and its geospatial decomposition at the specified administrative level for the observed flooding
+    Inequality metrics:
+        - Concentration Index (CI) - understand the inequality of flood risk across the wealth distribution
+    """
+    input:
+        admin_areas = "data/inputs/boundaries/{ISO3}/geobounds_{ISO3}.gpkg",
+        social_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{SOCIAL}.tif",
+        urban_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-mod.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+        mask_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_surface_water.tif",
+        risk_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_{MODEL}-flood.tif",
+    output:
+        regional_CI = "data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_{MODEL}-flood_S-{SOCIAL}.gpkg",
+    wildcard_constraints:
+        MODEL="gfd|google",
+        SOCIAL="rwi|gdp",
+        ADMIN_SLUG="ADM1|ADM2"
+    script:
+        "./inequality_metrics_admin_decomposed.py"
+"""
+Test with
+snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM1_admin-decomposed_metrics_gfd-flood_S-rwi.gpkg
+"""
+
 def get_event_iso3s(wildcards):
     """Return a list of valid ISO3 codes for an event by reading its properties file."""
     props_path = f"data/inputs/analysis/events/DFO_{wildcards.event_id}/countries.json"
@@ -498,6 +524,11 @@ rule model_ADM0_decomposed_CI_bulk:
             ADMIN_SLUG=ADMINS, ISO3=config['problem_iso_codes'], urban=rl_urban),
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg",
             ADMIN_SLUG=ADMINS, ISO3=config['problem_iso_codes'])
+
+rule obs_admin_CI_decomposed:
+    input:
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_gfd-flood_S-rwi.gpkg",
+                ADMIN_SLUG=ADMINS, ISO3=config['iso_codes']),
 
 rule pc_admin_CI_decomposed:
     input:
