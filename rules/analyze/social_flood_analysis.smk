@@ -493,7 +493,7 @@ rule metrics_all_gfd_events:
 countries = ['KEN']
 ADMINS = ["ADM1", "ADM2"]
 RPs = [50]
-MODELS = ['jrc']
+MODELS = ['jrc', 'giri', 'wri']
 fp_urban = [23, 30]
 DUC_protection = [21, 22, 23, 30]
 rl_urban = [11, 12, 13, 21, 22, 23, 30]
@@ -532,8 +532,8 @@ rule obs_admin_CI_decomposed:
 
 rule pc_admin_CI_decomposed:
     input:
-        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_protected_AAR_V-JRC_S-rwi.gpkg",
-            ADMIN_SLUG=ADMINS, ISO3=config['problem_iso_codes']),
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_{MODEL}-flood_protected_AAR_V-JRC_S-rwi.gpkg",
+            ADMIN_SLUG=ADMINS, ISO3=config['problem_iso_codes'], MODEL=MODELS),
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_fp_rp{RP}_duc{urban}.gpkg",
             ADMIN_SLUG=ADMINS, ISO3=config['problem_iso_codes'], RP=RPs, urban=fp_urban),
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_{ADMIN_SLUG}_admin-decomposed_metrics_jrc-flood_adapted_AAR_V-JRC_S-rwi_rl_duc{urban}.gpkg",
