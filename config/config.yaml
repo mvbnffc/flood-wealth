@@ -7,138 +7,97 @@
 # - "BRA"
 # - "IND"
 
-
+# Limit to 92 countries where there are modelled and observed results.
 iso_codes:
- - "AGO" # fails on PC NEW
- - "ALB"
- - "ARG" # fails on PC
- - "ARM"
- - "AZE"   
- - "BDI"
- - "BEN"
- - "BFA"
- - "BGD"
- - "BGR"
- - "BIH"
- - "BLZ"
- - "BOL" # fails on PC NEW
- - "BRA" # fails on PC
- - "BTN"
- - "BWA"
- - "CAF"
- - "CIV"
- - "CMR"
- - "COD" # fails on PC
- - "COG"
- - "COL" # fails on PC
-#  - "COM"
-#  - "CPV"
- - "CRI"
- - "DJI"
-#  - "DMA" # PBF issue
- - "DOM"
- - "DZA" # fails on PC
- - "ECU" # PBF issue
- - "EGY"
- - "ERI"
- - "ETH" # fails on PC
- - "GAB"
- - "GEO"
- - "GHA"
- - "GIN"
- - "GMB"
- - "GNB"
- - "GNQ"
-#  - "GRD" # PBF issue 
- - "GTM"
- - "GUY"
- - "HND"
- - "HTI"
- - "IDN" # fails on PC
- - "IND" # fails on PC
- - "JAM"
- - "JOR"
- - "KAZ" # fails on PC
- - "KEN"
- - "KGZ"
- - "KHM"
- - "LAO"
- - "LBR"
- - "LBY" # fails on PC
-#  - "LCA" # PBF issue
- - "LKA"
- - "LSO"
- - "MAR"
- - "MDA"
- - "MDG"
-#  - "MDV"
- - "MEX" # fails on PC
- - "MKD"
- - "MLI" # fails on PC
- - "MNE"
- - "MNG" # fails on PC
- - "MOZ" # fails on PC NEW
- - "MRT"
-#  - "MUS"
- - "MWI"
- - "MYS"
- - "NAM" # fails on PC NEW
- - "NER" # fails on PC
- - "NGA"
- - "NIC" # PBF issue
- - "NPL"
- - "PAK" # fails on PC
- - "PER" # fails on PC
- - "PHL" # fails on PC  NEW
- - "PRY"
- - "ROU"
- - "RWA"
- - "SEN"
- - "SLE"
- - "SLV"
- - "SRB"
-#  - "STP"
- - "SUR"
- - "SWZ"
- - "TCD" # fails on PC NEW
- - "TGO"
- - "THA"
- - "TJK"
- - "TKM"
- - "TLS"
- - "TUN"
- - "TUR"
- - "TZA"
- - "UGA"
- - "UKR"
- - "UZB"
-#  - "VCT" # PBF issue
- - "VNM"
- - "ZAF" # fails on PC
- - "ZMB"
- - "ZWE"
-
-problem_iso_codes: # []
-#  - "AGO" # fails on PC NEW
- - "ARG" # fails on PC
-#  - "BOL" # fails on PC NEW
- - "BRA" # fails on PC
-#  - "COD" # fails on PC
-#  - "COL" # fails on PC
-#  - "DZA" # fails on PC
-#  - "ETH" # fails on PC
- - "IDN" # fails on PC
- - "IND" # fails on PC
-#  - "KAZ" # fails on PC
-#  - "LBY" # fails on PC
-#  - "MEX" # fails on PC
-#  - "MLI" # fails on PC
-#  - "MNG" # fails on PC
-#  - "MOZ" # fails on PC NEW
-#  - "NAM" # fails on PC NEW
-#  - "NER" # fails on PC
-#  - "PAK" # fails on PC
-#  - "PER" # fails on PC
-#  - "PHL" # fails on PC  NEW
-#  - "TCD" # fails on PC NEW
-#  - "ZAF" # fails on PC
+- "AGO"
+- "ALB"
+- "ARG"
+- "ARM"
+- "BDI"
+- "BEN"
+- "BFA"
+- "BGD"
+- "BGR"
+- "BIH"
+- "BLZ"
+- "BOL"
+- "BRA"
+- "BTN"
+- "BWA"
+- "CAF"
+- "CIV"
+- "CMR"
+- "COD"
+- "COG"
+- "COL"
+- "CRI"
+- "DJI"
+- "DOM"
+- "DZA"
+- "ECU"
+- "EGY"
+- "ERI"
+- "ETH"
+- "GEO"
+- "GHA"
+- "GIN"
+- "GMB"
+- "GNB"
+- "GTM"
+- "GUY"
+- "HND"
+- "HTI"
+- "IDN"
+- "IND"
+- "JAM"
+- "JOR"
+- "KAZ"
+- "KEN"
+- "KGZ"
+- "KHM"
+- "LAO"
+- "LBR"
+- "LKA"
+- "LSO"
+- "MAR"
+- "MDA"
+- "MDG"
+- "MEX"
+- "MKD"
+- "MLI"
+- "MNE"
+- "MOZ"
+- "MRT"
+- "MWI"
+- "MYS"
+- "NER"
+- "NGA"
+- "NIC"
+- "NPL"
+- "PAK"
+- "PER"
+- "PHL"
+- "PRY"
+- "ROU"
+- "RWA"
+- "SEN"
+- "SLE"
+- "SLV"
+- "SRB"
+- "SUR"
+- "SWZ"
+- "TCD"
+- "TGO"
+- "THA"
+- "TJK"
+- "TKM"
+- "TUN"
+- "TUR"
+- "TZA"
+- "UGA"
+- "UKR"
+- "UZB"
+- "VNM"
+- "ZAF"
+- "ZMB"
+- "ZWE"
