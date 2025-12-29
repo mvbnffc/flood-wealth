@@ -472,22 +472,7 @@ rule adapted_dry_proofing_metrics_for_all_countries:
 
 
 
-# Run observed modelled metrics for all ISO3 codes
-rule observed_metrics_for_all_countries:
-    input:
-        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_gfd-flood_S-{SOCIAL}.gpkg", ISO3=config['iso_codes'], SOCIAL=SOCIALS)
 
-rule observed_metrics_decomposed_for_all_countries:
-    input:
-        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_decomposed_metrics_gfd-flood_S-{SOCIAL}.gpkg", ISO3=config['iso_codes'], SOCIAL=SOCIALS)
-
-
-# Run metrics on all DFO flood events
-# Find all events in the prep folder
-events = glob_wildcards("data/inputs/gfd/prep/DFO_{event_id}.tif").event_id
-rule metrics_all_gfd_events:
-    input:
-        expand("data/results/social_flood/events/DFO_{event_id}/DFO_{event_id}_results.csv", event_id=events)
 
 
 countries = ['KEN']
