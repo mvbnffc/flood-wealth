@@ -394,18 +394,21 @@ snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM
 
 def get_event_iso3s(wildcards):
     """Return a list of valid ISO3 codes for an event by reading its properties file."""
-    # Raw wildcard
     raw_id = str(wildcards.event_id)
 
-    # Keep only digits, e.g. " 4334 " or "DFO_4334" -> "4334"
+    # Keep only digits, e.g. " DFO_ 4334 " -> "4334"
     cleaned = re.sub(r"\D", "", raw_id)
 
-    # Build the folder name exactly as it exists on disk
-    event_dir = f"DFO_{cleaned}"
+    # Build the directory name
+    event_dir = "DFO_" + cleaned
 
+    # Build the path
     props_path = os.path.join(
         "data", "inputs", "analysis", "events", event_dir, "countries.json"
     )
+
+    # Final safety: strip ALL spaces from the full path
+    props_path = props_path.replace(" ", "")
 
     # DEBUG
     print(f"DEBUG raw_id={repr(raw_id)}", flush=True)
