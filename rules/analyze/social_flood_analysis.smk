@@ -397,21 +397,34 @@ def get_event_iso3s(wildcards):
     # Get the raw wildcard and normalise it
     raw_id = str(wildcards.event_id)
 
-    # Fix cluster whitespace issues
+    # 1) remove surrounding whitespace
     cleaned = raw_id.strip()
+
+    # 2) remove any 'DFO_' fragment if it snuck into the wildcard
     cleaned = cleaned.replace("DFO_", "")
+
+    # 3) collapse any internal whitespace to nothing (keep only digits)
+    #    e.g. " 4 3 3 4 " -> "4334"
     cleaned = re.sub(r"\s+", "", cleaned)
 
+    # Now build the directory name in the format we actually use on disk
     event_dir = f"DFO_{cleaned}"
+
     props_path = os.path.join(
         "data", "inputs", "analysis", "events", event_dir, "countries.json"
     )
+
+    # DEBUG (optional)
+    print(f"DEBUG raw_id={repr(raw_id)}")
+    print(f"DEBUG cleaned={repr(cleaned)}")
+    print(f"DEBUG event_dir={repr(event_dir)}")
+    print(f"DEBUG props_path={repr(props_path)}")
 
     with open(props_path, "r") as f:
         props = json.load(f)
 
     return props["valid"]
-    
+
 
 rule dfo_event_analysis:
     """
