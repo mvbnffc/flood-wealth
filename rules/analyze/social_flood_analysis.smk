@@ -397,6 +397,7 @@ def get_event_iso3s(wildcards):
     props_path = os.path.join(
         "data", "inputs", "analysis", "events", f"DFO_{event_id}", "countries.json"
     )
+    print(props_path) # debug
     with open(props_path, "r") as f:
         props = json.load(f)
     return props["valid"]
