@@ -4,6 +4,7 @@ Rulebook for the social flood analyses (concentration curves and inequality metr
 
 import json
 import os
+import re
 
 rule inequality_metrics:
     """
@@ -393,14 +394,24 @@ snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM
 
 def get_event_iso3s(wildcards):
     """Return a list of valid ISO3 codes for an event by reading its properties file."""
-    event_id = str(wildcards.event_id).strip()  # remove any whitespace
+    # Get the raw wildcard and normalise it
+    raw_id = str(wildcards.event_id)
+
+    # Fix cluster whitespace issues
+    cleaned = raw_id.strip()
+    cleaned = cleaned.replace("DFO_", "")
+    cleaned = re.sub(r"\s+", "", cleaned)
+
+    event_dir = f"DFO_{cleaned}"
     props_path = os.path.join(
-        "data", "inputs", "analysis", "events", f"DFO_{event_id}", "countries.json"
+        "data", "inputs", "analysis", "events", event_dir, "countries.json"
     )
-    print(props_path) # debug
+
     with open(props_path, "r") as f:
         props = json.load(f)
+
     return props["valid"]
+    
 
 rule dfo_event_analysis:
     """
