@@ -23,10 +23,7 @@ rule observed_metrics_decomposed_for_all_countries:
 # Find all events in the prep folder
 events = glob_wildcards("data/inputs/gfd/prep/DFO_{event_id}.tif").event_id
 
-# Run clip_gfd_event rule for all events in the prep folder
-rule clip_all_gfd_events:
-    input:
-        expand("data/inputs/analysis/events/DFO_{event_id}/", event_id=events)
+# Before running below rule run clip_gfd_event rule for all events in the prep gfd folder
 
 # Run metrics analysis for all DFO events
 rule metrics_all_gfd_events:
