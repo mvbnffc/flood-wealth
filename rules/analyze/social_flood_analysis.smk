@@ -396,7 +396,7 @@ def get_event_iso3s(wildcards):
     """Return a list of valid ISO3 codes for an event by reading its properties file."""
     raw_id = str(wildcards.event_id)
 
-    # Keep only digits, e.g. " DFO_ 4334 " -> "4334"
+    # Keep only digits (cluster whitespace issue fix)
     cleaned = re.sub(r"\D", "", raw_id)
 
     # Build the directory name
@@ -409,12 +409,6 @@ def get_event_iso3s(wildcards):
 
     # Final safety: strip ALL spaces from the full path
     props_path = props_path.replace(" ", "")
-
-    # DEBUG
-    print(f"DEBUG raw_id={repr(raw_id)}", flush=True)
-    print(f"DEBUG cleaned={repr(cleaned)}", flush=True)
-    print(f"DEBUG event_dir={repr(event_dir)}", flush=True)
-    print(f"DEBUG props_path={repr(props_path)}", flush=True)
 
     with open(props_path, "r") as f:
         props = json.load(f)
