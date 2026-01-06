@@ -394,31 +394,24 @@ snakemake -c1 data/results/social_flood/countries/KEN/inequality_metrics/KEN_ADM
 
 def get_event_iso3s(wildcards):
     """Return a list of valid ISO3 codes for an event by reading its properties file."""
-    # Get the raw wildcard and normalise it
+    # Raw wildcard
     raw_id = str(wildcards.event_id)
 
-    # 1) remove surrounding whitespace
-    cleaned = raw_id.strip()
+    # Keep only digits, e.g. " 4334 " or "DFO_4334" -> "4334"
+    cleaned = re.sub(r"\D", "", raw_id)
 
-    # 2) remove any 'DFO_' fragment if it snuck into the wildcard
-    cleaned = cleaned.replace("DFO_", "")
-
-    # 3) collapse any internal whitespace to nothing (keep only digits)
-    #    e.g. " 4 3 3 4 " -> "4334"
-    cleaned = re.sub(r"\s+", "", cleaned)
-
-    # Now build the directory name in the format we actually use on disk
+    # Build the folder name exactly as it exists on disk
     event_dir = f"DFO_{cleaned}"
 
     props_path = os.path.join(
         "data", "inputs", "analysis", "events", event_dir, "countries.json"
     )
 
-    # DEBUG (optional)
-    print(f"DEBUG raw_id={repr(raw_id)}")
-    print(f"DEBUG cleaned={repr(cleaned)}")
-    print(f"DEBUG event_dir={repr(event_dir)}")
-    print(f"DEBUG props_path={repr(props_path)}")
+    # DEBUG
+    print(f"DEBUG raw_id={repr(raw_id)}", flush=True)
+    print(f"DEBUG cleaned={repr(cleaned)}", flush=True)
+    print(f"DEBUG event_dir={repr(event_dir)}", flush=True)
+    print(f"DEBUG props_path={repr(props_path)}", flush=True)
 
     with open(props_path, "r") as f:
         props = json.load(f)
