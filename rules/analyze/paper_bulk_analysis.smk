@@ -19,7 +19,16 @@ rule observed_metrics_decomposed_for_all_countries:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_decomposed_metrics_gfd-flood_S-rwi.gpkg", ISO3=config['iso_codes'])
 
 # Run individual DFO event CI analysis
+
+# Find all events in the prep folder
 events = glob_wildcards("data/inputs/gfd/prep/DFO_{event_id}.tif").event_id
+
+# Run clip_gfd_event rule for all events in the prep folder
+rule clip_all_gfd_events:
+    input:
+        expand("data/inputs/analysis/events/DFO_{event_id}/", event_id=events)
+
+# Run metrics analysis for all DFO events
 rule metrics_all_gfd_events:
     input:
         expand("data/results/social_flood/events/DFO_{event_id}/DFO_{event_id}_results.csv", event_id=events)
