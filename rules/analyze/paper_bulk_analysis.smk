@@ -40,10 +40,10 @@ MODELS = ['jrc', 'giri', 'wri']
 rule flood_model_metrics_ADM0_all_countries:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_{MODEL}-flood_protected_AAR_V-JRC_S-rwi.gpkg",
-            ISO3=config['iso_codes'], MODEL=MODELS),
+            ISO3=config['iso_codes'], MODEL=MODELS)
 
 # Run country level admin 1 decomposed CI metrics
 rule flood_model_admin_CI_decomposed:
     input:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM1_admin-decomposed_metrics_{MODEL}-flood_protected_AAR_V-JRC_S-rwi.gpkg",
-             ISO3=config['iso_codes'], MODEL=MODELS),
+             ISO3=config['iso_codes'], MODEL=MODELS)
