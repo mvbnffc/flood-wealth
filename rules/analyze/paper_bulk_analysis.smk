@@ -34,7 +34,7 @@ rule metrics_all_gfd_events:
 Section 2: Modelled Flooding Analysis
 """
 
-MODELS = ['jrc', 'giri', 'wri']
+MODELS = ['jrc']
 
 # Run country level flood model CI metrics
 rule flood_model_metrics_ADM0_all_countries:
