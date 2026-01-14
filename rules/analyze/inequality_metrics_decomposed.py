@@ -56,7 +56,8 @@ if social_name == "rwi":
 water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
 logging.info("Fixing urban dataset values (spatial nearest valid cell fill)")
-
+# For some countries population cells do not perfectly align with the GHS-MOD urbanization layer
+# As a fix we will assign invalid urban cells the value of the nearest valid urban cell
 VALID_CODES = np.array([11, 12, 13, 21, 22, 23, 30], dtype=np.float32)
 def fill_invalid_urban_by_nearest(arr: np.ndarray,
                                  valid_codes: np.ndarray,
