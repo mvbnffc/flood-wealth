@@ -10,6 +10,7 @@ from pathlib import Path
 import subprocess
 
 import numpy as np
+import ast
 import rasterio
 import json
 import yaml
@@ -25,22 +26,51 @@ if __name__ == "__main__":
 
 logging.basicConfig(format="%(asctime)s %(process)d %(filename)s %(message)s", level=logging.INFO)
 
-logging.info(f"Preparing country data for DFO event {event_id}.")
-
-logging.info("Reading json file for flood event information.")
-with open(json_file, 'r') as json_in:
-    data = json.load(json_in)
-    # Get country codes
-    cc_str = data.get("cc", "")
-    country_list = [code.strip() for code in cc_str.split(",")]
-
-logging.info(f"Working on the following countries: {country_list}. Checking validitiy...")
 # Load config file and pull country list
 current_file = Path(__file__).resolve()
 config_path = current_file.parents[2] / "config" / "config.yaml"
+# Load config file
 with open(config_path, "r") as file:
     config = yaml.safe_load(file)
+# Pull ISO list and gfd code mapping from config
 valid_countries = config.get("iso_codes", [])
+gfd_code_mapping = config.get("gfd_code_mapping", {})
+
+logging.info(f"Preparing country data for DFO event {event_id}.")
+
+# Read in the json file to get country codes
+logging.info("Reading json file for flood event information.")
+with open(json_file, "r") as json_in:
+    data = json.load(json_in)
+
+raw_codes = data.get("gfd_country_code", "[]")
+
+try:
+    gfd_codes = ast.literal_eval(raw_codes)
+except (ValueError, SyntaxError):
+    gfd_codes = []
+
+country_list = []
+invalid_gfd_codes = []
+seen = set()
+
+for code in gfd_codes:
+    iso3 = gfd_code_mapping.get(code)
+
+    if iso3 is None:
+        invalid_gfd_codes.append(code)
+        continue
+
+    if iso3 not in valid_countries:
+        continue
+
+    if iso3 in seen:
+        continue
+
+    seen.add(iso3)
+    country_list.append(iso3)
+
+logging.info(f"Working on the following countries: {country_list}. Checking validitiy...")
 # Comparing lists to check validity
 invalid_countries = [country for country in country_list if country not in valid_countries]
 valid_countries = [country for country in country_list if country in valid_countries]
