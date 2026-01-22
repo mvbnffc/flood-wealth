@@ -75,7 +75,7 @@ iso_codes:
 - "NIC"
 - "NPL"
 - "PAK"
-- "PER"
+# - "PER"
 - "PHL"
 - "PRY"
 - "ROU"
