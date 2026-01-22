@@ -11,7 +11,7 @@
 iso_codes:
 - "AGO"
 - "ALB"
-- "ARG"
+# - "ARG"
 - "ARM"
 - "BDI"
 - "BEN"
@@ -67,7 +67,7 @@ iso_codes:
 # - "MLI"
 - "MNE"
 - "MOZ"
-- "MRT"
+# - "MRT"
 - "MWI"
 - "MYS"
 - "NER"
