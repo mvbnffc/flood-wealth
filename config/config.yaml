@@ -86,7 +86,7 @@ iso_codes:
 - "SRB"
 - "SUR"
 - "SWZ"
-- "TCD"
+# - "TCD"
 - "TGO"
 - "THA"
 - "TJK"
