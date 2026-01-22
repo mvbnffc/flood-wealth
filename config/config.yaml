@@ -74,7 +74,7 @@ iso_codes:
 - "NGA"
 - "NIC"
 - "NPL"
-- "PAK"
+# - "PAK"
 # - "PER"
 - "PHL"
 - "PRY"
