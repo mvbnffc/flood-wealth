@@ -9,7 +9,7 @@
 
 # Limit to 92 countries where there are modelled and observed results.
 iso_codes:
-- "AGO"
+# - "AGO"
 - "ALB"
 # - "ARG"
 - "ARM"
