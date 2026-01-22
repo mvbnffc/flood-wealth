@@ -37,7 +37,7 @@ iso_codes:
 - "ECU"
 - "EGY"
 - "ERI"
-- "ETH"
+# - "ETH"
 - "GEO"
 - "GHA"
 - "GIN"
@@ -98,7 +98,7 @@ iso_codes:
 # - "UKR"
 # - "UZB"
 - "VNM"
-- "ZAF"
+# - "ZAF"
 - "ZMB"
 - "ZWE"
 
