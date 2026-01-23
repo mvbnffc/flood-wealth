@@ -71,7 +71,7 @@ rule clip_gfd_event:
     """
     input:
         raw_flood_file="data/inputs/gfd/prep/DFO_{event_id}.tif",
-        json_file="data/inputs/gfd/prep/json/DFO_{event_id}_properties.json",
+        adm0_file="data/inputs/boundaries/global/geoBoundariesCGAZ_ADM0.gpkg",
     output:
         flood_event_dir=directory("data/inputs/analysis/events/DFO_{event_id}/"),
         country_json="data/inputs/analysis/events/DFO_{event_id}/countries.json"

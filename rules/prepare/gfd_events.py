@@ -10,15 +10,18 @@ from pathlib import Path
 import subprocess
 
 import numpy as np
+import geopandas as gpd
 import ast
 import rasterio
+from rasterio.features import geometry_mask
+from shapely.geometry import box
 import json
 import yaml
 
 if __name__ == "__main__":
     try:
         raw_flood_file: str = snakemake.input["raw_flood_file"]
-        json_file: str = snakemake.input["json_file"]
+        adm0_file: str = snakemake.input["adm0_file"]
         output_dir: str = snakemake.output["flood_event_dir"]
         event_id: str = snakemake.wildcards["event_id"]
     except:
@@ -34,48 +37,76 @@ with open(config_path, "r") as file:
     config = yaml.safe_load(file)
 # Pull ISO list and gfd code mapping from config
 valid_countries = config.get("iso_codes", [])
-gfd_code_mapping = config.get("gfd_code_mapping", {})
 
 logging.info(f"Preparing country data for DFO event {event_id}.")
 
-# Read in the json file to get country codes
-logging.info("Reading json file for flood event information.")
-with open(json_file, "r") as json_in:
-    data = json.load(json_in)
+# Get flood raster bounds and identify overlapping countries
+logging.info("Reading flood raster bounds and overlaying with global ADM0...")
+with rasterio.open(raw_flood_file) as src:
+    flood_bounds = src.bounds
+    flood_crs = src.crs
+    flood_transform = src.transform
+    flood_shape = (src.height, src.width)
+    
+    # Create bounding box polygon
+    bbox = box(flood_bounds.left, flood_bounds.bottom, flood_bounds.right, flood_bounds.top)
+    
+    # Load ADM0 boundaries that intersect with flood bbox (for efficiency)
+    logging.info("Loading ADM0 boundaries intersecting flood extent...")
+    adm0 = gpd.read_file(adm0_file, bbox=bbox)
+    
+    if adm0.crs != flood_crs:
+        adm0 = adm0.to_crs(flood_crs)
+    
+    # Read the flood data to check actual pixel overlap
+    flood_data = src.read(1)
+    nodata = src.nodata
+    
+    # Create mask of valid flood pixels
+    if nodata is not None:
+        valid_flood_mask = (flood_data != nodata) & (flood_data > 0)
+    else:
+        valid_flood_mask = flood_data > 0
 
-raw_codes = data.get("gfd_country_code", "[]")
-
-try:
-    gfd_codes = ast.literal_eval(raw_codes)
-except (ValueError, SyntaxError):
-    gfd_codes = []
-
+# Check which countries actually have flood pixels
+logging.info("Checking which countries have actual flood pixel overlap...")
 country_list = []
-invalid_gfd_codes = []
-seen = set()
 
-for code in gfd_codes:
-    iso3 = gfd_code_mapping.get(code)
-
+for idx, row in adm0.iterrows():
+    geom = row.geometry
+    # ISO3 column name in geoboundaries file
+    iso3 = row.get('shapeGroup')
+    
     if iso3 is None:
-        invalid_gfd_codes.append(code)
+        continue
+    
+    # Create a mask for this country's geometry
+    try:
+        country_mask = geometry_mask(
+            [geom],
+            out_shape=flood_shape,
+            transform=flood_transform,
+            invert=True  # True inside geometry
+        )
+        
+        # Check if any valid flood pixels fall within this country
+        overlap = np.any(valid_flood_mask & country_mask)
+        
+        if overlap:
+            country_list.append(iso3)
+            logging.info(f"  Found flood overlap in {iso3}")
+            
+    except Exception as e:
+        logging.warning(f"Could not process geometry for {iso3}: {e}")
         continue
 
-    if iso3 not in valid_countries:
-        continue
-
-    if iso3 in seen:
-        continue
-
-    seen.add(iso3)
-    country_list.append(iso3)
-
-logging.info(f"Working on the following countries: {country_list}. Checking validitiy...")
-# Comparing lists to check validity
+logging.info(f"Found {len(country_list)} countries with flood pixel overlap: {country_list}")
 invalid_countries = [country for country in country_list if country not in valid_countries]
 valid_countries = [country for country in country_list if country in valid_countries]
+
 # Create output folder (if it doesn't already exist)
 os.makedirs(output_dir, exist_ok=True)
+
 # Write valid and invalid countries to json file
 with open(os.path.join(output_dir, "countries.json"), 'w') as json_file:
     json.dump({"valid": valid_countries, "invalid": invalid_countries}, json_file, indent=4)
