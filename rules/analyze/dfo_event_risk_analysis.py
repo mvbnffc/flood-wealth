@@ -10,6 +10,7 @@ from rasterio.features import geometry_mask
 import pandas as pd
 import geopandas as gpd
 import numpy as np
+from scipy import ndimage
 import shapely
 from tqdm import tqdm
 
