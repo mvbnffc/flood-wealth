@@ -47,8 +47,10 @@ def get_global_extent(files):
 
 def calculate_offsets(raster_bounds, global_extent, transform):
     """Calculate the row and column offsets for the raster within the global raster."""
-    row_offset = int((raster_bounds.top - global_extent[3]) / -transform[4])
-    col_offset = int((raster_bounds.left - global_extent[0]) / transform[0])
+    # row_offset = int((raster_bounds.top - global_extent[3]) / -transform[4]) OLD DEBUG
+    # col_offset = int((raster_bounds.left - global_extent[0]) / transform[0]) OLD DEBUG
+    row_offset = round((raster_bounds.top - global_extent[3]) / -transform[4]) # NEW DEBUG
+    col_offset = round((raster_bounds.left - global_extent[0]) / transform[0]) # NEW DEBUG
     return row_offset, col_offset
 
 def pad_and_add_raster(src, global_raster, row_offset, col_offset, global_extent, transform):
