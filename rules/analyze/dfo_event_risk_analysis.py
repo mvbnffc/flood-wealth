@@ -59,8 +59,6 @@ for iso3 in iso3_list:
         affine = flood_src.transform 
     
     rwi[rwi==-999] = np.nan # convert -999 in RWI dataset to NaN 
-    # urban[urban==10] = np.nan # convert 10 in urban dataset (water class) to NaN
-    # urban[urban==-200] = np.nan # convert -200 in urban dataset (no data) to NaN   
 
     water_mask = np.where(mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
