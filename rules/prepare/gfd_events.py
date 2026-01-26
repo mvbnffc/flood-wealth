@@ -137,7 +137,7 @@ for country in valid_countries:
         "-cutline", boundary_path,
         "-crop_to_cutline",
         "-tr", "0.00083333333333333", "0.00083333333333333",
-        "-tap",
+        # "-tap", remove TAP for debug
         "-te_srs", "EPSG:4326",
         "-te", *te_args,
         "-of", "GTiff",
