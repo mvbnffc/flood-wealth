@@ -65,6 +65,7 @@ for iso3 in iso3_list:
     logging.info("Fixing urban dataset values (spatial nearest valid cell fill)")
     # For some countries population cells do not perfectly align with the GHS-MOD urbanization layer
     # As a fix we will assign invalid urban cells the value of the nearest valid urban cell
+    # TODO: When run for all events this takes forever. Consider pre-processing urban layers for all countries once.
     VALID_CODES = np.array([11, 12, 13, 21, 22, 23, 30], dtype=np.float32)
     def fill_invalid_urban_by_nearest(arr: np.ndarray,
                                     valid_codes: np.ndarray,
