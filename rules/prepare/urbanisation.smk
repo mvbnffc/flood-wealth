@@ -65,3 +65,21 @@ rule clip_ghs_mod:
 Test with
 snakemake -c1 data/inputs/analysis/countries/KEN/KEN_ghs-mod.tif
 """
+
+rule fix_ghs_mod:
+    """
+    Fix GHS-MOD so that population cells that aren't assigned a GSH-MOD value
+    are assigned the nearest valid one. 
+    """
+    input:
+        ghs_mod="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-mod.tif",
+        pop_file="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-pop.tif",
+    output:
+        fixed_ghs_mod="data/inputs/analysis/countries/{ISO3}/{ISO3}_ghs-mod_fixed.tif",
+    script:
+        "./fix_ghs-mod.py"
+
+"""
+Test with
+snakemake -c1 data/inputs/analysis/countries/KEN/KEN_ghs-mod_fixed.tif
+"""

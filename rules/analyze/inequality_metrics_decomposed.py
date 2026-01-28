@@ -55,51 +55,51 @@ if social_name == "rwi":
 # Create the water mask
 water_mask = np.where(water_mask>50, np.nan, 1) # WARNING WE ARE HARD CODING PERM_WATER > 50% mask here
 
-logging.info("Fixing urban dataset values (spatial nearest valid cell fill)")
-# For some countries population cells do not perfectly align with the GHS-MOD urbanization layer
-# As a fix we will assign invalid urban cells the value of the nearest valid urban cell
-VALID_CODES = np.array([11, 12, 13, 21, 22, 23, 30], dtype=np.float32)
-def fill_invalid_urban_by_nearest(arr: np.ndarray,
-                                 valid_codes: np.ndarray,
-                                 fill_nans: bool = False) -> np.ndarray:
-    """
-    Replace invalid urban codes with the nearest valid code in *space*.
-    - "Nearest" is Euclidean distance in pixel coordinates (row/col).
-    - Invalid = value not in valid_codes (and optionally NaN).
-    """
-    out = arr.astype(np.float32, copy=True)
+# logging.info("Fixing urban dataset values (spatial nearest valid cell fill)")
+# # For some countries population cells do not perfectly align with the GHS-MOD urbanization layer
+# # As a fix we will assign invalid urban cells the value of the nearest valid urban cell
+# VALID_CODES = np.array([11, 12, 13, 21, 22, 23, 30], dtype=np.float32)
+# def fill_invalid_urban_by_nearest(arr: np.ndarray,
+#                                  valid_codes: np.ndarray,
+#                                  fill_nans: bool = False) -> np.ndarray:
+#     """
+#     Replace invalid urban codes with the nearest valid code in *space*.
+#     - "Nearest" is Euclidean distance in pixel coordinates (row/col).
+#     - Invalid = value not in valid_codes (and optionally NaN).
+#     """
+#     out = arr.astype(np.float32, copy=True)
 
-    is_valid = np.isin(out, valid_codes)
-    if fill_nans:
-        needs_fill = ~is_valid   # includes NaNs (since NaN is not in valid_codes)
-    else:
-        needs_fill = (~is_valid) & (~np.isnan(out))  # only non-NaN invalids
+#     is_valid = np.isin(out, valid_codes)
+#     if fill_nans:
+#         needs_fill = ~is_valid   # includes NaNs (since NaN is not in valid_codes)
+#     else:
+#         needs_fill = (~is_valid) & (~np.isnan(out))  # only non-NaN invalids
 
-    # Nothing to do
-    if not np.any(needs_fill):
-        return out
+#     # Nothing to do
+#     if not np.any(needs_fill):
+#         return out
 
-    # If there are no valid pixels anywhere, can't fill
-    if not np.any(is_valid):
-        return out
+#     # If there are no valid pixels anywhere, can't fill
+#     if not np.any(is_valid):
+#         return out
 
-    # distance_transform_edt computes distance to nearest "background" (False)
-    # So we pass needs_fill==True, and the "background" is ~needs_fill
-    # return_indices gives coords of nearest background cell for each cell
-    _, (ri, ci) = ndimage.distance_transform_edt(
-        needs_fill,
-        return_distances=True,
-        return_indices=True
-    )
+#     # distance_transform_edt computes distance to nearest "background" (False)
+#     # So we pass needs_fill==True, and the "background" is ~needs_fill
+#     # return_indices gives coords of nearest background cell for each cell
+#     _, (ri, ci) = ndimage.distance_transform_edt(
+#         needs_fill,
+#         return_distances=True,
+#         return_indices=True
+#     )
 
-    # nearest value for every pixel is out[ri, ci]
-    nearest_vals = out[ri, ci]
+#     # nearest value for every pixel is out[ri, ci]
+#     nearest_vals = out[ri, ci]
 
-    # fill only where requested
-    out[needs_fill] = nearest_vals[needs_fill]
-    return out
+#     # fill only where requested
+#     out[needs_fill] = nearest_vals[needs_fill]
+#     return out
 
-urban = fill_invalid_urban_by_nearest(urban, VALID_CODES, fill_nans=False)
+# urban = fill_invalid_urban_by_nearest(urban, VALID_CODES, fill_nans=False)
 
 logging.info(f"Reading level {administrative_level} admin boundaries")
 layer_name = f"ADM{admin_level}"
