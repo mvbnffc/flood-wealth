@@ -10,10 +10,10 @@ rule download_gdp:
     output:
         "data/inputs/gdp/2019gdp.tif"
     params:
-        top_zip="Real GDP.zip",
+        api_url="https://api.figshare.com/v2/file/download/31456837",
+        top_zip="Real_GDP.zip",
         nested_zip="updated real GDP/2019.zip",
-        nested_member="2019GDP.tif",
-        url="https://figshare.com/ndownloader/files/31456837"
+        nested_member="2019GDP.tif"
     shell:
         r"""
         set -euo pipefail
@@ -21,20 +21,20 @@ rule download_gdp:
         output_dir=$(dirname {output})
         mkdir -p "$output_dir"
 
-        # Download robustly (Figshare may return 202/HTML initially)
-        rm -f "$output_dir/{params.top_zip}"
-        for i in $(seq 1 20); do
-          curl -L -o "$output_dir/{params.top_zip}" "{params.url}" || true
-          if head -c 2 "$output_dir/{params.top_zip}" | grep -q "PK"; then
-            break
-          fi
-          echo "Download not ready (attempt $i). Retrying..." >&2
-          sleep 2
-        done
-        head -c 2 "$output_dir/{params.top_zip}" | grep -q "PK"
-
+        outer="$output_dir/{params.top_zip}"
         tmp_nested="$output_dir/tmp_2019.zip"
-        unzip -p "$output_dir/{params.top_zip}" "{params.nested_zip}" > "$tmp_nested"
+
+        # Download outer zip via Figshare API (bypasses AWS WAF)
+        curl -L -o "$outer" "{params.api_url}"
+
+        # Basic sanity check
+        file "$outer" | grep -qi zip
+
+        # Extract nested zip
+        unzip -p "$outer" "{params.nested_zip}" > "$tmp_nested"
+
+        # Extract final GeoTIFF
         unzip -p "$tmp_nested" "{params.nested_member}" > "{output}"
+
         rm -f "$tmp_nested"
         """
