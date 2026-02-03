@@ -64,7 +64,7 @@ rl_urban = [13] # in paper we use 13 (densest rural)
 rule bulk_flood_risk_and_adaptation_analysis:
     input:
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_baseline_capstock.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS)
+                ISO3=config['iso_codes'], ADM=ADMINS),
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_adapted_fp_rp{RP}_duc{urban}_capstock.gpkg",
                 ISO3=config['iso_codes'], ADM=ADMINS, RP=RPs, urban=fp_urban),
         expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_adapted_rl_duc{urban}_capstock.gpkg",
