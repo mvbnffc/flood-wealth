@@ -48,6 +48,38 @@ rule flood_model_admin_CI_decomposed:
         expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM1_admin-decomposed_metrics_{MODEL}-flood_protected_AAR_V-JRC_S-rwi.gpkg",
              ISO3=config['iso_codes'], MODEL=MODELS)
 
+"""
+Section 3: the outputs from Section 1 and 2 should be enough
+"""
+
+"""
+Section 4: Flood Adaptation Analysis
+"""
+
+MODELS = ['jrc', 'wri', 'giri']
+RP = [100] # in paper we use 100
+fp_urban = [30] # in paper we use 30 (cities)
+rl_urban = [13] # in paper we use 13 (densest rural)
+
+rule bulk_flood_risk_and_adaptation_analysis:
+    input:
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_baseline_capstock.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS)
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_adapted_fp_rp{RP}_duc{urban}_capstock.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS, RP=RPs, urban=fp_urban),
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_adapted_rl_duc{urban}_capstock.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS, urban=rl_urban),
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_adapted_dp_capstock.gpkg",
+                ISO3=config['iso_codes'], ADM=ADMINS)
+
+rule bulk_social_metrics_adaptation:
+    input:
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_{MODEL}-flood_adapted_AAR_V-JRC_S-rwi_fp_rp{RP}_duc{urban}.gpkg",
+            ISO3=config['iso_codes'], MODEL=MODELS, RP=RPs, urban=fp_urban),
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_{MODEL}-flood_adapted_AAR_V-JRC_S-rwi_dp.gpkg",
+            ISO3=config['iso_codes'], MODEL=MODELS),
+        expand("data/results/social_flood/countries/{ISO3}/inequality_metrics/{ISO3}_ADM0_metrics_{MODEL}-flood_adapted_AAR_V-JRC_S-rwi_rl_duc{urban}.gpkg",
+            ISO3=config['iso_codes'], MODEL=MODELS, urban=rl_urban),    
 
 """
 Section Supplementary: Sensitivity Analysis 
