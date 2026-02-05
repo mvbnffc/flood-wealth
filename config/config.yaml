@@ -21,7 +21,7 @@ iso_codes:
 - "BIH"
 - "BLZ"
 - "BOL"
-- "BRA" # MEM
+# - "BRA" # MEM
 - "BTN"
 - "BWA"
 - "CAF"
