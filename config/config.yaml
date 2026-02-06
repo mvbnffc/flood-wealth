@@ -11,7 +11,7 @@
 iso_codes:
 - "AGO"
 - "ALB"
-- "ARG" # MEM
+# - "ARG" # MEM
 - "ARM"
 - "BDI"
 - "BEN"
@@ -21,7 +21,7 @@ iso_codes:
 - "BIH"
 - "BLZ"
 - "BOL"
-- "BRA" # MEM
+# - "BRA" # MEM
 - "BTN"
 - "BWA"
 - "CAF"
@@ -47,11 +47,11 @@ iso_codes:
 - "GUY"
 - "HND"
 - "HTI"
-- "IDN" # MEM
-- "IND" # MEM
+# - "IDN" # MEM
+# - "IND" # MEM
 - "JAM"
 - "JOR"
-- "KAZ" # MEM
+# - "KAZ" # MEM
 - "KEN"
 - "KGZ"
 - "KHM"
@@ -62,7 +62,7 @@ iso_codes:
 - "MAR"
 - "MDA"
 - "MDG"
-- "MEX" # MEM
+# - "MEX" # MEM
 - "MKD"
 - "MLI"
 - "MNE"
@@ -98,7 +98,7 @@ iso_codes:
 - "UKR"
 - "UZB"
 - "VNM"
-- "ZAF" # MEM
+# - "ZAF" # MEM
 - "ZMB"
 - "ZWE"
 
