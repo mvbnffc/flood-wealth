@@ -57,7 +57,7 @@ Section 4: Flood Adaptation Analysis
 """
 
 MODELS = ['jrc', 'wri', 'giri']
-RP = [100] # in paper we use 100
+RPs = [100] # in paper we use 100
 fp_urban = [30] # in paper we use 30 (cities)
 rl_urban = [13] # in paper we use 13 (densest rural)
 
