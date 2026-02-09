@@ -63,14 +63,23 @@ rl_urban = [13] # in paper we use 13 (densest rural)
 
 rule bulk_flood_risk_and_adaptation_analysis:
     input:
-        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_baseline_capstock.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS),
-        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_adapted_fp_rp{RP}_duc{urban}_capstock.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS, RP=RPs, urban=fp_urban),
-        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_adapted_rl_duc{urban}_capstock.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS, urban=rl_urban),
-        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_jrc-flood_AALs_adapted_dp_capstock.gpkg",
-                ISO3=config['iso_codes'], ADM=ADMINS)
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_{MODEL}-flood_AALs_baseline_capstock.gpkg",
+                ISO3=config['iso_codes'], MODEL=MODELS),
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_{MODEL}-flood_AALs_adapted_fp_rp{RP}_duc{urban}_capstock.gpkg",
+                ISO3=config['iso_codes'], MODEL=MODELS, RP=RPs, urban=fp_urban),
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_{MODEL}-flood_AALs_adapted_rl_duc{urban}_capstock.gpkg",
+                ISO3=config['iso_codes'], MODEL=MODELS, urban=rl_urban),
+        expand("data/results/flood_risk/summary/countries/{ISO3}/{ISO3}_ADM0_metrics_{MODEL}-flood_AALs_adapted_dp_capstock.gpkg",
+                ISO3=config['iso_codes'], MODEL=MODELS,)
+
+rule bulk_adaptation_costs:
+    input:
+        expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_fp_rp{RP}_duc{urban}_ADM0.gpkg",
+                ISO3=config['iso_codes'], RP=RPs, urban=fp_urban),
+        expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_rl_m-{MODEL}_duc{urban}_ADM0.gpkg",
+                ISO3=config['iso_codes'], MODEL=MODELS, urban=rl_urban),
+        expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_dp_m-jrc_ADM0.gpkg",
+                ISO3=config['iso_codes'], MODEL=MODELS)
 
 rule bulk_social_metrics_adaptation:
     input:
