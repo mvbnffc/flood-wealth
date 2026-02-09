@@ -54,3 +54,4 @@ include: "rules/analyze/paper_bulk_analysis.smk"
 
 include: "rules/plot/figures.smk"
 include: "rules/plot/maps.smk"
+include: "rules/plot/stats.smk"
