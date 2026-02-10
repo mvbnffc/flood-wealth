@@ -20,7 +20,7 @@ if __name__ == "__main__":
         risk_path: str = snakemake.input["risk_file"]
         mask_path: str = snakemake.input["mask_file"]
         quintile_path: str = snakemake.input["quintile_file"]
-        output_path: str = snakemake.output["pop_stats"]
+        output_path: str = snakemake.output["risk_stats"]
         administrative_level: int = snakemake.wildcards.ADMIN_SLUG
         model = snakemake.wildcards.MODEL
         vuln = snakemake.wildcards.VULN
