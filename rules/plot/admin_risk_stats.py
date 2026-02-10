@@ -131,5 +131,6 @@ results_df = pd.DataFrame({
     "q4_risk": q4_risk_by_region,
     "q5_risk": q5_risk_by_region,
 })
+results_df.to_csv(output_path, index=False)
 
 logging.info("Done.")
