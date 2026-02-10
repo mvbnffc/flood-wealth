@@ -75,7 +75,7 @@ rule bulk_flood_risk_and_adaptation_analysis:
                 ISO3=config['iso_codes'], RP=RPs, urban=fp_urban),
         expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_rl_m-{MODEL}_duc{urban}_ADM0.gpkg",
                 ISO3=config['iso_codes'], MODEL=MODELS, urban=rl_urban),
-        expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_dp_m-jrc_ADM0.gpkg",
+        expand("data/results/adaptation/costs/countries/{ISO3}/{ISO3}_adaptation-cost_dp_m-{MODEL}_ADM0.gpkg",
                 ISO3=config['iso_codes'], MODEL=MODELS)
 
 rule bulk_social_metrics_adaptation:
